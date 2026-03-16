@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import prisma from '../config/db';
 import { IncomingEvent } from '../types/index';
+import { enqueueDelivery } from '../config/rabbitmq';
 
 // POST /events  — Ingest a new event
 export const ingestEvent = async (req: Request, res: Response): Promise<void> => {
@@ -22,21 +23,28 @@ export const ingestEvent = async (req: Request, res: Response): Promise<void> =>
     },
   });
 
-  // Create a PENDING delivery record for each matched subscription
+  // Create a PENDING delivery record for each matched subscription and enqueue passing the delivery ID
   if (subscriptions.length > 0) {
-    await prisma.delivery.createMany({
-      data: subscriptions.map((sub: { id: string }) => ({
-        eventId: event.id,
-        subscriptionId: sub.id,
-        status: 'PENDING' as const,
-      })),
-    });
+    for (const sub of subscriptions) {
+      const delivery = await prisma.delivery.create({
+        data: {
+          eventId: event.id,
+          subscriptionId: sub.id,
+          status: 'PENDING',
+        },
+      });
+      // Enqueue to RabbitMQ
+      await enqueueDelivery(delivery.id);
+    }
   }
 
-  res.status(201).json({
-    status: 'ok',
-    message: `Event ingested. ${subscriptions.length} delivery record(s) queued.`,
-    data: event,
+  res.status(202).json({
+    status: 'accepted',
+    message: 'Event ingested and queued for delivery',
+    data: {
+      eventId: event.id,
+      deliveriesScheduled: subscriptions.length,
+    },
   });
 };
 

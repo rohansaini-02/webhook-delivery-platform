@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Subscription {
+  id          String     @id @default(uuid())
+  url         String
+  secret      String
+  events      String[]
+  isActive    Boolean    @default(true)
+  failCount   Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  deliveries  Delivery[]
+}
+
+model Event {
+  id          String     @id @default(uuid())
+  type        String
+  payload     Json
+  createdAt   DateTime   @default(now())
+  deliveries  Delivery[]
+}
+
+model Delivery {
+  id              String         @id @default(uuid())
+  eventId         String
+  subscriptionId  String
+  status          DeliveryStatus @default(PENDING)
+  attempts        Int            @default(0)
+  maxAttempts     Int            @default(5)
+  nextAttemptAt   DateTime?
+  lastStatusCode  Int?
+  lastError       String?
+  isDlq           Boolean        @default(false)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  event        Event        @relation(fields: [eventId], references: [id])
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+
+  @@index([eventId])
+  @@index([subscriptionId])
+  @@index([status])
+}
+
+enum DeliveryStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  RETRYING
+  DLQ
+}

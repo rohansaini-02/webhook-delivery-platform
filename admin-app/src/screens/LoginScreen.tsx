@@ -96,6 +96,14 @@ export default function LoginScreen({ navigation }: any) {
           {/* Error message */}
           {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
+          {/* Forgot Password */}
+          <TouchableOpacity
+            onPress={() => navigation.navigate('ForgotPassword')}
+            style={styles.forgotRow}
+          >
+            <Text style={styles.forgotText}>Forgot Password?</Text>
+          </TouchableOpacity>
+
           {/* Sign In Button */}
           <TouchableOpacity onPress={handleLogin} disabled={loading} activeOpacity={0.85}>
             <LinearGradient
@@ -177,8 +185,10 @@ const styles = StyleSheet.create({
   eyeBtn: { padding: spacing.sm },
   eyeIcon: { fontSize: 18 },
   errorText: { ...typography.caption, color: colors.error, marginTop: spacing.sm },
+  forgotRow: { width: '100%', alignItems: 'flex-end', marginTop: spacing.sm, marginBottom: spacing.sm },
+  forgotText: { ...typography.captionBold, color: colors.primary },
   primaryBtn: {
-    marginTop: spacing.xxl, borderRadius: borderRadius.md,
+    marginTop: spacing.sm, borderRadius: borderRadius.md,
     paddingVertical: 16, alignItems: 'center',
   },
   primaryBtnText: { ...typography.bodyBold, color: colors.textInverse },

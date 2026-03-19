@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { colors, spacing, borderRadius, typography, shadows } from '../styles/theme';
 import { fetchMetrics, fetchDeliveries } from '../services/api';
+import SearchBar from '../components/SearchBar';
 
 interface MetricsData {
   totals: { subscriptions: number; events: number; deliveries: number };
@@ -76,16 +77,11 @@ export default function DashboardScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
       >
         {/* Search Bar */}
-        <View style={styles.searchBar}>
-          <Text style={styles.searchIcon}>🔍</Text>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search events, logs, or webhooks..."
-            placeholderTextColor={colors.textMuted}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-        </View>
+        <SearchBar
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholder="Search events, logs, or webhooks..."
+        />
 
         {/* Title */}
         <Text style={styles.title}>Dashboard</Text>

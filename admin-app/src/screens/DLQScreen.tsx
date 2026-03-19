@@ -5,6 +5,8 @@ import {
 } from 'react-native';
 import { colors, spacing, borderRadius, typography, shadows } from '../styles/theme';
 import { fetchDeliveries } from '../services/api';
+import SearchBar from '../components/SearchBar';
+import StatusBadge from '../components/StatusBadge';
 
 if (Platform.OS === 'android') {
   UIManager.setLayoutAnimationEnabledExperimental?.(true);
@@ -51,9 +53,7 @@ export default function DLQScreen() {
           <View style={{ flex: 1 }}>
             <View style={styles.titleRow}>
               <Text style={styles.eventType}>{item.event?.type || 'unknown'}</Text>
-              <View style={styles.failedBadge}>
-                <Text style={styles.failedText}>Failed</Text>
-              </View>
+              <StatusBadge status="FAILED" size="sm" />
             </View>
             <Text style={styles.dlqId}>{item.id?.slice(0, 10)}</Text>
           </View>
@@ -121,14 +121,11 @@ export default function DLQScreen() {
   return (
     <View style={styles.container}>
       {/* Search */}
-      <View style={styles.searchBar}>
-        <Text style={styles.searchIcon}>🔍</Text>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search failed events..."
-          placeholderTextColor={colors.textMuted}
+      <View style={styles.searchContainer}>
+        <SearchBar
           value={searchQuery}
           onChangeText={setSearchQuery}
+          placeholder="Search failed events..."
         />
       </View>
 
@@ -166,15 +163,7 @@ export default function DLQScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg, paddingTop: 50 },
   center: { alignItems: 'center', justifyContent: 'center' },
-  searchBar: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: colors.bgElevated, borderRadius: borderRadius.xl,
-    paddingHorizontal: spacing.lg, paddingVertical: spacing.sm,
-    borderWidth: 1, borderColor: colors.border,
-    marginHorizontal: spacing.lg, marginBottom: spacing.lg,
-  },
-  searchIcon: { fontSize: 16, marginRight: spacing.sm },
-  searchInput: { flex: 1, ...typography.body, color: colors.textPrimary },
+  searchContainer: { marginHorizontal: spacing.lg, marginBottom: spacing.lg },
   mainTitle: { ...typography.h1, color: colors.textPrimary, marginHorizontal: spacing.lg, marginBottom: spacing.xs },
   subtitle: { ...typography.body, color: colors.textSecondary, marginHorizontal: spacing.lg, marginBottom: spacing.lg },
   countCard: {
@@ -195,8 +184,6 @@ const styles = StyleSheet.create({
   cardHeader: { flexDirection: 'row', alignItems: 'flex-start' },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   eventType: { ...typography.bodyBold, color: colors.textPrimary },
-  failedBadge: { backgroundColor: colors.errorBg, paddingHorizontal: spacing.sm, paddingVertical: 2, borderRadius: borderRadius.pill },
-  failedText: { ...typography.small, color: colors.error, fontWeight: '600' },
   dlqId: { ...typography.caption, color: colors.textMuted, marginTop: 2 },
   replayBtn: {
     backgroundColor: colors.infoBg, paddingHorizontal: spacing.md,

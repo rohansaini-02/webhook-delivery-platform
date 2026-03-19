@@ -5,6 +5,8 @@ import {
 } from 'react-native';
 import { colors, spacing, borderRadius, typography, shadows } from '../styles/theme';
 import { fetchDeliveries } from '../services/api';
+import SearchBar from '../components/SearchBar';
+import StatusBadge from '../components/StatusBadge';
 
 type FilterType = 'ALL' | 'SUCCESS' | 'FAILED';
 
@@ -64,12 +66,7 @@ export default function DeliveryLogsScreen({ navigation }: any) {
     >
       <View style={styles.cardHeader}>
         <Text style={styles.eventType}>{item.event?.type || 'unknown.event'}</Text>
-        <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) + '20' }]}>
-          <View style={[styles.statusDot, { backgroundColor: getStatusColor(item.status) }]} />
-          <Text style={[styles.statusText, { color: getStatusColor(item.status) }]}>
-            {item.status}
-          </Text>
-        </View>
+        <StatusBadge status={item.status as any} size="sm" />
         <Text style={styles.chevron}>›</Text>
       </View>
       <Text style={styles.logId}>{item.id?.slice(0, 8) || 'log'}</Text>
@@ -110,14 +107,11 @@ export default function DeliveryLogsScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       {/* Search */}
-      <View style={styles.searchBar}>
-        <Text style={styles.searchIcon}>🔍</Text>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search logs, events..."
-          placeholderTextColor={colors.textMuted}
+      <View style={styles.searchContainer}>
+        <SearchBar
           value={searchQuery}
           onChangeText={setSearchQuery}
+          placeholder="Search logs, events..."
         />
       </View>
 
@@ -171,15 +165,7 @@ export default function DeliveryLogsScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg, paddingTop: 50 },
   center: { alignItems: 'center', justifyContent: 'center' },
-  searchBar: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: colors.bgElevated, borderRadius: borderRadius.xl,
-    paddingHorizontal: spacing.lg, paddingVertical: spacing.sm,
-    borderWidth: 1, borderColor: colors.border,
-    marginHorizontal: spacing.lg, marginBottom: spacing.lg,
-  },
-  searchIcon: { fontSize: 16, marginRight: spacing.sm },
-  searchInput: { flex: 1, ...typography.body, color: colors.textPrimary },
+  searchContainer: { marginHorizontal: spacing.lg, marginBottom: spacing.lg },
   title: { ...typography.h1, color: colors.textPrimary, marginHorizontal: spacing.lg, marginBottom: spacing.xs },
   subtitle: { ...typography.body, color: colors.textSecondary, marginHorizontal: spacing.lg, marginBottom: spacing.lg },
   filterRow: { flexDirection: 'row', gap: spacing.sm, marginHorizontal: spacing.lg, marginBottom: spacing.lg },
@@ -201,12 +187,6 @@ const styles = StyleSheet.create({
   },
   cardHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.xs },
   eventType: { ...typography.bodyBold, color: colors.textPrimary, flex: 1 },
-  statusBadge: {
-    flexDirection: 'row', alignItems: 'center', gap: spacing.xs,
-    paddingHorizontal: spacing.sm, paddingVertical: 3, borderRadius: borderRadius.pill,
-  },
-  statusDot: { width: 6, height: 6, borderRadius: 3 },
-  statusText: { ...typography.small },
   chevron: { fontSize: 22, color: colors.textMuted, marginLeft: spacing.sm },
   logId: { ...typography.caption, color: colors.textMuted, marginBottom: spacing.md },
   cardMeta: { flexDirection: 'row', justifyContent: 'space-between' },

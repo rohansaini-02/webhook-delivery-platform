@@ -5,6 +5,8 @@ import {
 } from 'react-native';
 import { colors, spacing, borderRadius, typography, shadows } from '../styles/theme';
 import { fetchSubscriptions } from '../services/api';
+import SearchBar from '../components/SearchBar';
+import StatusBadge from '../components/StatusBadge';
 
 export default function SubscriptionsListScreen({ navigation }: any) {
   const [subscriptions, setSubscriptions] = useState<any[]>([]);
@@ -51,10 +53,7 @@ export default function SubscriptionsListScreen({ navigation }: any) {
         </View>
 
         <View style={styles.cardFooter}>
-          <View style={[styles.statusDot, { backgroundColor: isActive ? colors.success : colors.textMuted }]} />
-          <Text style={[styles.statusLabel, { color: isActive ? colors.success : colors.textMuted }]}>
-            {isActive ? 'Active' : 'Disabled'}
-          </Text>
+          <StatusBadge status={isActive ? 'ACTIVE' : 'DISABLED'} size="sm" />
           <Text style={styles.metaText}>Success Rate: <Text style={styles.metaBold}>{successRate}%</Text></Text>
           <Text style={styles.metaText}>Last: {new Date(item.createdAt).toLocaleDateString()}</Text>
         </View>
@@ -78,14 +77,11 @@ export default function SubscriptionsListScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       {/* Search */}
-      <View style={styles.searchBar}>
-        <Text style={styles.searchIcon}>🔍</Text>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search subscriptions..."
-          placeholderTextColor={colors.textMuted}
+      <View style={styles.searchContainer}>
+        <SearchBar
           value={searchQuery}
           onChangeText={setSearchQuery}
+          placeholder="Search subscriptions..."
         />
       </View>
 
@@ -130,15 +126,7 @@ function extractName(url: string): string {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg, paddingTop: 50 },
   center: { alignItems: 'center', justifyContent: 'center' },
-  searchBar: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: colors.bgElevated, borderRadius: borderRadius.xl,
-    paddingHorizontal: spacing.lg, paddingVertical: spacing.sm,
-    borderWidth: 1, borderColor: colors.border,
-    marginHorizontal: spacing.lg, marginBottom: spacing.lg,
-  },
-  searchIcon: { fontSize: 16, marginRight: spacing.sm },
-  searchInput: { flex: 1, ...typography.body, color: colors.textPrimary },
+  searchContainer: { marginHorizontal: spacing.lg, marginBottom: spacing.lg },
   title: { ...typography.h1, color: colors.textPrimary, marginHorizontal: spacing.lg, marginBottom: spacing.xs },
   subtitle: { ...typography.body, color: colors.textSecondary, marginHorizontal: spacing.lg, marginBottom: spacing.lg },
   list: { paddingHorizontal: spacing.lg, paddingBottom: 100 },
@@ -152,8 +140,6 @@ const styles = StyleSheet.create({
   cardUrl: { ...typography.caption, color: colors.textMuted, marginTop: 2 },
   chevron: { fontSize: 22, color: colors.textMuted },
   cardFooter: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginBottom: spacing.sm },
-  statusDot: { width: 8, height: 8, borderRadius: 4 },
-  statusLabel: { ...typography.captionBold },
   metaText: { ...typography.small, color: colors.textMuted },
   metaBold: { fontWeight: '700', color: colors.textSecondary },
   progressBar: {

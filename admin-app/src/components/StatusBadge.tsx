@@ -9,13 +9,13 @@ interface StatusBadgeProps {
   size?: 'sm' | 'md';
 }
 
-const statusConfig: Record<StatusType, { label: string; color: string; bgColor: string; icon: string }> = {
-  SUCCESS: { label: 'Success', color: colors.success, bgColor: colors.successBg, icon: '✓' },
-  FAILED: { label: 'Failed', color: colors.error, bgColor: colors.errorBg, icon: '✕' },
-  PENDING: { label: 'Pending', color: colors.warning, bgColor: colors.warningBg, icon: '⏳' },
-  RETRYING: { label: 'Retrying', color: colors.info, bgColor: colors.infoBg, icon: '↻' },
-  ACTIVE: { label: 'Active', color: colors.success, bgColor: colors.successBg, icon: '●' },
-  DISABLED: { label: 'Disabled', color: colors.textMuted, bgColor: colors.bgInput, icon: '●' },
+const statusConfig: Record<StatusType, { label: string; color: string; bgColor: string; }> = {
+  SUCCESS: { label: 'Success', color: colors.success, bgColor: colors.successBg },
+  FAILED: { label: 'Failed', color: colors.error, bgColor: colors.errorBg },
+  PENDING: { label: 'Pending', color: colors.warning, bgColor: colors.warningBg },
+  RETRYING: { label: 'Retrying', color: colors.info, bgColor: colors.infoBg },
+  ACTIVE: { label: 'Active', color: colors.success, bgColor: colors.successBg },
+  DISABLED: { label: 'Disabled', color: colors.textMuted, bgColor: colors.bgInput },
 };
 
 export default function StatusBadge({ status, size = 'md' }: StatusBadgeProps) {

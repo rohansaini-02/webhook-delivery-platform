@@ -3,19 +3,30 @@ import {
   View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList,
   RefreshControl, ActivityIndicator,
 } from 'react-native';
-import { colors, spacing, borderRadius, typography, shadows } from '../styles/theme';
+import { ChevronRight, Inbox } from 'lucide-react-native';
+import GlassCard from '../components/GlassCard';
+import { colors, spacing, borderRadius, typography } from '../styles/theme';
 import { fetchDeliveries } from '../services/api';
 import SearchBar from '../components/SearchBar';
 import StatusBadge from '../components/StatusBadge';
 
 type FilterType = 'ALL' | 'SUCCESS' | 'FAILED';
 
-export default function DeliveryLogsScreen({ navigation }: any) {
+export default function DeliveryLogsScreen({ route, navigation }: any) {
+  const initialParamsFilter = route.params?.initialFilter;
+  
   const [deliveries, setDeliveries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [activeFilter, setActiveFilter] = useState<FilterType>('ALL');
+  const [activeFilter, setActiveFilter] = useState<FilterType>(initialParamsFilter || 'ALL');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // When navigated to with a new param, instantly update tab
+  useEffect(() => {
+    if (initialParamsFilter) {
+      setActiveFilter(initialParamsFilter);
+    }
+  }, [initialParamsFilter]);
 
   const loadData = useCallback(async () => {
     try {
@@ -60,39 +71,41 @@ export default function DeliveryLogsScreen({ navigation }: any) {
 
   const renderDeliveryCard = ({ item }: any) => (
     <TouchableOpacity
-      style={styles.card}
       activeOpacity={0.7}
+      style={{ marginBottom: spacing.md }}
       onPress={() => navigation.navigate('EventDetails', { deliveryId: item.id })}
     >
-      <View style={styles.cardHeader}>
-        <Text style={styles.eventType}>{item.event?.type || 'unknown.event'}</Text>
-        <StatusBadge status={item.status as any} size="sm" />
-        <Text style={styles.chevron}>›</Text>
-      </View>
-      <Text style={styles.logId}>{item.id?.slice(0, 8) || 'log'}</Text>
+      <GlassCard intensity={15}>
+        <View style={styles.cardHeader}>
+          <Text style={styles.eventType}>{item.event?.type || 'unknown.event'}</Text>
+          <StatusBadge status={item.status as any} size="sm" />
+          <ChevronRight size={22} color={colors.textMuted} style={{ marginLeft: spacing.sm }} />
+        </View>
+        <Text style={styles.logId}>{item.id?.slice(0, 8) || 'log'}</Text>
 
-      <View style={styles.cardMeta}>
-        <View style={styles.metaItem}>
-          <Text style={styles.metaLabel}>HTTP Code</Text>
-          <View style={[styles.httpBadge, { borderColor: getHttpCodeColor(item.lastStatusCode) }]}>
-            <Text style={[styles.httpCode, { color: getHttpCodeColor(item.lastStatusCode) }]}>
-              {item.lastStatusCode || '—'}
+        <View style={styles.cardMeta}>
+          <View style={styles.metaItem}>
+            <Text style={styles.metaLabel}>HTTP Code</Text>
+            <View style={[styles.httpBadge, { borderColor: getHttpCodeColor(item.lastStatusCode) + '50' }]}>
+              <Text style={[styles.httpCode, { color: getHttpCodeColor(item.lastStatusCode) }]}>
+                {item.lastStatusCode || '—'}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.metaItem}>
+            <Text style={styles.metaLabel}>Retries</Text>
+            <Text style={styles.metaValue}>{item.attempts || 0}</Text>
+          </View>
+          <View style={styles.metaItem}>
+            <Text style={styles.metaLabel}>Time</Text>
+            <Text style={styles.metaValue}>
+              {item.updatedAt ? new Date(item.updatedAt).toLocaleString('en-US', {
+                month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+              }) : '—'}
             </Text>
           </View>
         </View>
-        <View style={styles.metaItem}>
-          <Text style={styles.metaLabel}>Retries</Text>
-          <Text style={styles.metaValue}>{item.attempts || 0}</Text>
-        </View>
-        <View style={styles.metaItem}>
-          <Text style={styles.metaLabel}>Time</Text>
-          <Text style={styles.metaValue}>
-            {item.updatedAt ? new Date(item.updatedAt).toLocaleString('en-US', {
-              month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
-            }) : '—'}
-          </Text>
-        </View>
-      </View>
+      </GlassCard>
     </TouchableOpacity>
   );
 
@@ -153,7 +166,7 @@ export default function DeliveryLogsScreen({ navigation }: any) {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadData(); }} tintColor={colors.primary} />}
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>📭</Text>
+            <Inbox size={48} color={colors.textMuted} style={{ marginBottom: spacing.md }} />
             <Text style={styles.emptyText}>No delivery logs found</Text>
           </View>
         }
@@ -180,14 +193,8 @@ const styles = StyleSheet.create({
   filterText: { ...typography.captionBold, color: colors.textMuted },
   filterTextActive: { color: colors.textPrimary },
   list: { paddingHorizontal: spacing.lg, paddingBottom: 100 },
-  card: {
-    backgroundColor: colors.bgCard, borderRadius: borderRadius.lg,
-    padding: spacing.lg, marginBottom: spacing.md,
-    borderWidth: 1, borderColor: colors.borderCard, ...shadows.soft,
-  },
   cardHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.xs },
   eventType: { ...typography.bodyBold, color: colors.textPrimary, flex: 1 },
-  chevron: { fontSize: 22, color: colors.textMuted, marginLeft: spacing.sm },
   logId: { ...typography.caption, color: colors.textMuted, marginBottom: spacing.md },
   cardMeta: { flexDirection: 'row', justifyContent: 'space-between' },
   metaItem: {},
@@ -196,6 +203,5 @@ const styles = StyleSheet.create({
   httpBadge: { borderWidth: 1, borderRadius: borderRadius.sm, paddingHorizontal: spacing.sm, paddingVertical: 2 },
   httpCode: { ...typography.bodyBold },
   emptyState: { alignItems: 'center', paddingTop: 60 },
-  emptyIcon: { fontSize: 40, marginBottom: spacing.md },
   emptyText: { ...typography.body, color: colors.textMuted },
 });

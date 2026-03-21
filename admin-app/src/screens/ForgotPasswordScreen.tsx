@@ -3,7 +3,9 @@ import {
   View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView,
   Platform, ScrollView, ActivityIndicator,
 } from 'react-native';
+import { ChevronLeft, Lock, CheckCircle, Mail } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import GlassCard from '../components/GlassCard';
 import { colors, spacing, borderRadius, typography } from '../styles/theme';
 
 export default function ForgotPasswordScreen({ navigation }: any) {
@@ -38,13 +40,13 @@ export default function ForgotPasswordScreen({ navigation }: any) {
 
           {/* Back button */}
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Text style={styles.backIcon}>←</Text>
+            <ChevronLeft size={24} color={colors.textPrimary} />
           </TouchableOpacity>
 
           {/* Logo */}
           <View style={styles.logoArea}>
             <View style={styles.logoBadge}>
-              <Text style={styles.logoIcon}>🔐</Text>
+              <Lock size={36} color={colors.primary} />
             </View>
           </View>
 
@@ -57,7 +59,7 @@ export default function ForgotPasswordScreen({ navigation }: any) {
           {sent ? (
             /* Success state */
             <View style={styles.successCard}>
-              <Text style={styles.successIcon}>✅</Text>
+              <CheckCircle size={48} color={colors.success} style={{ marginBottom: spacing.lg }} />
               <Text style={styles.successTitle}>Code Sent!</Text>
               <Text style={styles.successText}>
                 Check your inbox at {email} for the verification code.
@@ -81,7 +83,7 @@ export default function ForgotPasswordScreen({ navigation }: any) {
             <>
               {/* Email input */}
               <Text style={styles.label}>Email address*</Text>
-              <View style={styles.inputWrapper}>
+              <GlassCard intensity={8} style={styles.inputWrapper}>
                 <TextInput
                   style={styles.input}
                   placeholder="example@gmail.com"
@@ -91,7 +93,7 @@ export default function ForgotPasswordScreen({ navigation }: any) {
                   keyboardType="email-address"
                   autoCapitalize="none"
                 />
-              </View>
+              </GlassCard>
 
               {/* Send Code Button */}
               <TouchableOpacity onPress={handleSendCode} disabled={loading} activeOpacity={0.85}>
@@ -104,7 +106,10 @@ export default function ForgotPasswordScreen({ navigation }: any) {
                   {loading ? (
                     <ActivityIndicator color={colors.textInverse} />
                   ) : (
-                    <Text style={styles.primaryBtnText}>📧 Send Code</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                      <Mail size={18} color={colors.textInverse} />
+                      <Text style={styles.primaryBtnText}>Send Code</Text>
+                    </View>
                   )}
                 </LinearGradient>
               </TouchableOpacity>
@@ -137,7 +142,6 @@ const styles = StyleSheet.create({
     borderRadius: 80, backgroundColor: colors.primaryGlow, opacity: 0.06,
   },
   backBtn: { marginBottom: spacing.lg },
-  backIcon: { fontSize: 24, color: colors.textPrimary },
   logoArea: { alignItems: 'center', marginBottom: spacing.xxl },
   logoBadge: {
     width: 80, height: 80, borderRadius: 40,
@@ -145,7 +149,6 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: colors.borderFocused,
   },
-  logoIcon: { fontSize: 36 },
   title: { ...typography.h1, color: colors.textPrimary, textAlign: 'center', marginBottom: spacing.sm },
   subtitle: {
     ...typography.body, color: colors.textSecondary, textAlign: 'center',
@@ -154,8 +157,7 @@ const styles = StyleSheet.create({
   label: { ...typography.captionBold, color: colors.textSecondary, marginBottom: spacing.sm },
   inputWrapper: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: colors.bgInput, borderRadius: borderRadius.md,
-    borderWidth: 1, borderColor: colors.border, paddingHorizontal: spacing.lg,
+    borderRadius: borderRadius.md, paddingHorizontal: spacing.lg,
     marginBottom: spacing.xl,
   },
   input: { flex: 1, ...typography.body, color: colors.textPrimary, paddingVertical: 14 },
@@ -167,8 +169,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bgCard, borderRadius: borderRadius.lg,
     padding: spacing.xxl, alignItems: 'center',
     borderWidth: 1, borderColor: colors.successBg,
+    marginTop: spacing.xl,
   },
-  successIcon: { fontSize: 48, marginBottom: spacing.lg },
   successTitle: { ...typography.h2, color: colors.textPrimary, marginBottom: spacing.sm },
   successText: { ...typography.body, color: colors.textSecondary, textAlign: 'center', lineHeight: 22 },
   footer: { flexDirection: 'row', justifyContent: 'center', marginTop: spacing.xxxl },

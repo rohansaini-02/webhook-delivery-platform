@@ -3,7 +3,9 @@ import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator,
   Switch, Alert, Platform,
 } from 'react-native';
+import { ChevronLeft, CheckCircle, BarChart2, Copy, Eye, EyeOff, RefreshCw } from 'lucide-react-native';
 import * as Clipboard from 'expo-clipboard';
+import GlassCard from '../components/GlassCard';
 import { colors, spacing, borderRadius, typography, shadows } from '../styles/theme';
 import { fetchSubscription, updateSubscription, deleteSubscription } from '../services/api';
 
@@ -84,7 +86,7 @@ export default function SubscriptionDetailsScreen({ route, navigation }: any) {
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Text style={styles.backIcon}>←</Text>
+            <ChevronLeft size={24} color={colors.textPrimary} />
           </TouchableOpacity>
           <Text style={styles.title}>{extractName(sub.url)}</Text>
           <View style={[styles.activeBadge, { backgroundColor: isActive ? colors.successBg : colors.errorBg }]}>
@@ -95,28 +97,34 @@ export default function SubscriptionDetailsScreen({ route, navigation }: any) {
         </View>
 
         <View style={styles.healthBadge}>
-          <Text style={styles.healthText}>✅ Healthy</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <CheckCircle size={14} color={colors.success} />
+            <Text style={styles.healthText}>Healthy</Text>
+          </View>
         </View>
 
         {/* Stats Row */}
         <View style={styles.statsRow}>
-          <View style={styles.statCard}>
+          <GlassCard intensity={15} style={styles.statCard}>
             <Text style={styles.statLabel}>Success</Text>
             <Text style={[styles.statValue, { color: colors.success }]}>—</Text>
-          </View>
-          <View style={styles.statCard}>
+          </GlassCard>
+          <GlassCard intensity={15} style={styles.statCard}>
             <Text style={styles.statLabel}>Failed</Text>
             <Text style={[styles.statValue, { color: colors.error }]}>—</Text>
-          </View>
-          <View style={styles.statCard}>
+          </GlassCard>
+          <GlassCard intensity={15} style={styles.statCard}>
             <Text style={styles.statLabel}>Fail Rate</Text>
             <Text style={[styles.statValue, { color: colors.textPrimary }]}>0.0%</Text>
-          </View>
+          </GlassCard>
         </View>
 
         {/* 7-Day Performance placeholder */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>📊 7-Day Performance</Text>
+        <GlassCard intensity={15} style={styles.section}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.lg }}>
+            <BarChart2 size={20} color={colors.textPrimary} />
+            <Text style={[styles.sectionTitle, { marginBottom: 0 }]}>7-Day Performance</Text>
+          </View>
           <View style={styles.chartPlaceholder}>
             <View style={styles.chartBar}>
               {[40, 48, 45, 50, 42, 38, 44].map((h, i) => (
@@ -127,13 +135,13 @@ export default function SubscriptionDetailsScreen({ route, navigation }: any) {
               ))}
             </View>
           </View>
-        </View>
+        </GlassCard>
 
         {/* Last Delivery */}
-        <View style={styles.section}>
+        <GlassCard intensity={15} style={styles.section}>
           <Text style={styles.sectionTitle}>Last Delivery</Text>
           <View style={styles.lastDelivery}>
-            <Text style={styles.lastIcon}>✅</Text>
+            <CheckCircle size={20} color={colors.success} />
             <View style={{ flex: 1 }}>
               <Text style={styles.lastStatus}>Successful</Text>
               <Text style={styles.lastMeta}>
@@ -144,42 +152,51 @@ export default function SubscriptionDetailsScreen({ route, navigation }: any) {
               <Text style={styles.httpCode}>HTTP 200</Text>
             </View>
           </View>
-        </View>
+        </GlassCard>
 
         {/* Endpoint URL */}
-        <View style={styles.section}>
+        <GlassCard intensity={15} style={styles.section}>
           <Text style={styles.sectionTitle}>Endpoint URL</Text>
           <View style={styles.codeBlock}>
             <Text style={styles.codeText}>{sub.url}</Text>
           </View>
           <TouchableOpacity style={styles.copyRow} onPress={() => copyToClipboard(sub.url)}>
-            <Text style={styles.copyText}>📋 Copy URL</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+              <Copy size={16} color={colors.textSecondary} />
+              <Text style={styles.copyText}>Copy URL</Text>
+            </View>
           </TouchableOpacity>
-        </View>
+        </GlassCard>
 
         {/* Secret Key */}
-        <View style={styles.section}>
+        <GlassCard intensity={15} style={styles.section}>
           <Text style={styles.sectionTitle}>Secret Key</Text>
           <View style={styles.secretRow}>
             <Text style={styles.secretValue}>
               {showSecret ? sub.secret : '••••••••••••••••••••••••••••'}
             </Text>
             <TouchableOpacity onPress={() => setShowSecret(!showSecret)}>
-              <Text style={styles.eyeIcon}>{showSecret ? '🙈' : '👁️'}</Text>
+              {showSecret ? <EyeOff size={18} color={colors.textSecondary} /> : <Eye size={18} color={colors.textSecondary} />}
             </TouchableOpacity>
           </View>
           <View style={styles.secretActions}>
             <TouchableOpacity style={styles.secretBtn} onPress={() => copyToClipboard(sub.secret || '')}>
-              <Text style={styles.secretBtnText}>📋 Copy</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                <Copy size={16} color={colors.textSecondary} />
+                <Text style={styles.secretBtnText}>Copy</Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity style={styles.secretBtn}>
-              <Text style={styles.secretBtnText}>🔄 Rotate</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                <RefreshCw size={16} color={colors.textSecondary} />
+                <Text style={styles.secretBtnText}>Rotate</Text>
+              </View>
             </TouchableOpacity>
           </View>
-        </View>
+        </GlassCard>
 
         {/* Subscribed Events */}
-        <View style={styles.section}>
+        <GlassCard intensity={15} style={styles.section}>
           <Text style={styles.sectionTitle}>Subscribed Events</Text>
           <View style={styles.tagsRow}>
             {(sub.events || []).map((ev: string, i: number) => (
@@ -188,10 +205,10 @@ export default function SubscriptionDetailsScreen({ route, navigation }: any) {
               </View>
             ))}
           </View>
-        </View>
+        </GlassCard>
 
         {/* Settings */}
-        <View style={styles.section}>
+        <GlassCard intensity={15} style={styles.section}>
           <Text style={styles.sectionTitle}>Settings</Text>
           <View style={styles.settingRow}>
             <View>
@@ -209,7 +226,7 @@ export default function SubscriptionDetailsScreen({ route, navigation }: any) {
           <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete} activeOpacity={0.8}>
             <Text style={styles.deleteBtnText}>Delete Subscription</Text>
           </TouchableOpacity>
-        </View>
+        </GlassCard>
       </ScrollView>
     </View>
   );
@@ -232,7 +249,6 @@ const styles = StyleSheet.create({
   center: { alignItems: 'center', justifyContent: 'center' },
   scroll: { paddingHorizontal: spacing.lg, paddingTop: 50, paddingBottom: 100 },
   header: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginBottom: spacing.sm },
-  backIcon: { fontSize: 24, color: colors.textPrimary },
   title: { ...typography.h2, color: colors.textPrimary, flex: 1 },
   activeBadge: { paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: borderRadius.pill },
   activeText: { ...typography.captionBold },
@@ -244,16 +260,12 @@ const styles = StyleSheet.create({
   healthText: { ...typography.captionBold, color: colors.success },
   statsRow: { flexDirection: 'row', gap: spacing.md, marginBottom: spacing.xl },
   statCard: {
-    flex: 1, backgroundColor: colors.bgCard, borderRadius: borderRadius.lg,
-    padding: spacing.lg, alignItems: 'center',
-    borderWidth: 1, borderColor: colors.borderCard,
+    flex: 1, padding: spacing.lg, alignItems: 'center',
   },
   statLabel: { ...typography.caption, color: colors.textSecondary, marginBottom: spacing.xs },
   statValue: { ...typography.h2 },
   section: {
-    backgroundColor: colors.bgCard, borderRadius: borderRadius.lg,
-    padding: spacing.xl, borderWidth: 1, borderColor: colors.borderCard,
-    marginBottom: spacing.lg, ...shadows.soft,
+    padding: spacing.xl, marginBottom: spacing.lg,
   },
   sectionTitle: { ...typography.h3, color: colors.textPrimary, marginBottom: spacing.lg },
   chartPlaceholder: { alignItems: 'center' },

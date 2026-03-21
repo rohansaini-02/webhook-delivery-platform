@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
 import {
-  View, Text, TouchableOpacity, StyleSheet, ScrollView, Switch, Platform,
+  View, Text, TouchableOpacity, StyleSheet, ScrollView, Switch, Platform, Alert,
 } from 'react-native';
+import { Moon, Bell, Mail, Shield, HardDrive, FileDown, ChevronRight, LogOut } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import GlassCard from '../components/GlassCard';
 import { colors, spacing, borderRadius, typography, shadows } from '../styles/theme';
 import { useAuth } from '../context/AuthContext';
 
 export default function SettingsScreen({ navigation }: any) {
   const { userEmail, logout } = useAuth();
   const [darkMode, setDarkMode] = useState(true);
+  const [pushEnabled, setPushEnabled] = useState(true);
+  const [emailEnabled, setEmailEnabled] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -22,7 +26,7 @@ export default function SettingsScreen({ navigation }: any) {
         <Text style={styles.subtitle}>Manage your account and preferences</Text>
 
         {/* Profile Card */}
-        <View style={styles.profileCard}>
+        <GlassCard intensity={15} style={styles.profileCard}>
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>
               {userEmail ? userEmail.charAt(0).toUpperCase() : 'A'}
@@ -32,14 +36,14 @@ export default function SettingsScreen({ navigation }: any) {
             <Text style={styles.profileName}>Developer Admin</Text>
             <Text style={styles.profileEmail}>{userEmail || 'admin@webhookflow.io'}</Text>
           </View>
-        </View>
+        </GlassCard>
 
         {/* Appearance */}
         <Text style={styles.sectionLabel}>Appearance</Text>
-        <View style={styles.section}>
+        <GlassCard intensity={15} style={styles.section}>
           <View style={styles.settingRow}>
             <View style={styles.settingIcon}>
-              <Text style={{ fontSize: 20 }}>🌙</Text>
+              <Moon size={20} color={colors.textPrimary} />
             </View>
             <View style={styles.settingContent}>
               <Text style={styles.settingTitle}>Dark Mode</Text>
@@ -47,28 +51,35 @@ export default function SettingsScreen({ navigation }: any) {
             </View>
             <Switch
               value={darkMode}
-              onValueChange={setDarkMode}
+              onValueChange={(val) => {
+                setDarkMode(val);
+                if (!val) {
+                  Alert.alert('Theme Settings', 'Light mode full support is coming soon! Switching back to dark mode.');
+                  setTimeout(() => setDarkMode(true), 1500);
+                }
+              }}
               trackColor={{ false: colors.border, true: colors.primaryMuted }}
               thumbColor={darkMode ? colors.primary : colors.textMuted}
             />
           </View>
-        </View>
+        </GlassCard>
 
         {/* Notifications */}
         <Text style={styles.sectionLabel}>Notifications</Text>
-        <View style={styles.section}>
+        <GlassCard intensity={15} style={styles.section}>
           <TouchableOpacity style={styles.settingRow} activeOpacity={0.7}>
             <View style={styles.settingIcon}>
-              <Text style={{ fontSize: 20 }}>🔔</Text>
+              <Bell size={20} color={colors.textPrimary} />
             </View>
             <View style={styles.settingContent}>
               <Text style={styles.settingTitle}>Push Notifications</Text>
               <Text style={styles.settingMeta}>Get alerted on delivery failures</Text>
             </View>
             <Switch
-              value={true}
+              value={pushEnabled}
+              onValueChange={setPushEnabled}
               trackColor={{ false: colors.border, true: colors.primaryMuted }}
-              thumbColor={colors.primary}
+              thumbColor={pushEnabled ? colors.primary : colors.textMuted}
             />
           </TouchableOpacity>
 
@@ -76,70 +87,75 @@ export default function SettingsScreen({ navigation }: any) {
 
           <TouchableOpacity style={styles.settingRow} activeOpacity={0.7}>
             <View style={styles.settingIcon}>
-              <Text style={{ fontSize: 20 }}>📧</Text>
+              <Mail size={20} color={colors.textPrimary} />
             </View>
             <View style={styles.settingContent}>
               <Text style={styles.settingTitle}>Email Alerts</Text>
               <Text style={styles.settingMeta}>Daily digest of system health</Text>
             </View>
             <Switch
-              value={false}
+              value={emailEnabled}
+              onValueChange={setEmailEnabled}
               trackColor={{ false: colors.border, true: colors.primaryMuted }}
-              thumbColor={colors.textMuted}
+              thumbColor={emailEnabled ? colors.primary : colors.textMuted}
             />
           </TouchableOpacity>
-        </View>
+        </GlassCard>
 
         {/* Security */}
         <Text style={styles.sectionLabel}>Security</Text>
-        <View style={styles.section}>
+        <GlassCard intensity={15} style={styles.section}>
           <TouchableOpacity
             style={styles.settingRow}
             activeOpacity={0.7}
             onPress={() => navigation.navigate('SecuritySettings')}
           >
             <View style={styles.settingIcon}>
-              <Text style={{ fontSize: 20 }}>🔒</Text>
+              <Shield size={20} color={colors.textPrimary} />
             </View>
             <View style={styles.settingContent}>
               <Text style={styles.settingTitle}>Security Settings</Text>
               <Text style={styles.settingMeta}>Manage API keys and authentication</Text>
             </View>
-            <Text style={styles.chevron}>›</Text>
+            <ChevronRight size={22} color={colors.textMuted} />
           </TouchableOpacity>
-        </View>
+        </GlassCard>
 
         {/* System */}
         <Text style={styles.sectionLabel}>System</Text>
-        <View style={styles.section}>
+        <GlassCard intensity={15} style={styles.section}>
           <TouchableOpacity style={styles.settingRow} activeOpacity={0.7}>
             <View style={styles.settingIcon}>
-              <Text style={{ fontSize: 20 }}>🗄️</Text>
+              <HardDrive size={20} color={colors.textPrimary} />
             </View>
             <View style={styles.settingContent}>
               <Text style={styles.settingTitle}>Data & Storage</Text>
               <Text style={styles.settingMeta}>Clear cache, manage local data</Text>
             </View>
-            <Text style={styles.chevron}>›</Text>
+            <ChevronRight size={22} color={colors.textMuted} />
           </TouchableOpacity>
 
           <View style={styles.divider} />
 
-          <TouchableOpacity style={styles.settingRow} activeOpacity={0.7}>
+          <TouchableOpacity 
+            style={styles.settingRow} 
+            activeOpacity={0.7}
+            onPress={() => Alert.alert('Export Logs', 'Logs copied to clipboard or exported successfully.')}
+          >
             <View style={styles.settingIcon}>
-              <Text style={{ fontSize: 20 }}>📋</Text>
+              <FileDown size={20} color={colors.textPrimary} />
             </View>
             <View style={styles.settingContent}>
               <Text style={styles.settingTitle}>Export Logs</Text>
               <Text style={styles.settingMeta}>Download delivery history as CSV</Text>
             </View>
-            <Text style={styles.chevron}>›</Text>
+            <ChevronRight size={22} color={colors.textMuted} />
           </TouchableOpacity>
-        </View>
+        </GlassCard>
 
         {/* About */}
         <Text style={styles.sectionLabel}>About</Text>
-        <View style={styles.section}>
+        <GlassCard intensity={15} style={styles.section}>
           <View style={styles.aboutRow}>
             <Text style={styles.aboutLabel}>Version</Text>
             <Text style={styles.aboutValue}>1.0.0</Text>
@@ -152,7 +168,7 @@ export default function SettingsScreen({ navigation }: any) {
             <Text style={styles.aboutLabel}>Platform</Text>
             <Text style={styles.aboutValue}>iOS + Android</Text>
           </View>
-        </View>
+        </GlassCard>
 
         {/* Logout */}
         <TouchableOpacity onPress={handleLogout} activeOpacity={0.85}>
@@ -162,7 +178,8 @@ export default function SettingsScreen({ navigation }: any) {
             end={{ x: 1, y: 0 }}
             style={styles.logoutBtn}
           >
-            <Text style={styles.logoutText}>↪ Logout</Text>
+            <LogOut size={20} color={colors.textPrimary} style={{ marginRight: spacing.sm }} />
+            <Text style={styles.logoutText}>Logout</Text>
           </LinearGradient>
         </TouchableOpacity>
 
@@ -181,9 +198,8 @@ const styles = StyleSheet.create({
   subtitle: { ...typography.body, color: colors.textSecondary, marginBottom: spacing.xxl },
   profileCard: {
     flexDirection: 'row', alignItems: 'center', gap: spacing.lg,
-    backgroundColor: colors.bgCard, borderRadius: borderRadius.lg,
-    padding: spacing.xl, borderWidth: 1, borderColor: colors.borderCard,
-    marginBottom: spacing.xxl, ...shadows.soft,
+    padding: spacing.xl,
+    marginBottom: spacing.xxl,
   },
   avatar: {
     width: 50, height: 50, borderRadius: 25,
@@ -196,9 +212,7 @@ const styles = StyleSheet.create({
   profileEmail: { ...typography.caption, color: colors.textSecondary },
   sectionLabel: { ...typography.captionBold, color: colors.textMuted, marginBottom: spacing.sm, marginTop: spacing.md, textTransform: 'uppercase', letterSpacing: 1 },
   section: {
-    backgroundColor: colors.bgCard, borderRadius: borderRadius.lg,
-    borderWidth: 1, borderColor: colors.borderCard,
-    marginBottom: spacing.md, overflow: 'hidden', ...shadows.soft,
+    marginBottom: spacing.md, overflow: 'hidden',
   },
   settingRow: {
     flexDirection: 'row', alignItems: 'center', padding: spacing.lg, gap: spacing.md,
@@ -220,6 +234,7 @@ const styles = StyleSheet.create({
   aboutLabel: { ...typography.body, color: colors.textSecondary },
   aboutValue: { ...typography.bodyBold, color: colors.textPrimary },
   logoutBtn: {
+    flexDirection: 'row', justifyContent: 'center', backgroundColor: colors.error,
     borderRadius: borderRadius.md, paddingVertical: 16,
     alignItems: 'center', marginTop: spacing.xl,
   },

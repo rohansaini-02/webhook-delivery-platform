@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Platform,
 } from 'react-native';
+import { ChevronLeft, CheckCircle, XCircle, Copy } from 'lucide-react-native';
+import GlassCard from '../components/GlassCard';
 import { colors, spacing, borderRadius, typography, shadows } from '../styles/theme';
 import { fetchDelivery } from '../services/api';
 
@@ -49,22 +51,24 @@ export default function EventDetailsScreen({ route, navigation }: any) {
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Text style={styles.backIcon}>←</Text>
+          <ChevronLeft size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.title}>Event Details</Text>
         <Text style={styles.logId}>{delivery.id?.slice(0, 12)}</Text>
 
         {/* Status Card */}
-        <View style={[styles.statusCard, { borderColor: statusColor }]}>
-          <Text style={styles.statusIcon}>{isSuccess ? '✅' : '❌'}</Text>
+        <GlassCard intensity={15} style={[styles.statusCard, { borderColor: statusColor }]}>
+          {isSuccess ? 
+            <CheckCircle size={28} color={colors.success} style={{ marginBottom: spacing.sm }} /> : 
+            <XCircle size={28} color={colors.error} style={{ marginBottom: spacing.sm }} />}
           <Text style={styles.eventType}>{delivery.event?.type || 'unknown.event'}</Text>
           <View style={[styles.statusBadge, { backgroundColor: statusColor + '20' }]}>
             <Text style={[styles.statusText, { color: statusColor }]}>{delivery.status}</Text>
           </View>
-        </View>
+        </GlassCard>
 
         {/* Event Metadata */}
-        <View style={styles.section}>
+        <GlassCard intensity={15} style={styles.section}>
           <Text style={styles.sectionTitle}>Event Metadata</Text>
           <View style={styles.metaGrid}>
             <View style={styles.metaItem}>
@@ -90,23 +94,26 @@ export default function EventDetailsScreen({ route, navigation }: any) {
               <Text style={styles.metaValue}>—</Text>
             </View>
           </View>
-        </View>
+        </GlassCard>
 
         {/* Request Payload */}
-        <View style={styles.section}>
+        <GlassCard intensity={15} style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Request Payload</Text>
-            <TouchableOpacity><Text style={styles.copyBtn}>📋 Copy</Text></TouchableOpacity>
+            <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+              <Copy size={16} color={colors.textSecondary} />
+              <Text style={styles.copyBtn}>Copy</Text>
+            </TouchableOpacity>
           </View>
           <View style={styles.codeBlock}>
             <Text style={styles.codeText}>
               {JSON.stringify(delivery.event?.payload || {}, null, 2)}
             </Text>
           </View>
-        </View>
+        </GlassCard>
 
         {/* Response Body */}
-        <View style={styles.section}>
+        <GlassCard intensity={15} style={styles.section}>
           <Text style={styles.sectionTitle}>Response Body</Text>
           <View style={styles.codeBlock}>
             <Text style={styles.codeText}>
@@ -115,7 +122,7 @@ export default function EventDetailsScreen({ route, navigation }: any) {
                 : '{ "message": "No response recorded" }'}
             </Text>
           </View>
-        </View>
+        </GlassCard>
       </ScrollView>
     </View>
   );
@@ -130,18 +137,13 @@ const styles = StyleSheet.create({
   title: { ...typography.h1, color: colors.textPrimary, marginBottom: spacing.xs },
   logId: { ...typography.caption, color: colors.textMuted, marginBottom: spacing.xl },
   statusCard: {
-    backgroundColor: colors.bgCard, borderRadius: borderRadius.lg,
-    padding: spacing.xl, borderWidth: 1, marginBottom: spacing.xl,
-    ...shadows.card,
+    padding: spacing.xl, marginBottom: spacing.xl,
   },
-  statusIcon: { fontSize: 24, marginBottom: spacing.sm },
   eventType: { ...typography.h3, color: colors.textPrimary, marginBottom: spacing.sm },
   statusBadge: { alignSelf: 'flex-start', paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: borderRadius.pill },
   statusText: { ...typography.captionBold },
   section: {
-    backgroundColor: colors.bgCard, borderRadius: borderRadius.lg,
-    padding: spacing.xl, borderWidth: 1, borderColor: colors.borderCard,
-    marginBottom: spacing.lg, ...shadows.soft,
+    padding: spacing.xl, marginBottom: spacing.lg,
   },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   sectionTitle: { ...typography.h3, color: colors.textPrimary, marginBottom: spacing.lg },

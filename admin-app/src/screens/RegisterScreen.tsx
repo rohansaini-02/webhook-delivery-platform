@@ -3,7 +3,9 @@ import {
   View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView,
   Platform, ScrollView, ActivityIndicator,
 } from 'react-native';
+import { Zap, Eye, EyeOff, Sparkles } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import GlassCard from '../components/GlassCard';
 import { colors, spacing, borderRadius, typography } from '../styles/theme';
 
 export default function RegisterScreen({ navigation }: any) {
@@ -39,7 +41,7 @@ export default function RegisterScreen({ navigation }: any) {
           {/* Logo Area */}
           <View style={styles.logoArea}>
             <View style={styles.logoBadge}>
-              <Text style={styles.logoIcon}>⚡</Text>
+              <Zap size={36} color={colors.primary} />
             </View>
           </View>
 
@@ -50,7 +52,7 @@ export default function RegisterScreen({ navigation }: any) {
 
           {/* Full Name */}
           <Text style={styles.label}>Full Name*</Text>
-          <View style={styles.inputWrapper}>
+          <GlassCard intensity={8} style={styles.inputWrapper}>
             <TextInput
               style={styles.input}
               placeholder="Alex Smith"
@@ -58,11 +60,11 @@ export default function RegisterScreen({ navigation }: any) {
               value={fullName}
               onChangeText={setFullName}
             />
-          </View>
+          </GlassCard>
 
           {/* Email */}
           <Text style={styles.label}>Email address*</Text>
-          <View style={styles.inputWrapper}>
+          <GlassCard intensity={8} style={styles.inputWrapper}>
             <TextInput
               style={styles.input}
               placeholder="example@gmail.com"
@@ -72,11 +74,11 @@ export default function RegisterScreen({ navigation }: any) {
               keyboardType="email-address"
               autoCapitalize="none"
             />
-          </View>
+          </GlassCard>
 
           {/* Password */}
           <Text style={styles.label}>Password*</Text>
-          <View style={styles.inputWrapper}>
+          <GlassCard intensity={8} style={styles.inputWrapper}>
             <TextInput
               style={[styles.input, { flex: 1 }]}
               placeholder="Create a strong password"
@@ -86,9 +88,9 @@ export default function RegisterScreen({ navigation }: any) {
               secureTextEntry={!showPass}
             />
             <TouchableOpacity onPress={() => setShowPass(!showPass)} style={styles.eyeBtn}>
-              <Text style={styles.eyeIcon}>{showPass ? '🙈' : '👁️'}</Text>
+              {showPass ? <EyeOff size={18} color={colors.textSecondary} /> : <Eye size={18} color={colors.textSecondary} />}
             </TouchableOpacity>
-          </View>
+          </GlassCard>
 
           {/* Register Button */}
           <TouchableOpacity onPress={handleRegister} disabled={loading} activeOpacity={0.85}>
@@ -101,7 +103,10 @@ export default function RegisterScreen({ navigation }: any) {
               {loading ? (
                 <ActivityIndicator color={colors.textInverse} />
               ) : (
-                <Text style={styles.primaryBtnText}>✨ Register</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                  <Sparkles size={18} color={colors.textInverse} />
+                  <Text style={styles.primaryBtnText}>Register</Text>
+                </View>
               )}
             </LinearGradient>
           </TouchableOpacity>
@@ -115,11 +120,15 @@ export default function RegisterScreen({ navigation }: any) {
 
           {/* Social Buttons */}
           <View style={styles.socialRow}>
-            <TouchableOpacity style={styles.socialBtn} activeOpacity={0.7}>
-              <Text style={styles.socialBtnText}>G  Google</Text>
+            <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.7}>
+              <GlassCard intensity={15} style={styles.socialBtn}>
+                <Text style={styles.socialBtnText}>G  Google</Text>
+              </GlassCard>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.socialBtn} activeOpacity={0.7}>
-              <Text style={styles.socialBtnText}>  Apple</Text>
+            <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.7}>
+              <GlassCard intensity={15} style={styles.socialBtn}>
+                <Text style={styles.socialBtnText}>  Apple</Text>
+              </GlassCard>
             </TouchableOpacity>
           </View>
 
@@ -151,7 +160,6 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: colors.borderFocused,
   },
-  logoIcon: { fontSize: 36 },
   title: { ...typography.h1, color: colors.textPrimary, textAlign: 'center', marginBottom: spacing.sm },
   subtitle: {
     ...typography.body, color: colors.textSecondary, textAlign: 'center',
@@ -160,12 +168,11 @@ const styles = StyleSheet.create({
   label: { ...typography.captionBold, color: colors.textSecondary, marginBottom: spacing.sm, marginTop: spacing.lg },
   inputWrapper: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: colors.bgInput, borderRadius: borderRadius.md,
-    borderWidth: 1, borderColor: colors.border, paddingHorizontal: spacing.lg,
+    borderRadius: borderRadius.md, paddingHorizontal: spacing.lg,
+    marginBottom: spacing.sm,
   },
   input: { flex: 1, ...typography.body, color: colors.textPrimary, paddingVertical: 14 },
   eyeBtn: { padding: spacing.sm },
-  eyeIcon: { fontSize: 18 },
   primaryBtn: {
     marginTop: spacing.xxl, borderRadius: borderRadius.md,
     paddingVertical: 16, alignItems: 'center',
@@ -176,9 +183,8 @@ const styles = StyleSheet.create({
   dividerText: { ...typography.caption, color: colors.textMuted, marginHorizontal: spacing.md },
   socialRow: { flexDirection: 'row', gap: spacing.md },
   socialBtn: {
-    flex: 1, backgroundColor: colors.bgInput, borderRadius: borderRadius.md,
+    borderRadius: borderRadius.md,
     paddingVertical: 14, alignItems: 'center',
-    borderWidth: 1, borderColor: colors.border,
   },
   socialBtnText: { ...typography.bodyBold, color: colors.textPrimary },
   footer: { flexDirection: 'row', justifyContent: 'center', marginTop: spacing.xxxl },

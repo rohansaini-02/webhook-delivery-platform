@@ -3,7 +3,9 @@ import {
   View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView,
   ActivityIndicator, Platform, Alert,
 } from 'react-native';
+import { Key, Eye, EyeOff, Copy, Shield, ChevronLeft } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import GlassCard from '../components/GlassCard';
 import { colors, spacing, borderRadius, typography, shadows } from '../styles/theme';
 import { useAuth } from '../context/AuthContext';
 
@@ -51,29 +53,33 @@ export default function SecurityScreen({ navigation }: any) {
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backRow}>
-          <Text style={styles.backIcon}>←</Text>
+          <ChevronLeft size={24} color={colors.textPrimary} />
           <Text style={styles.title}>Security</Text>
         </TouchableOpacity>
         <Text style={styles.subtitle}>Manage your API keys and security settings</Text>
 
         {/* API Key Section */}
-        <View style={styles.section}>
+        <GlassCard intensity={15} style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionIcon}>🔑</Text>
+            <Key size={20} color={colors.textPrimary} />
             <Text style={styles.sectionTitle}>API Key</Text>
           </View>
           <Text style={styles.fieldLabel}>Your API Key</Text>
-          <View style={styles.keyRow}>
+          <GlassCard intensity={8} style={styles.keyRow}>
             <Text style={styles.keyText}>
               {showKey ? (apiKey || 'No key stored') : '••••••••••••••••••••••••••••'}
             </Text>
             <TouchableOpacity onPress={() => setShowKey(!showKey)}>
-              <Text style={styles.eyeIcon}>{showKey ? '🙈' : '👁️'}</Text>
+              {showKey ? (
+                <EyeOff size={18} color={colors.textSecondary} />
+              ) : (
+                <Eye size={18} color={colors.textSecondary} />
+              )}
             </TouchableOpacity>
             <TouchableOpacity onPress={() => copyToClipboard(apiKey || '')}>
-              <Text style={styles.copyIcon}>📋</Text>
+              <Copy size={18} color={colors.textSecondary} />
             </TouchableOpacity>
-          </View>
+          </GlassCard>
           <Text style={styles.helpText}>
             Keep this key secure. Anyone with this key can access your webhook data.
           </Text>
@@ -88,18 +94,18 @@ export default function SecurityScreen({ navigation }: any) {
               <Text style={styles.dangerBtnText}>Generate New API Key</Text>
             </LinearGradient>
           </TouchableOpacity>
-        </View>
+        </GlassCard>
 
         {/* Change Password */}
-        <View style={styles.section}>
+        <GlassCard intensity={15} style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionIcon}>🛡️</Text>
+            <Shield size={20} color={colors.textPrimary} />
             <Text style={styles.sectionTitle}>Authentication</Text>
           </View>
           <Text style={styles.subTitle}>Change Password</Text>
 
           <Text style={styles.fieldLabel}>Current Password</Text>
-          <View style={styles.inputWrapper}>
+          <GlassCard intensity={8} style={styles.inputWrapper}>
             <TextInput
               style={styles.input}
               placeholder="Enter current password"
@@ -108,10 +114,10 @@ export default function SecurityScreen({ navigation }: any) {
               onChangeText={setCurrentPassword}
               secureTextEntry
             />
-          </View>
+          </GlassCard>
 
           <Text style={styles.fieldLabel}>New Password</Text>
-          <View style={styles.inputWrapper}>
+          <GlassCard intensity={8} style={styles.inputWrapper}>
             <TextInput
               style={styles.input}
               placeholder="Enter new password"
@@ -120,10 +126,10 @@ export default function SecurityScreen({ navigation }: any) {
               onChangeText={setNewPassword}
               secureTextEntry
             />
-          </View>
+          </GlassCard>
 
           <Text style={styles.fieldLabel}>Confirm New Password</Text>
-          <View style={styles.inputWrapper}>
+          <GlassCard intensity={8} style={styles.inputWrapper}>
             <TextInput
               style={styles.input}
               placeholder="Confirm new password"
@@ -132,7 +138,7 @@ export default function SecurityScreen({ navigation }: any) {
               onChangeText={setConfirmPassword}
               secureTextEntry
             />
-          </View>
+          </GlassCard>
 
           <TouchableOpacity onPress={handleUpdatePassword} disabled={updating} activeOpacity={0.85}>
             <LinearGradient
@@ -148,12 +154,12 @@ export default function SecurityScreen({ navigation }: any) {
               )}
             </LinearGradient>
           </TouchableOpacity>
-        </View>
+        </GlassCard>
 
         {/* Best Practices */}
-        <View style={styles.section}>
+        <GlassCard intensity={15} style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionIcon}>🛡️</Text>
+            <Shield size={20} color={colors.textPrimary} />
             <Text style={styles.sectionTitle}>Security Best Practices</Text>
           </View>
           {[
@@ -167,7 +173,7 @@ export default function SecurityScreen({ navigation }: any) {
               <Text style={styles.tipText}>{tip}</Text>
             </View>
           ))}
-        </View>
+        </GlassCard>
       </ScrollView>
     </View>
   );
@@ -181,9 +187,7 @@ const styles = StyleSheet.create({
   title: { ...typography.h1, color: colors.textPrimary },
   subtitle: { ...typography.body, color: colors.textSecondary, marginBottom: spacing.xxl },
   section: {
-    backgroundColor: colors.bgCard, borderRadius: borderRadius.lg,
-    padding: spacing.xl, borderWidth: 1, borderColor: colors.borderCard,
-    marginBottom: spacing.lg, ...shadows.soft,
+    padding: spacing.xl, marginBottom: spacing.lg,
   },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.lg },
   sectionIcon: { fontSize: 20 },
@@ -192,8 +196,7 @@ const styles = StyleSheet.create({
   fieldLabel: { ...typography.captionBold, color: colors.textSecondary, marginBottom: spacing.sm, marginTop: spacing.md },
   keyRow: {
     flexDirection: 'row', alignItems: 'center', gap: spacing.md,
-    backgroundColor: colors.bg, borderRadius: borderRadius.md,
-    padding: spacing.lg, borderWidth: 1, borderColor: colors.border,
+    borderRadius: borderRadius.md, padding: spacing.lg,
     marginBottom: spacing.sm,
   },
   keyText: { flex: 1, ...typography.body, color: colors.textPrimary, letterSpacing: 1 },
@@ -201,8 +204,7 @@ const styles = StyleSheet.create({
   copyIcon: { fontSize: 18 },
   helpText: { ...typography.caption, color: colors.textMuted, marginBottom: spacing.lg, lineHeight: 18 },
   inputWrapper: {
-    backgroundColor: colors.bgInput, borderRadius: borderRadius.md,
-    borderWidth: 1, borderColor: colors.border, paddingHorizontal: spacing.lg,
+    borderRadius: borderRadius.md, paddingHorizontal: spacing.lg,
     marginBottom: spacing.sm,
   },
   input: { ...typography.body, color: colors.textPrimary, paddingVertical: 14 },

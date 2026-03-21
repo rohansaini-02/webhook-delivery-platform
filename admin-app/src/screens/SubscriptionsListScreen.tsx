@@ -3,6 +3,9 @@ import {
   View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList,
   RefreshControl, ActivityIndicator,
 } from 'react-native';
+import { ChevronRight, Radio, Plus } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import GlassCard from '../components/GlassCard';
 import { colors, spacing, borderRadius, typography, shadows } from '../styles/theme';
 import { fetchSubscriptions } from '../services/api';
 import SearchBar from '../components/SearchBar';
@@ -40,28 +43,34 @@ export default function SubscriptionsListScreen({ navigation }: any) {
 
     return (
       <TouchableOpacity
-        style={styles.card}
         activeOpacity={0.7}
+        style={{ marginBottom: spacing.md }}
         onPress={() => navigation.navigate('SubscriptionDetails', { subscriptionId: item.id })}
       >
-        <View style={styles.cardHeader}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.cardTitle}>{extractName(item.url)}</Text>
-            <Text style={styles.cardUrl}>{item.url}</Text>
+        <GlassCard intensity={15}>
+          <View style={styles.cardHeader}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.cardTitle}>{extractName(item.url)}</Text>
+              <Text style={styles.cardUrl}>{item.url}</Text>
+            </View>
+            <ChevronRight size={22} color={colors.textMuted} />
           </View>
-          <Text style={styles.chevron}>›</Text>
-        </View>
 
-        <View style={styles.cardFooter}>
-          <StatusBadge status={isActive ? 'ACTIVE' : 'DISABLED'} size="sm" />
-          <Text style={styles.metaText}>Success Rate: <Text style={styles.metaBold}>{successRate}%</Text></Text>
-          <Text style={styles.metaText}>Last: {new Date(item.createdAt).toLocaleDateString()}</Text>
-        </View>
+          <View style={styles.cardFooter}>
+            <StatusBadge status={isActive ? 'ACTIVE' : 'DISABLED'} size="sm" />
+            <Text style={styles.metaText}>Success Rate: <Text style={styles.metaBold}>{successRate}%</Text></Text>
+            <Text style={styles.metaText}>Last: {new Date(item.createdAt).toLocaleDateString()}</Text>
+          </View>
 
-        {/* Success Rate Bar */}
-        <View style={styles.progressBar}>
-          <View style={[styles.progressFill, { width: `${successRate}%` }]} />
-        </View>
+          {/* Success Rate Bar */}
+          <View style={styles.progressBar}>
+            <LinearGradient
+              colors={[colors.primary, colors.primarySoft]}
+              style={[styles.progressFill, { width: `${successRate}%` }]}
+              start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+            />
+          </View>
+        </GlassCard>
       </TouchableOpacity>
     );
   };
@@ -97,15 +106,19 @@ export default function SubscriptionsListScreen({ navigation }: any) {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadData(); }} tintColor={colors.primary} />}
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>📡</Text>
+            <Radio size={48} color={colors.textMuted} style={{ marginBottom: spacing.md }} />
             <Text style={styles.emptyText}>No subscriptions found</Text>
           </View>
         }
       />
 
       {/* FAB */}
-      <TouchableOpacity style={styles.fab} activeOpacity={0.8}>
-        <Text style={styles.fabIcon}>+</Text>
+      <TouchableOpacity 
+        style={styles.fab} 
+        activeOpacity={0.8}
+        onPress={() => navigation.navigate('CreateSubscription')}
+      >
+        <Plus size={32} color={colors.textInverse} />
       </TouchableOpacity>
     </View>
   );
@@ -130,30 +143,22 @@ const styles = StyleSheet.create({
   title: { ...typography.h1, color: colors.textPrimary, marginHorizontal: spacing.lg, marginBottom: spacing.xs },
   subtitle: { ...typography.body, color: colors.textSecondary, marginHorizontal: spacing.lg, marginBottom: spacing.lg },
   list: { paddingHorizontal: spacing.lg, paddingBottom: 100 },
-  card: {
-    backgroundColor: colors.bgCard, borderRadius: borderRadius.lg,
-    padding: spacing.lg, marginBottom: spacing.md,
-    borderWidth: 1, borderColor: colors.borderCard, ...shadows.soft,
-  },
   cardHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm },
   cardTitle: { ...typography.bodyBold, color: colors.textPrimary },
   cardUrl: { ...typography.caption, color: colors.textMuted, marginTop: 2 },
-  chevron: { fontSize: 22, color: colors.textMuted },
   cardFooter: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginBottom: spacing.sm },
   metaText: { ...typography.small, color: colors.textMuted },
   metaBold: { fontWeight: '700', color: colors.textSecondary },
   progressBar: {
-    height: 3, backgroundColor: colors.border, borderRadius: 2, overflow: 'hidden',
+    height: 4, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 2, overflow: 'hidden',
   },
-  progressFill: { height: '100%', backgroundColor: colors.primary, borderRadius: 2 },
+  progressFill: { height: '100%', borderRadius: 2 },
   fab: {
     position: 'absolute', bottom: 90, right: spacing.xl,
     width: 56, height: 56, borderRadius: 28,
     backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center',
     ...shadows.glow,
   },
-  fabIcon: { fontSize: 28, color: colors.textInverse, marginTop: -2 },
   emptyState: { alignItems: 'center', paddingTop: 60 },
-  emptyIcon: { fontSize: 40, marginBottom: spacing.md },
   emptyText: { ...typography.body, color: colors.textMuted },
 });

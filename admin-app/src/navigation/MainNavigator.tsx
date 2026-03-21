@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createMaterialTopTabNavigator, MaterialTopTabBar } from '@react-navigation/material-top-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Radio, ClipboardList, Hexagon, AlertTriangle, Settings, LayoutDashboard } from 'lucide-react-native';
 import { colors, spacing, borderRadius, typography, shadows } from '../styles/theme';
 import { MainTabParamList, WebhooksStackParamList, LogsStackParamList, SettingsStackParamList } from './types';
 
@@ -9,6 +11,7 @@ import { MainTabParamList, WebhooksStackParamList, LogsStackParamList, SettingsS
 import DashboardScreen from '../screens/DashboardScreen';
 import SubscriptionsListScreen from '../screens/SubscriptionsListScreen';
 import SubscriptionDetailsScreen from '../screens/SubscriptionDetailsScreen';
+import CreateSubscriptionScreen from '../screens/CreateSubscriptionScreen';
 import DeliveryLogsScreen from '../screens/DeliveryLogsScreen';
 import EventDetailsScreen from '../screens/EventDetailsScreen';
 import DLQScreen from '../screens/DLQScreen';
@@ -22,6 +25,7 @@ function WebhooksNavigator() {
     <WebhooksStack.Navigator screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
       <WebhooksStack.Screen name="SubscriptionsList" component={SubscriptionsListScreen} />
       <WebhooksStack.Screen name="SubscriptionDetails" component={SubscriptionDetailsScreen} />
+      <WebhooksStack.Screen name="CreateSubscription" component={CreateSubscriptionScreen} />
     </WebhooksStack.Navigator>
   );
 }
@@ -49,13 +53,15 @@ function SettingsNavigator() {
 }
 
 // ─── Bottom Tab Navigator ────────────────────────────────────────────────────
-const Tab = createBottomTabNavigator<MainTabParamList>();
+const Tab = createMaterialTopTabNavigator<MainTabParamList>();
 
-function TabIcon({ label, emoji, focused }: { label: string; emoji: string; focused: boolean }) {
+function TabIcon({ label, icon: Icon, focused }: { label: string; icon: any; focused: boolean }) {
   return (
-    <View style={styles.tabIconContainer}>
-      <Text style={[styles.tabEmoji, focused && styles.tabEmojiActive]}>{emoji}</Text>
-      <Text style={[styles.tabLabel, focused && styles.tabLabelActive]}>{label}</Text>
+    <View style={[styles.tabIconContainer, focused && styles.tabIconContainerActive]}>
+      <View style={{ opacity: focused ? 1 : 0.6 }}>
+        <Icon size={22} color={focused ? colors.textInverse : colors.textSecondary} />
+      </View>
+      {focused && <View style={styles.activeGlowDot} />}
     </View>
   );
 }
@@ -63,24 +69,28 @@ function TabIcon({ label, emoji, focused }: { label: string; emoji: string; focu
 export default function MainNavigator() {
   return (
     <Tab.Navigator
+      initialRouteName="DashboardTab"
+      tabBarPosition="bottom"
       screenOptions={{
-        headerShown: false,
         tabBarStyle: styles.tabBar,
         tabBarShowLabel: false,
+        tabBarShowIcon: true,
+        tabBarIndicatorStyle: { height: 0, backgroundColor: 'transparent' },
+        swipeEnabled: true,
       }}
     >
       <Tab.Screen
         name="Webhooks"
         component={WebhooksNavigator}
         options={{
-          tabBarIcon: ({ focused }) => <TabIcon label="Webhooks" emoji="📡" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon label="Webhooks" icon={Radio} focused={focused} />,
         }}
       />
       <Tab.Screen
         name="Logs"
         component={LogsNavigator}
         options={{
-          tabBarIcon: ({ focused }) => <TabIcon label="Logs" emoji="📋" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon label="Logs" icon={ClipboardList} focused={focused} />,
         }}
       />
       <Tab.Screen
@@ -89,9 +99,12 @@ export default function MainNavigator() {
         options={{
           tabBarIcon: ({ focused }) => (
             <View style={styles.centerTab}>
-              <View style={[styles.centerTabInner, focused && styles.centerTabFocused]}>
-                <Text style={styles.centerTabIcon}>⬡</Text>
-              </View>
+              <LinearGradient
+                colors={focused ? [colors.primary, colors.primarySoft] : [colors.bgCard, colors.bg]}
+                style={[styles.centerTabInner, focused && styles.centerTabInnerActive]}
+              >
+                <LayoutDashboard size={26} color={focused ? colors.textInverse : colors.primary} />
+              </LinearGradient>
             </View>
           ),
         }}
@@ -100,14 +113,14 @@ export default function MainNavigator() {
         name="DLQ"
         component={DLQScreen}
         options={{
-          tabBarIcon: ({ focused }) => <TabIcon label="DLQ" emoji="⚠️" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon label="DLQ" icon={AlertTriangle} focused={focused} />,
         }}
       />
       <Tab.Screen
         name="Settings"
         component={SettingsNavigator}
         options={{
-          tabBarIcon: ({ focused }) => <TabIcon label="Settings" emoji="⚙️" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon label="Settings" icon={Settings} focused={focused} />,
         }}
       />
     </Tab.Navigator>
@@ -120,30 +133,25 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.tabBarBorder,
     height: 75,
-    paddingBottom: 8,
-    paddingTop: 8,
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
+    paddingTop: 10,
     elevation: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.4,
     shadowRadius: 12,
   },
-  tabIconContainer: { alignItems: 'center', justifyContent: 'center', gap: 2 },
-  tabEmoji: { fontSize: 20, opacity: 0.5 },
-  tabEmojiActive: { opacity: 1 },
-  tabLabel: { ...typography.small, color: colors.tabInactive, fontSize: 10 },
-  tabLabelActive: { color: colors.tabActive, fontWeight: '600' },
-  centerTab: { alignItems: 'center', justifyContent: 'center', marginTop: -20 },
+  tabIconContainer: { alignItems: 'center', justifyContent: 'center', flex: 1, gap: 4, height: 40, width: 40, borderRadius: 20 },
+  tabIconContainerActive: { backgroundColor: 'rgba(255,255,255,0.08)' },
+  activeGlowDot: { width: 4, height: 4, borderRadius: 2, backgroundColor: colors.textInverse, position: 'absolute', bottom: -6, ...shadows.glow },
+  centerTab: { alignItems: 'center', justifyContent: 'center', marginTop: -25 },
   centerTabInner: {
-    width: 56, height: 56, borderRadius: 16,
-    backgroundColor: colors.primary,
+    width: 60, height: 60, borderRadius: 30,
     alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
+    ...shadows.soft,
+  },
+  centerTabInnerActive: {
+    borderColor: 'rgba(255,255,255,0.4)',
     ...shadows.glow,
   },
-  centerTabFocused: { backgroundColor: colors.primarySoft },
-  centerTabIcon: { fontSize: 24, color: colors.textInverse },
 });

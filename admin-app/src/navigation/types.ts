@@ -22,10 +22,11 @@ export type MainTabParamList = {
 export type WebhooksStackParamList = {
   SubscriptionsList: undefined;
   SubscriptionDetails: { subscriptionId: string };
+  CreateSubscription: undefined;
 };
 
 export type LogsStackParamList = {
-  DeliveryLogs: undefined;
+  DeliveryLogs: { initialFilter?: 'ALL' | 'SUCCESS' | 'FAILED' };
   EventDetails: { deliveryId: string };
 };
 

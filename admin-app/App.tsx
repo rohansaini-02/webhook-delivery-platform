@@ -1,5 +1,6 @@
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
+import { ImageBackground, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AuthProvider } from './src/context/AuthContext';
@@ -8,9 +9,16 @@ import { colors } from './src/styles/theme';
 
 export default function App() {
   return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.bg }}>
-      <AuthProvider>
-        <NavigationContainer
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: '#0A0F0D' }}>
+      <ImageBackground 
+        source={require('./assets/background.jpg')} 
+        style={StyleSheet.absoluteFillObject}
+        imageStyle={{ opacity: 0.65 }}
+        resizeMode="cover"
+        blurRadius={20}
+      >
+        <AuthProvider>
+          <NavigationContainer
           theme={{
             dark: true,
             colors: {
@@ -33,6 +41,7 @@ export default function App() {
           <StatusBar style="light" />
         </NavigationContainer>
       </AuthProvider>
+      </ImageBackground>
     </GestureHandlerRootView>
   );
 }

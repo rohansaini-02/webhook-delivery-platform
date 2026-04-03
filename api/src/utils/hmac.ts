@@ -28,3 +28,11 @@ export const verifySignature = (
   const expected = signPayload(secret, payload);
   return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
 };
+
+
+
+
+// This file:
+// generates secret
+// signs payload
+// verifies signature

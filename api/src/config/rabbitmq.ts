@@ -26,7 +26,7 @@ export const enqueueDelivery = async (deliveryId: string): Promise<boolean> => {
     console.error('RabbitMQ channel not initialized. Cannot enqueue delivery:', deliveryId);
     return false;
   }
-  
+
   return channel.sendToQueue(DELIVERY_QUEUE, Buffer.from(JSON.stringify({ deliveryId })), {
     persistent: true,
   });
@@ -41,3 +41,11 @@ export const closeRabbitMQ = async (): Promise<void> => {
     console.error('Error closing RabbitMQ connection:', error);
   }
 };
+
+
+
+
+// This file:
+// connects to RabbitMQ
+// creates queue
+// sends messages

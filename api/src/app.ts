@@ -22,11 +22,11 @@ const limiter = rateLimit({
 });
 
 // ─── Global Middleware ────────────────────────────────────────────────────────
-app.use(helmet());
-app.use(cors());
-app.use(express.json());
-app.use(morgan('dev'));
-app.use('/api/', limiter);
+app.use(helmet()); // Helmet helps secure the app by setting various HTTP headers.
+app.use(cors()); 
+app.use(express.json()); 
+app.use(morgan('dev')); // This logs HTTP requests to the console in development mode.
+app.use('/api/', limiter); 
 
 // ─── Health Check (public — no auth required) ─────────────────────────────────
 app.get('/health', async (req: Request, res: Response) => {
@@ -49,3 +49,4 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 export default app;
+

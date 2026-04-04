@@ -133,3 +133,14 @@ const startWorker = async () => {
 };
 
 startWorker();
+
+
+
+
+// This file:
+// consumes messages from RabbitMQ
+// processes deliveries
+// implements exponential backoff
+// handles retries
+// moves failed deliveries to DLQ
+// auto-disables subscriptions after max failures

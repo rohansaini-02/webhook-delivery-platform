@@ -12,3 +12,10 @@ router.get('/', getEvents);
 router.get('/:id', getEventById);
 
 export default router;
+
+
+
+
+// This file:
+// defines routes
+// calls controllers

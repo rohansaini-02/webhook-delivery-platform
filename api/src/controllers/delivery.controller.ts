@@ -17,6 +17,7 @@ export const getDeliveries = async (req: Request, res: Response): Promise<void> 
   res.json({ status: 'ok', data: deliveries });
 };
 
+
 // GET /deliveries/:id — Get single delivery detail
 export const getDeliveryById = async (req: Request, res: Response): Promise<void> => {
   const id: string = String(req.params.id);

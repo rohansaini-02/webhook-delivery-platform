@@ -6,3 +6,10 @@ const router = Router();
 router.get('/', getMetrics as any);
 
 export default router;
+
+
+
+// This file:
+// defines routes for metrics
+// uses metrics controller
+// requires authentication

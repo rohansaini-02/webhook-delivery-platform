@@ -25,6 +25,12 @@ export const colors = {
   info: '#40C4FF',
   infoBg: 'rgba(64, 196, 255, 0.12)',
 
+  // DLQ / Red Theme
+  dlqPrimary: '#FF5252',
+  dlqMuted: 'rgba(255, 82, 82, 0.15)',
+  dlqGlow: 'rgba(255, 82, 82, 0.25)',
+
+
   // Text
   textPrimary: '#FFFFFF',
   textSecondary: '#8A9A8E',

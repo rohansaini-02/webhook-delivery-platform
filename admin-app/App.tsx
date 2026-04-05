@@ -7,6 +7,24 @@ import { AuthProvider } from './src/context/AuthContext';
 import RootNavigator from './src/navigation/RootNavigator';
 import { colors } from './src/styles/theme';
 
+const customTheme = {
+  dark: true,
+  colors: {
+    primary: colors.primary,
+    background: colors.bg,
+    card: colors.tabBar,
+    text: colors.textPrimary,
+    border: colors.border,
+    notification: colors.primary,
+  },
+  fonts: {
+    regular: { fontFamily: 'System', fontWeight: '400' as const },
+    medium: { fontFamily: 'System', fontWeight: '500' as const },
+    bold: { fontFamily: 'System', fontWeight: '700' as const },
+    heavy: { fontFamily: 'System', fontWeight: '800' as const },
+  },
+};
+
 export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: '#0A0F0D' }}>
@@ -18,29 +36,11 @@ export default function App() {
         blurRadius={20}
       >
         <AuthProvider>
-          <NavigationContainer
-          theme={{
-            dark: true,
-            colors: {
-              primary: colors.primary,
-              background: colors.bg,
-              card: colors.tabBar,
-              text: colors.textPrimary,
-              border: colors.border,
-              notification: colors.primary,
-            },
-            fonts: {
-              regular: { fontFamily: 'System', fontWeight: '400' },
-              medium: { fontFamily: 'System', fontWeight: '500' },
-              bold: { fontFamily: 'System', fontWeight: '700' },
-              heavy: { fontFamily: 'System', fontWeight: '800' },
-            },
-          }}
-        >
-          <RootNavigator />
-          <StatusBar style="light" />
-        </NavigationContainer>
-      </AuthProvider>
+          <NavigationContainer theme={customTheme as any}>
+            <RootNavigator />
+            <StatusBar style="light" />
+          </NavigationContainer>
+        </AuthProvider>
       </ImageBackground>
     </GestureHandlerRootView>
   );

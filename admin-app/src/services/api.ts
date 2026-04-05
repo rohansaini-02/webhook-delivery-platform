@@ -1,7 +1,11 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
 
-const API_BASE = 'http://10.0.2.2:3000/api/v1'; // Android emulator → localhost
+// Automatically detect the IP address of the development machine hosting the Expo server
+const debuggerHost = Constants.expoConfig?.hostUri;
+const ip = debuggerHost ? debuggerHost.split(':')[0] : '10.110.155.246';
+const API_BASE = `http://${ip}:3000/api/v1`;
 
 const api = axios.create({
   baseURL: API_BASE,

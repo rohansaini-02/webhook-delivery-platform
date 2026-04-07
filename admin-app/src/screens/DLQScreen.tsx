@@ -290,3 +290,4 @@ const styles = StyleSheet.create({
   pageText: { ...typography.caption, color: colors.textSecondary },
   pageTextActive: { ...typography.captionBold, color: '#FFFFFF' }
 });
+ 

@@ -291,3 +291,4 @@ const styles = StyleSheet.create({
   pageTextActive: { ...typography.captionBold, color: '#FFFFFF' }
 });
  
+ 

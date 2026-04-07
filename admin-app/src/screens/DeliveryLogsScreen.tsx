@@ -285,3 +285,4 @@ const styles = StyleSheet.create({
   },
   loadMoreText: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 12 }
 });
+ 

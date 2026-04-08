@@ -200,3 +200,4 @@ const styles = StyleSheet.create({
   footerInfo: { alignItems: 'center', marginBottom: spacing.xl },
   footerInfoText: { ...typography.small, color: 'rgba(255,255,255,0.1)', letterSpacing: 1.5, fontSize: 9, fontWeight: '700' },
 });
+ 

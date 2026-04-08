@@ -340,3 +340,4 @@ const styles = StyleSheet.create({
   },
   viewAllBtnText: { ...typography.bodyBold, color: '#4ADE80', fontSize: 10, letterSpacing: 0.5 },
 });
+ 

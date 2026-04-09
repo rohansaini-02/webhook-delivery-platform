@@ -6,7 +6,7 @@ import {
 import { Search, Bell, RotateCcw, Moon, BookOpen, Headset, Shield, LogOut, Edit2 } from 'lucide-react-native';
 import { colors, spacing, borderRadius, typography } from '../styles/theme';
 
-export default function SettingsScreen() {
+export default function SettingsScreen({ navigation }: any) {
   const [notifications, setNotifications] = React.useState(true);
   const [autoRetry, setAutoRetry] = React.useState(false);
   const [darkMode, setDarkMode] = React.useState(true);
@@ -46,6 +46,25 @@ export default function SettingsScreen() {
           <Text style={styles.heroName}>Alex Rivera</Text>
           <Text style={styles.heroRole}>LEAD INFRASTRUCTURE ENGINEER</Text>
           <Text style={styles.heroEmail}>alex.rivera@orchestrator.io</Text>
+        </View>
+
+        {/* ACCOUNT & SECURITY */}
+        <View style={styles.sectionBlock}>
+          <Text style={styles.sectionHeader}>ACCOUNT & SECURITY</Text>
+          <TouchableOpacity 
+            style={[styles.cardBox, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}
+            onPress={() => navigation.navigate('SecuritySettings')}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View style={[styles.iconBox, { backgroundColor: 'rgba(74,222,128,0.1)', marginRight: 16 }]}>
+                <Shield size={16} color="#4ADE80" />
+              </View>
+              <View>
+                <Text style={styles.toggleTitle}>Security & Access</Text>
+                <Text style={styles.toggleSub}>API Keys, Passwords, Active Sessions</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
         </View>
 
         {/* SYSTEM PREFERENCES */}
@@ -136,7 +155,7 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: spacing.xl, paddingTop: 50, marginBottom: spacing.lg },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   headerAvatar: { width: 30, height: 30, borderRadius: 15, backgroundColor: 'rgba(255,255,255,0.05)', alignItems: 'center', justifyContent: 'center' },
-  headerTitleText: { ...typography.bodyBold, color: '#4ADE80', fontSize: 13 },
+  headerTitleText: { ...typography.bodyBold, color: '#4ADE80', fontSize: 16 },
   searchBtn: { padding: 4 },
 
   profileHero: { alignItems: 'center', marginVertical: spacing.xl },
@@ -145,33 +164,33 @@ const styles = StyleSheet.create({
   avatarMockup: { flex: 1, backgroundColor: '#21334A' },
   
   adminBadge: { position: 'absolute', bottom: 6, left: '15%', right: '15%', backgroundColor: 'rgba(0,0,0,0.6)', paddingVertical: 2, borderRadius: 2 },
-  adminBadgeText: { ...typography.captionBold, color: '#FFFFFF', fontSize: 7, textAlign: 'center', letterSpacing: 0.5 },
+  adminBadgeText: { ...typography.captionBold, color: '#FFFFFF', fontSize: 11, textAlign: 'center', letterSpacing: 0.5 },
   
   editBtn: { position: 'absolute', bottom: -5, right: -5, backgroundColor: '#4ADE80', width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#101416' },
 
-  heroName: { fontWeight: '800', color: '#FFFFFF', fontSize: 26, marginTop: spacing.md, marginBottom: 2 },
-  heroRole: { ...typography.captionBold, color: colors.textSecondary, fontSize: 9, letterSpacing: 1.5, marginBottom: 4 },
-  heroEmail: { ...typography.body, color: colors.textMuted, fontSize: 12 },
+  heroName: { fontWeight: '800', color: '#FFFFFF', fontSize: 28, marginTop: spacing.md, marginBottom: 2 },
+  heroRole: { ...typography.captionBold, color: colors.textSecondary, fontSize: 13, letterSpacing: 1.5, marginBottom: 4 },
+  heroEmail: { ...typography.body, color: colors.textMuted, fontSize: 15 },
 
   sectionBlock: { marginHorizontal: spacing.xl, marginBottom: spacing.xl },
-  sectionHeader: { ...typography.captionBold, color: '#FFFFFF', fontSize: 9, letterSpacing: 1.5, marginBottom: spacing.md },
+  sectionHeader: { ...typography.captionBold, color: '#FFFFFF', fontSize: 13, letterSpacing: 1.5, marginBottom: spacing.md },
 
   cardBox: { backgroundColor: '#15191B', borderRadius: borderRadius.md, padding: spacing.lg },
   toggleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderBottomWidth: 1, borderBottomColor: '#1E2528', paddingBottom: spacing.md, marginBottom: spacing.md },
   iconBox: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', marginRight: spacing.md },
   toggleTextCol: { flex: 1, paddingRight: spacing.md },
-  toggleTitle: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 12, marginBottom: 2 },
-  toggleSub: { ...typography.caption, color: colors.textMuted, fontSize: 10, lineHeight: 14 },
+  toggleTitle: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 15, marginBottom: 2 },
+  toggleSub: { ...typography.caption, color: colors.textMuted, fontSize: 14, lineHeight: 14 },
 
   resourceCardFull: { backgroundColor: '#15191B', borderRadius: borderRadius.md, padding: spacing.xl, marginBottom: spacing.md },
-  resourceCardTitle: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 13, marginBottom: 4 },
-  resourceCardSub: { ...typography.caption, color: colors.textSecondary, fontSize: 11, lineHeight: 16 },
+  resourceCardTitle: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 16, marginBottom: 4 },
+  resourceCardSub: { ...typography.caption, color: colors.textSecondary, fontSize: 14, lineHeight: 16 },
 
   resourceGrid: { flexDirection: 'row', gap: spacing.md },
   resourceCardHalf: { flex: 1, backgroundColor: '#15191B', borderRadius: borderRadius.md, padding: spacing.lg },
 
   logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#211215', borderRadius: borderRadius.md, marginHorizontal: spacing.xl, paddingVertical: 16, marginTop: spacing.lg, marginBottom: spacing.xl },
-  logoutBtnText: { ...typography.bodyBold, color: '#FCA5A5', fontSize: 12 },
+  logoutBtnText: { ...typography.bodyBold, color: '#FCA5A5', fontSize: 15 },
 
-  versionText: { ...typography.captionBold, color: colors.textMuted, textAlign: 'center', fontSize: 8, letterSpacing: 2 }
+  versionText: { ...typography.captionBold, color: colors.textMuted, textAlign: 'center', fontSize: 12, letterSpacing: 2 }
 });

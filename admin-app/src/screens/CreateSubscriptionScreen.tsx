@@ -3,7 +3,7 @@ import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   Platform, ScrollView, ActivityIndicator, Alert
 } from 'react-native';
-import { User, Search, Link, ArrowRight, Zap, FlaskConical, Circle, CheckCircle2, ShieldAlert } from 'lucide-react-native';
+import { ChevronLeft, Link, ArrowRight, Zap, FlaskConical, Circle, CheckCircle2, ShieldAlert } from 'lucide-react-native';
 import { createSubscription } from '../services/api';
 import { colors, spacing, borderRadius, typography } from '../styles/theme';
 
@@ -41,15 +41,10 @@ export default function CreateSubscriptionScreen({ navigation }: any) {
         <View style={styles.headerRow}>
           <View style={styles.headerLeft}>
             <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-              <View style={styles.avatar}>
-               <User size={16} color={colors.primary} />
-              </View>
+              <ChevronLeft size={24} color="#FFFFFF" />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>The Orchestrator</Text>
+            <Text style={styles.headerTitle}>New Subscription</Text>
           </View>
-          <TouchableOpacity style={styles.searchBtn}>
-            <Search size={20} color={colors.textSecondary} />
-          </TouchableOpacity>
         </View>
 
         {/* Page Titles */}
@@ -148,24 +143,22 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.xxl },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   backBtn: { padding: 4, marginLeft: -8 },
-  avatar: { width: 32, height: 32, borderRadius: 16, backgroundColor: 'rgba(0, 230, 118, 0.05)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(0, 230, 118, 0.15)' },
-  headerTitle: { ...typography.bodyBold, color: colors.primary, fontSize: 13 },
-  searchBtn: { padding: 8, marginRight: -8 },
+  headerTitle: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 18 },
   
   pageHeader: { marginBottom: 32, alignItems: 'center', paddingHorizontal: spacing.md },
-  pageTitle: { ...typography.h1, color: colors.textPrimary, marginBottom: spacing.lg, fontSize: 26 },
+  pageTitle: { ...typography.h1, color: colors.textPrimary, marginBottom: spacing.lg, fontSize: 28 },
   pageSubtitle: { ...typography.body, color: colors.textSecondary, lineHeight: 22, textAlign: 'center' },
   
-  label: { ...typography.captionBold, fontSize: 10, letterSpacing: 1.2, color: colors.textMuted, marginBottom: spacing.sm, marginLeft: 2 },
+  label: { ...typography.captionBold, fontSize: 14, letterSpacing: 1.2, color: colors.textMuted, marginBottom: spacing.sm, marginLeft: 2 },
   inputContainer: {
     flexDirection: 'row', alignItems: 'center',
     borderRadius: borderRadius.md, paddingHorizontal: spacing.md,
     backgroundColor: '#121615', borderWidth: 1, borderColor: 'rgba(255,255,255,0.03)',
   },
   inputIcon: { marginRight: spacing.sm },
-  input: { flex: 1, ...typography.caption, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textSecondary, paddingVertical: 18, fontSize: 13 },
+  input: { flex: 1, ...typography.caption, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textSecondary, paddingVertical: 18, fontSize: 16 },
   helperTextContainer: { flexDirection: 'row', alignItems: 'center', marginTop: 8, marginBottom: 32, paddingHorizontal: 4 },
-  helperText: { ...typography.small, color: colors.textMuted, fontSize: 10, flex: 1, lineHeight: 14 },
+  helperText: { ...typography.small, color: colors.textMuted, fontSize: 14, flex: 1, lineHeight: 14 },
 
   envCard: { 
     flexDirection: 'row', alignItems: 'center', 
@@ -188,16 +181,16 @@ const styles = StyleSheet.create({
     padding: spacing.lg, borderWidth: 1, borderColor: 'rgba(255,255,255,0.03)',
     marginBottom: 40,
   },
-  codeText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', fontSize: 12, color: colors.primary, lineHeight: 22 },
+  codeText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', fontSize: 15, color: colors.primary, lineHeight: 22 },
   
   primaryBtn: { 
     backgroundColor: colors.primary, borderRadius: borderRadius.md, 
     paddingVertical: 18, alignItems: 'center', marginBottom: spacing.xl 
   },
   btnContent: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  primaryBtnText: { ...typography.bodyBold, color: colors.bg, fontSize: 15 },
+  primaryBtnText: { ...typography.bodyBold, color: colors.bg, fontSize: 17 },
   
   footerInfo: { alignItems: 'center', marginBottom: spacing.xl },
-  footerInfoText: { ...typography.small, color: 'rgba(255,255,255,0.1)', letterSpacing: 1.5, fontSize: 9, fontWeight: '700' },
+  footerInfoText: { ...typography.small, color: 'rgba(255,255,255,0.1)', letterSpacing: 1.5, fontSize: 13, fontWeight: '700' },
 });
  

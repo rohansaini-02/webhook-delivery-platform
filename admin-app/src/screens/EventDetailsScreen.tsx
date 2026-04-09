@@ -3,7 +3,7 @@ import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView,
   ActivityIndicator, Platform
 } from 'react-native';
-import { User, Search, RotateCcw, Copy, UploadCloud, DownloadCloud } from 'lucide-react-native';
+import { ChevronLeft, RotateCcw, Copy, UploadCloud, DownloadCloud } from 'lucide-react-native';
 import * as Clipboard from 'expo-clipboard';
 import { colors, spacing, borderRadius, typography } from '../styles/theme';
 
@@ -60,14 +60,11 @@ export default function EventDetailsScreen({ route, navigation }: any) {
       {/* Top Header */}
       <View style={styles.headerRow}>
         <View style={styles.headerLeft}>
-          <View style={styles.avatar}>
-             <User size={16} color={colors.primary} />
-          </View>
-          <Text style={styles.headerTitleText}>The Orchestrator</Text>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <ChevronLeft size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitleText}>Event Details</Text>
         </View>
-        <TouchableOpacity style={styles.searchBtn}>
-          <Search size={20} color={colors.textSecondary} />
-        </TouchableOpacity>
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
@@ -207,53 +204,52 @@ const styles = StyleSheet.create({
 
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: spacing.xl, paddingTop: 50, marginBottom: 30 },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  avatar: { width: 30, height: 30, borderRadius: 15, backgroundColor: 'rgba(255, 167, 38, 0.1)', alignItems: 'center', justifyContent: 'center' },
-  headerTitleText: { ...typography.bodyBold, color: '#4ADE80', fontSize: 13 },
-  searchBtn: { padding: 4 },
+  backBtn: { padding: 4, marginLeft: -8 },
+  headerTitleText: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 18 },
 
   alertCard: { backgroundColor: '#141718', borderRadius: borderRadius.md, marginHorizontal: spacing.xl, padding: spacing.xl, marginBottom: spacing.md, overflow: 'hidden' },
   alertCardIndicator: { position: 'absolute', left: 0, right: 0, top: 0, height: 2, backgroundColor: '#F87171' },
   
   criticalDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#F472B6', marginRight: 8, opacity: 0.6 },
-  criticalText: { ...typography.captionBold, color: '#F472B6', fontSize: 9, letterSpacing: 1.5, opacity: 0.8 },
-  alertTitle: { fontWeight: '700', color: '#FFFFFF', fontSize: 24, letterSpacing: -0.5, lineHeight: 32, marginBottom: spacing.md },
+  criticalText: { ...typography.captionBold, color: '#F472B6', fontSize: 13, letterSpacing: 1.5, opacity: 0.8 },
+  alertTitle: { fontWeight: '700', color: '#FFFFFF', fontSize: 26, letterSpacing: -0.5, lineHeight: 32, marginBottom: spacing.md },
   
   alertTargetLabel: { ...typography.caption, color: colors.textSecondary, marginBottom: 2 },
-  alertTargetVal: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textMuted, fontSize: 11, marginBottom: spacing.xl },
+  alertTargetVal: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textMuted, fontSize: 14, marginBottom: spacing.xl },
   
   alertButtonsRow: { flexDirection: 'row', gap: spacing.md },
   retryBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#333A36', paddingHorizontal: 16, paddingVertical: 10, borderRadius: borderRadius.pill },
-  retryBtnText: { ...typography.bodyBold, color: '#D1D5DB', fontSize: 12 },
+  retryBtnText: { ...typography.bodyBold, color: '#D1D5DB', fontSize: 15 },
   viewLogsBtn: { alignItems: 'center', backgroundColor: '#4ADE80', paddingHorizontal: 16, paddingVertical: 10, borderRadius: borderRadius.pill },
-  viewLogsBtnText: { ...typography.bodyBold, color: '#0A0D0C', fontSize: 12 },
+  viewLogsBtnText: { ...typography.bodyBold, color: '#0A0D0C', fontSize: 15 },
 
   dataCard: { backgroundColor: '#141718', borderRadius: borderRadius.md, marginHorizontal: spacing.xl, padding: spacing.lg, marginBottom: spacing.md },
-  cardHeaderLabel: { ...typography.captionBold, color: colors.textMuted, fontSize: 9, letterSpacing: 1, marginBottom: spacing.md },
+  cardHeaderLabel: { ...typography.captionBold, color: colors.textMuted, fontSize: 13, letterSpacing: 1, marginBottom: spacing.md },
   
   copyRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  copyRowText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: '#A0ADC0', fontSize: 12 },
+  copyRowText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: '#A0ADC0', fontSize: 15 },
 
-  dataText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: '#FFFFFF', fontSize: 12, marginBottom: 4 },
-  subText: { ...typography.caption, color: colors.textSecondary, fontSize: 10 },
+  dataText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: '#FFFFFF', fontSize: 15, marginBottom: 4 },
+  subText: { ...typography.caption, color: colors.textSecondary, fontSize: 14 },
 
-  hugeNumber: { fontWeight: '800', color: '#FFFFFF', fontSize: 24, letterSpacing: -0.5 },
-  hugeNumberSub: { ...typography.body, color: colors.textMuted, fontSize: 12 },
+  hugeNumber: { fontWeight: '800', color: '#FFFFFF', fontSize: 26, letterSpacing: -0.5 },
+  hugeNumberSub: { ...typography.body, color: colors.textMuted, fontSize: 15 },
   progressBarBg: { height: 4, backgroundColor: '#333A36', borderRadius: 2 },
   progressBarFill: { height: 4, backgroundColor: '#F472B6', borderRadius: 2 },
 
   protocolPillGreen: { backgroundColor: 'rgba(74,222,128,0.15)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 4 },
-  protocolPillGreenText: { ...typography.captionBold, color: '#4ADE80', fontSize: 9, letterSpacing: 0.5 },
+  protocolPillGreenText: { ...typography.captionBold, color: '#4ADE80', fontSize: 13, letterSpacing: 0.5 },
   protocolPillDark: { backgroundColor: '#333A36', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 4 },
-  protocolPillDarkText: { ...typography.captionBold, color: colors.textSecondary, fontSize: 9, letterSpacing: 0.5 },
+  protocolPillDarkText: { ...typography.captionBold, color: colors.textSecondary, fontSize: 13, letterSpacing: 0.5 },
 
   payloadHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.sm },
-  payloadSizeText: { ...typography.captionBold, color: colors.textSecondary, fontSize: 8 },
+  payloadSizeText: { ...typography.captionBold, color: colors.textSecondary, fontSize: 12 },
   payloadBox: { backgroundColor: '#0A0D0C', borderRadius: borderRadius.md, padding: spacing.lg, paddingLeft: 24, overflow: 'hidden' },
   leftAccent: { position: 'absolute', left: 0, top: 0, bottom: 0, width: 2 },
-  payloadCodeText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', fontSize: 11, color: '#4ADE80', lineHeight: 20 },
+  payloadCodeText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', fontSize: 14, color: '#4ADE80', lineHeight: 20 },
 
   contextContainer: { backgroundColor: '#141718', borderRadius: borderRadius.md, marginHorizontal: spacing.xl, padding: spacing.lg, marginTop: spacing.xl, marginBottom: 50 },
   logLine: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#1D2421', paddingBottom: spacing.md, marginBottom: spacing.md },
-  logLineTime: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textMuted, fontSize: 10, width: 90, flexShrink: 0 },
-  logLineDesc: { ...typography.caption, color: '#D1D5DB', fontSize: 11, flex: 1, lineHeight: 16 },
+  logLineTime: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textMuted, fontSize: 14, width: 90, flexShrink: 0 },
+  logLineDesc: { ...typography.caption, color: '#D1D5DB', fontSize: 14, flex: 1, lineHeight: 16 },
 });

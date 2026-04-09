@@ -226,7 +226,7 @@ export default function DashboardScreen({ navigation }: any) {
           </View>
           
           {/* View All Streams Footer */}
-          <TouchableOpacity style={styles.viewAllDarkBtn}>
+          <TouchableOpacity style={styles.viewAllDarkBtn} onPress={() => navigation.getParent()?.navigate('Logs')}>
             <Text style={styles.viewAllDarkBtnText}>VIEW ALL STREAMS</Text>
           </TouchableOpacity>
         </View>
@@ -237,7 +237,7 @@ export default function DashboardScreen({ navigation }: any) {
       </ScrollView>
 
       {/* Floating Action Button */}
-      <TouchableOpacity style={styles.fab} activeOpacity={0.8}>
+      <TouchableOpacity style={styles.fab} activeOpacity={0.8} onPress={() => navigation.getParent()?.navigate('Webhooks')}>
         <Plus color="#0A0D0C" strokeWidth={3} size={28} />
       </TouchableOpacity>
     </View>
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: spacing.xl, paddingTop: 50, marginBottom: spacing.lg },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   avatar: { width: 30, height: 30, borderRadius: 15, backgroundColor: 'rgba(255, 167, 38, 0.1)', alignItems: 'center', justifyContent: 'center' },
-  headerTitleText: { ...typography.bodyBold, color: '#4ADE80', fontSize: 13 },
+  headerTitleText: { ...typography.bodyBold, color: '#4ADE80', fontSize: 16 },
   searchBtn: { padding: 4 },
 
   searchWrap: { 
@@ -267,39 +267,39 @@ const styles = StyleSheet.create({
   gridRow: { flexDirection: 'row', gap: spacing.md },
   gridCard: { flex: 1, backgroundColor: '#141718', borderRadius: borderRadius.md, padding: spacing.md, paddingVertical: spacing.lg },
   cardHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
-  cardHeaderLabel: { ...typography.captionBold, color: colors.textMuted, fontSize: 9, letterSpacing: 1 },
-  hugeMetricLeft: { fontWeight: '800', fontSize: 28, color: '#FFFFFF', letterSpacing: -0.5, marginBottom: 2 },
-  metricSubInfo: { ...typography.caption, fontSize: 10 },
+  cardHeaderLabel: { ...typography.captionBold, color: colors.textMuted, fontSize: 13, letterSpacing: 1 },
+  hugeMetricLeft: { fontWeight: '800', fontSize: 32, color: '#FFFFFF', letterSpacing: -0.5, marginBottom: 2 },
+  metricSubInfo: { ...typography.caption, fontSize: 14 },
 
   cardSection: { backgroundColor: '#141718', borderRadius: borderRadius.md, marginHorizontal: spacing.xl, padding: spacing.lg, marginBottom: spacing.md },
   
   chartHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: spacing.xl },
-  sectionTitle: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 13, marginBottom: 2 },
-  sectionSubtitle: { ...typography.captionBold, color: colors.textMuted, fontSize: 8, letterSpacing: 1 },
+  sectionTitle: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 16, marginBottom: 2 },
+  sectionSubtitle: { ...typography.captionBold, color: colors.textMuted, fontSize: 12, letterSpacing: 1 },
   dotLegend: { width: 6, height: 6, borderRadius: 3, marginTop: 4 },
 
   chartWrapper: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', height: 120, paddingHorizontal: spacing.sm, paddingTop: spacing.md },
   chartCol: { alignItems: 'center', gap: 8, flex: 1 },
   chartBar: { width: 22, backgroundColor: '#333A36', borderRadius: 4 },
-  chartDayText: { ...typography.captionBold, color: colors.textMuted, fontSize: 8 },
+  chartDayText: { ...typography.captionBold, color: colors.textMuted, fontSize: 12 },
 
   streamList: { marginTop: spacing.lg },
   streamItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingBottom: spacing.lg, marginBottom: spacing.md, borderBottomWidth: 1, borderBottomColor: '#1F2422' },
   streamLeft: { flex: 1 },
-  streamIdText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: '#FFFFFF', fontSize: 12, marginBottom: 4 },
+  streamIdText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: '#FFFFFF', fontSize: 15, marginBottom: 4 },
   streamNameText: { ...typography.caption, color: colors.textSecondary },
   
   streamRight: { alignItems: 'flex-end', justifyContent: 'center' },
   statusPill: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, marginBottom: 4 },
-  statusPillText: { ...typography.captionBold, fontSize: 8, letterSpacing: 0.5 },
-  streamTimeText: { ...typography.caption, color: colors.textSecondary, fontSize: 10 },
+  statusPillText: { ...typography.captionBold, fontSize: 12, letterSpacing: 0.5 },
+  streamTimeText: { ...typography.caption, color: colors.textSecondary, fontSize: 14 },
 
   viewAllDarkBtn: { 
     alignItems: 'center', justifyContent: 'center', 
     backgroundColor: '#0A0D0C', borderRadius: borderRadius.md, 
     paddingVertical: 14, marginTop: spacing.md 
   },
-  viewAllDarkBtnText: { ...typography.bodyBold, color: '#4ADE80', fontSize: 10, letterSpacing: 0.5 },
+  viewAllDarkBtnText: { ...typography.bodyBold, color: '#4ADE80', fontSize: 14, letterSpacing: 0.5 },
 
   fab: {
     position: 'absolute',

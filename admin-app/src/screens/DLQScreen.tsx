@@ -220,20 +220,20 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: spacing.xl, paddingTop: 50, marginBottom: spacing.lg },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   avatar: { width: 30, height: 30, borderRadius: 15, backgroundColor: 'rgba(255, 167, 38, 0.1)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#F59E0B' },
-  headerTitleText: { ...typography.bodyBold, color: '#F87171', fontSize: 13 },
-  slashText: { ...typography.body, color: colors.textSecondary, fontSize: 13 },
+  headerTitleText: { ...typography.bodyBold, color: '#F87171', fontSize: 16 },
+  slashText: { ...typography.body, color: colors.textSecondary, fontSize: 16 },
   searchBtn: { padding: 4 },
 
   alertContainer: { marginHorizontal: spacing.xl, marginBottom: spacing.lg, padding: spacing.xl, borderRadius: borderRadius.md, backgroundColor: '#141718', borderWidth: 1, borderColor: 'rgba(248, 113, 113, 0.2)' },
-  alertLabelText: { ...typography.captionBold, color: '#F87171', fontSize: 9, letterSpacing: 1 },
+  alertLabelText: { ...typography.captionBold, color: '#F87171', fontSize: 13, letterSpacing: 1 },
   hugeAlertNumber: { fontWeight: '800', fontSize: 38, color: '#FFFFFF', letterSpacing: -1, marginBottom: 4 },
-  alertDescText: { ...typography.body, color: colors.textSecondary, fontSize: 12, lineHeight: 18, paddingRight: 20, marginBottom: spacing.xl },
+  alertDescText: { ...typography.body, color: colors.textSecondary, fontSize: 15, lineHeight: 18, paddingRight: 20, marginBottom: spacing.xl },
   
   alertActionsRow: { flexDirection: 'row', gap: spacing.md },
   replayAllBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F87171', borderRadius: borderRadius.pill, paddingHorizontal: 16, paddingVertical: 10 },
-  replayAllBtnText: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 12 },
+  replayAllBtnText: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 15 },
   purgeBtn: { justifyContent: 'center', alignItems: 'center', backgroundColor: '#333A36', borderRadius: borderRadius.pill, paddingHorizontal: 16, paddingVertical: 10 },
-  purgeBtnText: { ...typography.bodyBold, color: '#F87171', fontSize: 12 },
+  purgeBtnText: { ...typography.bodyBold, color: '#F87171', fontSize: 15 },
 
   searchWrap: { 
     flexDirection: 'row', alignItems: 'center', marginHorizontal: spacing.xl, marginBottom: spacing.md,
@@ -245,10 +245,10 @@ const styles = StyleSheet.create({
 
   chipRow: { flexDirection: 'row', marginHorizontal: spacing.xl, marginBottom: spacing.xl, gap: spacing.sm },
   chipBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#22272A', paddingHorizontal: 12, paddingVertical: 8, borderRadius: borderRadius.pill },
-  chipText: { ...typography.caption, color: colors.textSecondary, fontSize: 11 },
+  chipText: { ...typography.caption, color: colors.textSecondary, fontSize: 14 },
 
   tableHeaders: { flexDirection: 'row', marginHorizontal: spacing.xl, marginBottom: spacing.sm },
-  headerLabel: { ...typography.captionBold, color: colors.textMuted, fontSize: 9, letterSpacing: 1 },
+  headerLabel: { ...typography.captionBold, color: colors.textMuted, fontSize: 13, letterSpacing: 1 },
   headerLeftLabel: { flex: 1.2 },
   headerRightLabel: { flex: 2 },
 
@@ -257,13 +257,13 @@ const styles = StyleSheet.create({
   
   cardHeaderArea: { flexDirection: 'row', padding: spacing.lg, paddingLeft: 24, paddingBottom: spacing.sm },
   colLeft: { flex: 1.2, alignItems: 'flex-start', paddingRight: spacing.sm },
-  identifierText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', fontSize: 11, marginBottom: spacing.sm, fontWeight: '700' },
+  identifierText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', fontSize: 14, marginBottom: spacing.sm, fontWeight: '700' },
   idPill: { backgroundColor: '#333A36', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 4 },
-  idPillText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: '#FFFFFF', fontSize: 9 },
+  idPillText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: '#FFFFFF', fontSize: 13 },
 
   colRight: { flex: 2 },
-  reasonTitle: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 13, marginBottom: 2 },
-  reasonSub: { ...typography.caption, color: colors.textMuted, fontSize: 11, lineHeight: 16 },
+  reasonTitle: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 16, marginBottom: 2 },
+  reasonSub: { ...typography.caption, color: colors.textMuted, fontSize: 14, lineHeight: 16 },
 
   cardActionsArea: { flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', paddingRight: spacing.lg, paddingBottom: spacing.lg, gap: spacing.md },
   iconBtn: { padding: 4 },
@@ -272,18 +272,18 @@ const styles = StyleSheet.create({
   chevronBtn: { backgroundColor: '#333A36', borderRadius: 4, padding: 4 },
 
   payloadSection: { paddingHorizontal: 24, paddingBottom: spacing.lg },
-  payloadTitle: { ...typography.captionBold, color: '#F87171', fontSize: 9, letterSpacing: 1.5, marginBottom: spacing.md },
+  payloadTitle: { ...typography.captionBold, color: '#F87171', fontSize: 13, letterSpacing: 1.5, marginBottom: spacing.md },
   payloadCodeBox: { backgroundColor: '#0A0D0C', padding: spacing.lg, borderRadius: borderRadius.md, marginBottom: spacing.md },
-  payloadCodeText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', fontSize: 11, color: '#A0ADC0', lineHeight: 20 },
+  payloadCodeText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', fontSize: 14, color: '#A0ADC0', lineHeight: 20 },
 
   payloadActionRow: { flexDirection: 'row', gap: spacing.md, justifyContent: 'center', marginTop: spacing.sm },
   editPayloadBtn: { backgroundColor: '#333A36', borderRadius: borderRadius.pill, paddingHorizontal: 20, paddingVertical: 10, flex: 1, alignItems: 'center' },
-  editPayloadBtnText: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 13 },
+  editPayloadBtnText: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 16 },
   replayNowBtn: { backgroundColor: '#F87171', borderRadius: borderRadius.pill, paddingHorizontal: 20, paddingVertical: 10, flex: 1, alignItems: 'center' },
-  replayNowBtnText: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 13 },
+  replayNowBtnText: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 16 },
 
   paginationFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginHorizontal: spacing.xl, marginTop: spacing.lg, marginBottom: 40 },
-  paginationText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textSecondary, fontSize: 10 },
+  paginationText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textSecondary, fontSize: 14 },
   pagesRow: { flexDirection: 'row', gap: 6 },
   pageBtn: { backgroundColor: '#22272A', minWidth: 32, height: 32, borderRadius: 4, alignItems: 'center', justifyContent: 'center' },
   pageBtnActive: { backgroundColor: '#F87171', minWidth: 32, height: 32, borderRadius: 4, alignItems: 'center', justifyContent: 'center' },

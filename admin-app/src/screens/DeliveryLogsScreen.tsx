@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: spacing.xl, paddingTop: 50, marginBottom: spacing.lg },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   avatar: { width: 30, height: 30, borderRadius: 15, backgroundColor: 'rgba(59, 130, 246, 0.1)', alignItems: 'center', justifyContent: 'center' },
-  headerTitleText: { ...typography.bodyBold, color: '#4ADE80', fontSize: 13 },
+  headerTitleText: { ...typography.bodyBold, color: '#4ADE80', fontSize: 16 },
   searchBtn: { padding: 4 },
   
   searchWrap: { 
@@ -244,13 +244,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#161B19', borderWidth: 1, borderColor: 'transparent' 
   },
   searchIcon: { marginRight: spacing.sm },
-  searchInput: { flex: 1, ...typography.body, color: '#FFFFFF', padding: 0, fontSize: 13 },
+  searchInput: { flex: 1, ...typography.body, color: '#FFFFFF', padding: 0, fontSize: 16 },
   
   filterRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.xl, marginBottom: spacing.xl, gap: spacing.sm },
   filterChip: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 6, borderRadius: borderRadius.pill, backgroundColor: '#1D2421' },
   filterChipActive: { backgroundColor: 'rgba(74,222,128,0.1)' },
-  filterChipText: { ...typography.caption, color: colors.textSecondary, fontSize: 11 },
-  filterChipTextActive: { ...typography.caption, color: '#4ADE80', fontSize: 11 },
+  filterChipText: { ...typography.caption, color: colors.textSecondary, fontSize: 14 },
+  filterChipTextActive: { ...typography.caption, color: '#4ADE80', fontSize: 14 },
 
   list: { paddingHorizontal: spacing.xl, paddingBottom: 100 },
   
@@ -261,29 +261,29 @@ const styles = StyleSheet.create({
   },
   
   cardTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 2 },
-  eventType: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 12 },
-  timeText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textSecondary, fontSize: 10 },
+  eventType: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 15 },
+  timeText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textSecondary, fontSize: 14 },
 
   cardMidRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.lg },
-  eventId: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textMuted, fontSize: 10 },
-  dateText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textMuted, fontSize: 9 },
+  eventId: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textMuted, fontSize: 14 },
+  dateText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textMuted, fontSize: 13 },
 
   cardBotRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   statusPill: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 4 },
   statusDot: { width: 4, height: 4, borderRadius: 2, marginRight: 4 },
-  statusPillText: { ...typography.captionBold, fontSize: 9, letterSpacing: 0.5 },
-  statusCodeText: { ...typography.bodyBold, color: '#4ADE80', fontSize: 11 },
-  retriesText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textMuted, fontSize: 9 },
+  statusPillText: { ...typography.captionBold, fontSize: 13, letterSpacing: 0.5 },
+  statusCodeText: { ...typography.bodyBold, color: '#4ADE80', fontSize: 14 },
+  retriesText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textMuted, fontSize: 13 },
 
   payloadBox: { backgroundColor: '#0A0D0C', padding: spacing.lg, borderRadius: borderRadius.md },
-  payloadText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: '#A0ADC0', fontSize: 11, lineHeight: 20 },
+  payloadText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: '#A0ADC0', fontSize: 14, lineHeight: 20 },
   
   loadMoreBtn: { 
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm,
     paddingVertical: 14, borderRadius: borderRadius.pill, backgroundColor: '#1D2421', 
     marginTop: spacing.md
   },
-  loadMoreText: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 12 }
+  loadMoreText: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 15 }
 });
  
  

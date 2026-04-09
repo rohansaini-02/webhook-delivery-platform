@@ -3,7 +3,7 @@ import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator,
   Switch, Alert, Platform
 } from 'react-native';
-import { User, Search, Trash2, Plug, Copy, Eye, EyeOff, X } from 'lucide-react-native';
+import { ChevronLeft, Trash2, Plug, Copy, Eye, EyeOff, X } from 'lucide-react-native';
 import * as Clipboard from 'expo-clipboard';
 import { colors, spacing, borderRadius, typography } from '../styles/theme';
 import { fetchSubscription, updateSubscription, deleteSubscription } from '../services/api';
@@ -93,14 +93,11 @@ export default function SubscriptionDetailsScreen({ route, navigation }: any) {
         {/* Top Header */}
         <View style={styles.headerRow}>
           <View style={styles.headerLeft}>
-            <View style={styles.avatar}>
-               <User size={16} color={colors.primary} />
-            </View>
-            <Text style={styles.headerTitleText}>The Orchestrator</Text>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+              <ChevronLeft size={24} color="#FFFFFF" />
+            </TouchableOpacity>
+            <Text style={styles.headerTitleText}>Subscription Details</Text>
           </View>
-          <TouchableOpacity style={styles.searchBtn}>
-            <Search size={20} color={colors.textSecondary} />
-          </TouchableOpacity>
         </View>
 
         {/* Title Area */}
@@ -203,7 +200,7 @@ export default function SubscriptionDetailsScreen({ route, navigation }: any) {
         <View style={styles.payloadCardWrapper}>
           <View style={styles.payloadHeader}>
             <Text style={[styles.cardHeaderLabel, { marginBottom: 0 }]}>LATEST PAYLOAD</Text>
-            <Text style={[styles.metricSubInfo, { marginBottom: 0, fontSize: 10 }]}>2 mins ago</Text>
+            <Text style={[styles.metricSubInfo, { marginBottom: 0, fontSize: 14 }]}>2 mins ago</Text>
           </View>
           <View style={styles.payloadBox}>
             <Text style={styles.payloadText}>{payloadPreview}</Text>
@@ -277,67 +274,66 @@ const styles = StyleSheet.create({
 
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginHorizontal: spacing.xl, marginBottom: 30 },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  avatar: { width: 30, height: 30, borderRadius: 15, backgroundColor: 'rgba(255, 167, 38, 0.1)', alignItems: 'center', justifyContent: 'center' },
-  headerTitleText: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 13 },
-  searchBtn: { padding: 4 },
+  backBtn: { padding: 4, marginLeft: -8 },
+  headerTitleText: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 18 },
 
   titleArea: { marginHorizontal: spacing.xl, marginBottom: spacing.lg },
   titleRow: { flexDirection: 'row', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12, marginBottom: spacing.xs },
-  pageTitle: { ...typography.h1, color: '#FFFFFF', fontSize: 32, letterSpacing: -0.5, lineHeight: 38 },
+  pageTitle: { ...typography.h1, color: '#FFFFFF', fontSize: 28, letterSpacing: -0.5, lineHeight: 32 },
   activeBadge: { borderWidth: 1, borderColor: '#1F5133', backgroundColor: 'rgba(0, 230, 118, 0.05)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20, marginTop: 6 },
-  activeBadgeText: { ...typography.captionBold, color: '#4ADE80', fontSize: 9, letterSpacing: 1 },
-  subtitleText: { ...typography.caption, color: colors.textMuted, marginTop: spacing.sm, fontSize: 12 },
+  activeBadgeText: { ...typography.captionBold, color: '#4ADE80', fontSize: 13, letterSpacing: 1 },
+  subtitleText: { ...typography.caption, color: colors.textMuted, marginTop: spacing.sm, fontSize: 15 },
 
   actionRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginHorizontal: spacing.xl, marginBottom: 30 },
   actionLeft: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#181C1F', paddingHorizontal: 12, paddingVertical: 8, borderRadius: borderRadius.pill },
-  enabledText: { ...typography.captionBold, color: colors.textSecondary, fontSize: 9, letterSpacing: 1, marginRight: 8 },
+  enabledText: { ...typography.captionBold, color: colors.textSecondary, fontSize: 13, letterSpacing: 1, marginRight: 8 },
   deleteBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#3B1A1E', paddingHorizontal: 16, paddingVertical: 10, borderRadius: borderRadius.pill },
-  deleteBtnText: { ...typography.captionBold, color: '#FFA7A7', fontSize: 11 },
+  deleteBtnText: { ...typography.captionBold, color: '#FFA7A7', fontSize: 14 },
 
   card: { backgroundColor: '#181C1F', borderRadius: borderRadius.md, marginHorizontal: spacing.xl, padding: spacing.lg, marginBottom: spacing.md },
   
   cardHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
-  cardHeaderLabel: { ...typography.captionBold, color: colors.textMuted, fontSize: 9, letterSpacing: 1.2, marginBottom: spacing.md },
-  cardHeaderLabelRight: { ...typography.captionBold, fontSize: 9, letterSpacing: 0.5 },
+  cardHeaderLabel: { ...typography.captionBold, color: colors.textMuted, fontSize: 13, letterSpacing: 1.2, marginBottom: spacing.md },
+  cardHeaderLabelRight: { ...typography.captionBold, fontSize: 13, letterSpacing: 0.5 },
 
   chartWrapper: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', height: 75, gap: 4, marginTop: spacing.sm },
   chartBar: { flex: 1, backgroundColor: '#21422E', borderRadius: 2, minHeight: 4 },
 
-  hugeMetric: { fontWeight: '800', fontSize: 40, letterSpacing: -1, marginBottom: 4 },
-  hugeMetricSuffix: { ...typography.body, color: colors.textMuted, fontSize: 20, marginLeft: 2, fontWeight: '500' },
-  metricSubInfo: { ...typography.caption, color: colors.textSecondary, fontSize: 11 },
+  hugeMetric: { fontWeight: '800', fontSize: 32, letterSpacing: -1, marginBottom: 4 },
+  hugeMetricSuffix: { ...typography.body, color: colors.textMuted, fontSize: 18, marginLeft: 2, fontWeight: '500' },
+  metricSubInfo: { ...typography.caption, color: colors.textSecondary, fontSize: 14 },
 
-  inputLabel: { ...typography.captionBold, color: colors.textMuted, fontSize: 9, letterSpacing: 1, marginBottom: spacing.sm, marginLeft: 2 },
+  inputLabel: { ...typography.captionBold, color: colors.textMuted, fontSize: 13, letterSpacing: 1, marginBottom: spacing.sm, marginLeft: 2 },
   inputBox: { 
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     backgroundColor: '#0F1316', borderRadius: borderRadius.md, 
     paddingHorizontal: spacing.lg, paddingVertical: 20, marginBottom: spacing.xl 
   },
-  inputValueGreen: { ...typography.body, color: '#4ADE80', fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', fontSize: 12, flex: 1, marginRight: spacing.md },
-  inputValueWhite: { ...typography.body, color: '#FFFFFF', letterSpacing: 3, fontSize: 12, flex: 1, marginRight: spacing.md, paddingTop: 4 },
+  inputValueGreen: { ...typography.body, color: '#4ADE80', fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', fontSize: 15, flex: 1, marginRight: spacing.md },
+  inputValueWhite: { ...typography.body, color: '#FFFFFF', letterSpacing: 3, fontSize: 15, flex: 1, marginRight: spacing.md, paddingTop: 4 },
 
   payloadCardWrapper: { backgroundColor: '#181C1F', borderRadius: borderRadius.md, marginHorizontal: spacing.xl, marginBottom: spacing.md },
   payloadHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: spacing.lg, paddingTop: spacing.lg, paddingBottom: spacing.sm },
   payloadBox: { padding: spacing.lg, paddingTop: 0 },
-  payloadText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', fontSize: 11, color: '#A0ADC0', lineHeight: 22 },
+  payloadText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', fontSize: 14, color: '#A0ADC0', lineHeight: 22 },
 
   filterChipList: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   filterPill: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#22272A', paddingHorizontal: 12, paddingVertical: 8, borderRadius: borderRadius.pill, gap: 6 },
-  filterPillText: { ...typography.small, color: '#D1D5DB', fontSize: 11 },
+  filterPillText: { ...typography.small, color: '#D1D5DB', fontSize: 14 },
   addFilterPill: { borderStyle: 'dotted', borderWidth: 1, borderColor: '#3E3E40', paddingHorizontal: 12, paddingVertical: 8, borderRadius: borderRadius.pill, justifyContent: 'center' },
-  addFilterPillText: { ...typography.small, color: '#D1D5DB', fontSize: 10 },
+  addFilterPillText: { ...typography.small, color: '#D1D5DB', fontSize: 14 },
 
   miniLogItem: { flexDirection: 'row', alignItems: 'flex-start', borderBottomWidth: 1, borderBottomColor: '#22272A', paddingBottom: spacing.md, marginBottom: spacing.md },
   logIndicator: { width: 6, height: 6, borderRadius: 3, marginTop: 5, marginRight: spacing.sm },
   miniLogContent: { flex: 1 },
-  miniLogStatus: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 12, marginBottom: 2 },
-  miniLogTime: { ...typography.small, color: colors.textMuted, fontSize: 10 },
+  miniLogStatus: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 15, marginBottom: 2 },
+  miniLogTime: { ...typography.small, color: colors.textMuted, fontSize: 14 },
 
   viewAllBtn: { 
     alignItems: 'center', justifyContent: 'center', 
     borderWidth: 1, borderColor: '#1F5133', borderRadius: borderRadius.md, 
     paddingVertical: 14, marginTop: spacing.md 
   },
-  viewAllBtnText: { ...typography.bodyBold, color: '#4ADE80', fontSize: 10, letterSpacing: 0.5 },
+  viewAllBtnText: { ...typography.bodyBold, color: '#4ADE80', fontSize: 14, letterSpacing: 0.5 },
 });
  

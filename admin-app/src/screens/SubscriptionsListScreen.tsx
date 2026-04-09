@@ -4,7 +4,7 @@ import {
   RefreshControl, ActivityIndicator, Dimensions
 } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { User, Search, Plus, MoreVertical, Link, Sliders } from 'lucide-react-native';
+import { User, Search, Plus, MoreVertical, Link, Sliders, ChevronRight } from 'lucide-react-native';
 import { colors, spacing, borderRadius, typography, shadows } from '../styles/theme';
 import { fetchSubscriptions } from '../services/api';
 
@@ -69,9 +69,7 @@ export default function SubscriptionsListScreen({ navigation }: any) {
                 {item.createdAt ? new Date(item.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '2m 14s ago'}
               </Text>
             </View>
-            <TouchableOpacity style={styles.menuBtn}>
-              <MoreVertical size={20} color={colors.textSecondary} />
-            </TouchableOpacity>
+            <ChevronRight size={20} color={colors.textSecondary} />
           </View>
         </View>
       </TouchableOpacity>
@@ -95,7 +93,6 @@ export default function SubscriptionsListScreen({ navigation }: any) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.ambientGlow} />
 
       <BlurView intensity={50} tint="dark" style={styles.headerContainer}>
         <View style={styles.header}>
@@ -185,11 +182,6 @@ const { width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0A0E11' },
-  ambientGlow: {
-    position: 'absolute', top: -150, left: -50, width: width + 100, height: 300,
-    backgroundColor: '#1E2B24', opacity: 0.3, borderRadius: 200,
-    transform: [{ scaleX: 1.5 }],
-  },
   headerContainer: {
     paddingHorizontal: spacing.xl,
     paddingTop: 65,
@@ -205,12 +197,12 @@ const styles = StyleSheet.create({
   center: { alignItems: 'center', justifyContent: 'center' },
   
   pageHeader: { marginBottom: spacing.lg, marginTop: spacing.xs },
-  pageTitle: { ...typography.h1, color: colors.textPrimary, marginBottom: 6 },
-  pageSubtitle: { fontSize: 13, color: '#A0A0A0', lineHeight: 18, marginBottom: spacing.xl },
+  pageTitle: { ...typography.h1, color: colors.textPrimary, marginBottom: 6, fontSize: 28, letterSpacing: -0.5 },
+  pageSubtitle: { fontSize: 15, color: '#A0A0A0', lineHeight: 18, marginBottom: spacing.xl },
   
   searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#181C1A', borderRadius: 12, paddingHorizontal: 16, height: 48 },
   searchIcon: { marginRight: 12 },
-  searchText: { fontSize: 14, color: '#666' },
+  searchText: { fontSize: 15, color: '#666' },
 
   list: { paddingHorizontal: spacing.xl, paddingBottom: 140, paddingTop: spacing.xs },
   
@@ -220,24 +212,24 @@ const styles = StyleSheet.create({
   cardTitleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   cardTitle: { ...typography.h3, color: colors.textPrimary, fontSize: 16 },
   statusBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-  statusText: { ...typography.small, fontWeight: '700', fontSize: 10, letterSpacing: 0.5 },
+  statusText: { ...typography.small, fontWeight: '700', fontSize: 12, letterSpacing: 0.5 },
   
   urlRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: spacing.lg },
-  infinityIcon: { color: '#888', fontSize: 14, fontWeight: '800' },
-  cardUrl: { ...typography.caption, color: '#8A9A8E', fontFamily: 'monospace', flex: 1, opacity: 0.8 },
+  infinityIcon: { color: '#888', fontSize: 15, fontWeight: '800' },
+  cardUrl: { ...typography.caption, color: '#8A9A8E', fontFamily: 'monospace', flex: 1, opacity: 0.8, fontSize: 14 },
   
   statsSection: { marginBottom: spacing.md },
-  metricValue: { fontSize: 24, fontWeight: '700', marginTop: 4, letterSpacing: -0.5 },
+  metricValue: { fontSize: 22, fontWeight: '700', marginTop: 4, letterSpacing: -0.5 },
   
   bottomSection: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
   footerItem: { gap: 4 },
-  footerLabel: { ...typography.small, color: '#5A6A5E', fontSize: 9, letterSpacing: 1, fontWeight: '600' },
-  footerValuePrimary: { fontSize: 13, color: '#FFFFFF' },
+  footerLabel: { ...typography.small, color: '#5A6A5E', fontSize: 12, letterSpacing: 1, fontWeight: '600' },
+  footerValuePrimary: { fontSize: 14, color: '#FFFFFF' },
   menuBtn: { padding: 4, marginRight: -8, marginBottom: 4 },
 
   listFooter: { alignItems: 'center', justifyContent: 'center', paddingTop: spacing.xxl, paddingBottom: 60 },
   footerIconContainer: { marginBottom: 16, opacity: 0.8 },
-  listFooterText: { fontSize: 13, color: '#8A9A8E', textAlign: 'center', lineHeight: 20 },
+  listFooterText: { fontSize: 16, color: '#8A9A8E', textAlign: 'center', lineHeight: 20 },
   
   emptyState: { alignItems: 'center', paddingTop: 60 },
   emptyText: { ...typography.body, color: colors.textMuted },

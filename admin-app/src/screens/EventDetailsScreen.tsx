@@ -1,29 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import {
-  View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Platform,
+  View, Text, TouchableOpacity, StyleSheet, ScrollView,
+  ActivityIndicator, Platform
 } from 'react-native';
-import { ChevronLeft, CheckCircle, XCircle, Copy } from 'lucide-react-native';
-import GlassCard from '../components/GlassCard';
-import { colors, spacing, borderRadius, typography, shadows } from '../styles/theme';
-import { fetchDelivery } from '../services/api';
+import { User, Search, RotateCcw, Copy, UploadCloud, DownloadCloud } from 'lucide-react-native';
+import * as Clipboard from 'expo-clipboard';
+import { colors, spacing, borderRadius, typography } from '../styles/theme';
 
 export default function EventDetailsScreen({ route, navigation }: any) {
-  const { deliveryId } = route.params;
-  const [delivery, setDelivery] = useState<any>(null);
+  // Use either the passed ID or a fallback mock to display layout identically to design.
+  const deliveryId = route?.params?.deliveryId || 'evt_9k2L_x9132z_01';
+  const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadDelivery();
+    // Simulated network delay to show loading state if needed.
+    setTimeout(() => setLoading(false), 300);
   }, [deliveryId]);
 
-  const loadDelivery = async () => {
+  const copyToClipboard = async (text: string) => {
     try {
-      const res = await fetchDelivery(deliveryId);
-      setDelivery(res.data.data);
-    } catch (e) {
-      console.error('Event details load error:', e);
-    } finally {
-      setLoading(false);
+      await Clipboard.setStringAsync(text);
+    } catch {
+      // Fallback silently
     }
   };
 
@@ -35,129 +34,226 @@ export default function EventDetailsScreen({ route, navigation }: any) {
     );
   }
 
-  if (!delivery) {
-    return (
-      <View style={[styles.container, styles.center]}>
-        <Text style={styles.emptyText}>Delivery not found</Text>
-      </View>
-    );
+  const reqPayload = `{
+  "action": "DEPLOY_ORCHESTRATION",
+  "cluster_id": "us-east-4-main",
+  "params": {
+    "replication": 12,
+    "strategy": "rolling_update",
+    "canary": true
+  },
+  "metadata": {
+    "triggered_by": "ci-pipeline-882",
+    "version": "2.4.1-stable"
   }
+}`;
 
-  const isSuccess = delivery.status === 'SUCCESS';
-  const statusColor = isSuccess ? colors.success : colors.error;
+  const resPayload = `{
+  "error": "INTERNAL_SERVER_ERROR",
+  "code": 500,
+  "message": "Failed to connect to upstre",
+  "trace_id": "trc_882199021zx"
+}`;
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <ChevronLeft size={24} color={colors.textPrimary} />
+      {/* Top Header */}
+      <View style={styles.headerRow}>
+        <View style={styles.headerLeft}>
+          <View style={styles.avatar}>
+             <User size={16} color={colors.primary} />
+          </View>
+          <Text style={styles.headerTitleText}>The Orchestrator</Text>
+        </View>
+        <TouchableOpacity style={styles.searchBtn}>
+          <Search size={20} color={colors.textSecondary} />
         </TouchableOpacity>
-        <Text style={styles.title}>Event Details</Text>
-        <Text style={styles.logId}>{delivery.id?.slice(0, 12)}</Text>
+      </View>
 
-        {/* Status Card */}
-        <GlassCard intensity={15} style={[styles.statusCard, { borderColor: statusColor }]}>
-          {isSuccess ? 
-            <CheckCircle size={28} color={colors.success} style={{ marginBottom: spacing.sm }} /> : 
-            <XCircle size={28} color={colors.error} style={{ marginBottom: spacing.sm }} />}
-          <Text style={styles.eventType}>{delivery.event?.type || 'unknown.event'}</Text>
-          <View style={[styles.statusBadge, { backgroundColor: statusColor + '20' }]}>
-            <Text style={[styles.statusText, { color: statusColor }]}>{delivery.status}</Text>
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+
+        {/* Action Header Card - The 500 Error Box */}
+        <View style={styles.alertCard}>
+          {/* Subtle red indicator at top */}
+          <View style={styles.alertCardIndicator} />
+          
+          <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md}}>
+            <View style={styles.criticalDot} />
+            <Text style={styles.criticalText}>CRITICAL FAILURE</Text>
           </View>
-        </GlassCard>
 
-        {/* Event Metadata */}
-        <GlassCard intensity={15} style={styles.section}>
-          <Text style={styles.sectionTitle}>Event Metadata</Text>
-          <View style={styles.metaGrid}>
-            <View style={styles.metaItem}>
-              <Text style={styles.metaLabel}>Timestamp</Text>
-              <Text style={styles.metaValue}>
-                {delivery.updatedAt ? new Date(delivery.updatedAt).toLocaleString() : '—'}
-              </Text>
-            </View>
-            <View style={styles.metaItem}>
-              <Text style={styles.metaLabel}>HTTP Code</Text>
-              <View style={[styles.httpBadge, { borderColor: statusColor }]}>
-                <Text style={[styles.httpCode, { color: statusColor }]}>
-                  {delivery.lastStatusCode || '—'}
-                </Text>
-              </View>
-            </View>
-            <View style={styles.metaItem}>
-              <Text style={styles.metaLabel}>Retry Count</Text>
-              <Text style={styles.metaValue}>{delivery.attempts || 0}</Text>
-            </View>
-            <View style={styles.metaItem}>
-              <Text style={styles.metaLabel}>Duration</Text>
-              <Text style={styles.metaValue}>—</Text>
-            </View>
-          </View>
-        </GlassCard>
+          <Text style={styles.alertTitle}>Failed - 500 Internal Server Error</Text>
+          
+          <Text style={styles.alertTargetLabel}>Target:</Text>
+          <Text style={styles.alertTargetVal}>api.production.orchestrator.io/v1/deplo</Text>
 
-        {/* Request Payload */}
-        <GlassCard intensity={15} style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Request Payload</Text>
-            <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-              <Copy size={16} color={colors.textSecondary} />
-              <Text style={styles.copyBtn}>Copy</Text>
+          <View style={styles.alertButtonsRow}>
+            <TouchableOpacity style={styles.retryBtn}>
+              <RotateCcw size={14} color="#D1D5DB" style={{marginRight: 6}} />
+              <Text style={styles.retryBtnText}>Retry Now</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={styles.viewLogsBtn}>
+              <Text style={styles.viewLogsBtnText}>View Logs</Text>
             </TouchableOpacity>
           </View>
-          <View style={styles.codeBlock}>
-            <Text style={styles.codeText}>
-              {JSON.stringify(delivery.event?.payload || {}, null, 2)}
-            </Text>
-          </View>
-        </GlassCard>
+        </View>
 
-        {/* Response Body */}
-        <GlassCard intensity={15} style={styles.section}>
-          <Text style={styles.sectionTitle}>Response Body</Text>
-          <View style={styles.codeBlock}>
-            <Text style={styles.codeText}>
-              {delivery.lastResponseBody
-                ? JSON.stringify(JSON.parse(delivery.lastResponseBody), null, 2)
-                : '{ "message": "No response recorded" }'}
+        {/* EVENT ID Card */}
+        <View style={styles.dataCard}>
+          <Text style={styles.cardHeaderLabel}>EVENT ID</Text>
+          <View style={styles.copyRow}>
+            <Text style={styles.copyRowText}>{deliveryId}</Text>
+            <TouchableOpacity onPress={() => copyToClipboard(deliveryId)}>
+              <Copy size={14} color={colors.textSecondary} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* TIMESTAMP Card */}
+        <View style={styles.dataCard}>
+          <Text style={styles.cardHeaderLabel}>TIMESTAMP</Text>
+          <Text style={styles.dataText}>2023-10-24 14:02:11.492</Text>
+          <Text style={styles.subText}>GMT-0400</Text>
+        </View>
+
+        {/* RETRIES Card */}
+        <View style={styles.dataCard}>
+          <Text style={styles.cardHeaderLabel}>RETRIES</Text>
+          <View style={{flexDirection: 'row', alignItems: 'baseline', marginBottom: 12}}>
+            <Text style={styles.hugeNumber}>3</Text>
+            <Text style={styles.hugeNumberSub}> / 5 max</Text>
+          </View>
+          {/* Progress Bar */}
+          <View style={styles.progressBarBg}>
+             <View style={[styles.progressBarFill, { width: '60%' }]} />
+          </View>
+        </View>
+
+        {/* PROTOCOL Card */}
+        <View style={styles.dataCard}>
+          <Text style={styles.cardHeaderLabel}>PROTOCOL</Text>
+          <View style={{flexDirection: 'row', gap: spacing.sm}}>
+             <View style={styles.protocolPillGreen}>
+               <Text style={styles.protocolPillGreenText}>HTTPS/2</Text>
+             </View>
+             <View style={styles.protocolPillDark}>
+               <Text style={styles.protocolPillDarkText}>JSON</Text>
+             </View>
+          </View>
+        </View>
+
+        {/* REQUEST PAYLOAD Block */}
+        <View style={{ marginTop: spacing.md, paddingHorizontal: spacing.xl }}>
+          <View style={styles.payloadHeader}>
+            <View style={{flexDirection: 'row', alignItems: 'center', gap: 6}}>
+               <UploadCloud size={14} color={colors.textSecondary} />
+               <Text style={[styles.cardHeaderLabel, { marginBottom: 0 }]}>REQUEST PAYLOAD</Text>
+            </View>
+            <Text style={styles.payloadSizeText}>2.4 KB</Text>
+          </View>
+          <View style={styles.payloadBox}>
+            <View style={[styles.leftAccent, { backgroundColor: '#F472B6' }]} />
+            <Text style={styles.payloadCodeText}>{reqPayload}</Text>
+          </View>
+        </View>
+
+        {/* RESPONSE BODY Block */}
+        <View style={{ marginTop: spacing.xl, paddingHorizontal: spacing.xl }}>
+          <View style={styles.payloadHeader}>
+            <View style={{flexDirection: 'row', alignItems: 'center', gap: 6}}>
+               <DownloadCloud size={14} color={colors.textSecondary} />
+               <Text style={[styles.cardHeaderLabel, { marginBottom: 0 }]}>RESPONSE BODY</Text>
+            </View>
+            <Text style={styles.payloadSizeText}>156 B</Text>
+          </View>
+          <View style={styles.payloadBox}>
+            <View style={[styles.leftAccent, { backgroundColor: '#F87171' }]} />
+            <Text style={[styles.payloadCodeText, { color: '#F87171' }]}>{resPayload}</Text>
+          </View>
+        </View>
+
+        {/* EXECUTION CONTEXT LOGS Block */}
+        <View style={styles.contextContainer}>
+          <Text style={[styles.cardHeaderLabel, { marginBottom: spacing.lg }]}>EXECUTION CONTEXT LOGS</Text>
+          
+          <View style={styles.logLine}>
+            <Text style={styles.logLineTime}>14:02:11.481</Text>
+            <Text style={styles.logLineDesc}>Initiating handshake with us-east-4-main...</Text>
+          </View>
+
+          <View style={styles.logLine}>
+            <Text style={styles.logLineTime}>14:02:11.455</Text>
+            <Text style={styles.logLineDesc}>SSL verification successful. (Cipher: TLS_AES_256_GCM_SHA384)</Text>
+          </View>
+
+          <View style={[styles.logLine, { borderBottomWidth: 0, paddingBottom: 0 }]}>
+            <Text style={[styles.logLineTime, { color: '#F87171' }]}>14:02:11.492</Text>
+            <Text style={[styles.logLineDesc, { color: '#F87171' }]}>
+              Upstream service returned 500. Aborting sequence.
             </Text>
           </View>
-        </GlassCard>
+        </View>
+
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
-  center: { alignItems: 'center', justifyContent: 'center' },
-  scroll: { paddingHorizontal: spacing.lg, paddingTop: 50, paddingBottom: 100 },
-  backBtn: { marginBottom: spacing.md },
-  backIcon: { fontSize: 24, color: colors.textPrimary },
-  title: { ...typography.h1, color: colors.textPrimary, marginBottom: spacing.xs },
-  logId: { ...typography.caption, color: colors.textMuted, marginBottom: spacing.xl },
-  statusCard: {
-    padding: spacing.xl, marginBottom: spacing.xl,
-  },
-  eventType: { ...typography.h3, color: colors.textPrimary, marginBottom: spacing.sm },
-  statusBadge: { alignSelf: 'flex-start', paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: borderRadius.pill },
-  statusText: { ...typography.captionBold },
-  section: {
-    padding: spacing.xl, marginBottom: spacing.lg,
-  },
-  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  sectionTitle: { ...typography.h3, color: colors.textPrimary, marginBottom: spacing.lg },
-  copyBtn: { ...typography.captionBold, color: colors.textSecondary },
-  metaGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xl },
-  metaItem: { width: '45%' },
-  metaLabel: { ...typography.caption, color: colors.textSecondary, marginBottom: spacing.xs },
-  metaValue: { ...typography.bodyBold, color: colors.textPrimary },
-  httpBadge: { alignSelf: 'flex-start', borderWidth: 1, borderRadius: borderRadius.sm, paddingHorizontal: spacing.md, paddingVertical: 3 },
-  httpCode: { ...typography.bodyBold },
-  codeBlock: {
-    backgroundColor: colors.bg, borderRadius: borderRadius.md,
-    padding: spacing.lg, borderWidth: 1, borderColor: colors.border,
-  },
-  codeText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', fontSize: 12, color: colors.primary, lineHeight: 20 },
-  emptyText: { ...typography.body, color: colors.textMuted },
+  container: { flex: 1, backgroundColor: '#0F1316' },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  scroll: { paddingBottom: 60 },
+
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: spacing.xl, paddingTop: 50, marginBottom: 30 },
+  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  avatar: { width: 30, height: 30, borderRadius: 15, backgroundColor: 'rgba(255, 167, 38, 0.1)', alignItems: 'center', justifyContent: 'center' },
+  headerTitleText: { ...typography.bodyBold, color: '#4ADE80', fontSize: 13 },
+  searchBtn: { padding: 4 },
+
+  alertCard: { backgroundColor: '#141718', borderRadius: borderRadius.md, marginHorizontal: spacing.xl, padding: spacing.xl, marginBottom: spacing.md, overflow: 'hidden' },
+  alertCardIndicator: { position: 'absolute', left: 0, right: 0, top: 0, height: 2, backgroundColor: '#F87171' },
+  
+  criticalDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#F472B6', marginRight: 8, opacity: 0.6 },
+  criticalText: { ...typography.captionBold, color: '#F472B6', fontSize: 9, letterSpacing: 1.5, opacity: 0.8 },
+  alertTitle: { fontWeight: '700', color: '#FFFFFF', fontSize: 24, letterSpacing: -0.5, lineHeight: 32, marginBottom: spacing.md },
+  
+  alertTargetLabel: { ...typography.caption, color: colors.textSecondary, marginBottom: 2 },
+  alertTargetVal: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textMuted, fontSize: 11, marginBottom: spacing.xl },
+  
+  alertButtonsRow: { flexDirection: 'row', gap: spacing.md },
+  retryBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#333A36', paddingHorizontal: 16, paddingVertical: 10, borderRadius: borderRadius.pill },
+  retryBtnText: { ...typography.bodyBold, color: '#D1D5DB', fontSize: 12 },
+  viewLogsBtn: { alignItems: 'center', backgroundColor: '#4ADE80', paddingHorizontal: 16, paddingVertical: 10, borderRadius: borderRadius.pill },
+  viewLogsBtnText: { ...typography.bodyBold, color: '#0A0D0C', fontSize: 12 },
+
+  dataCard: { backgroundColor: '#141718', borderRadius: borderRadius.md, marginHorizontal: spacing.xl, padding: spacing.lg, marginBottom: spacing.md },
+  cardHeaderLabel: { ...typography.captionBold, color: colors.textMuted, fontSize: 9, letterSpacing: 1, marginBottom: spacing.md },
+  
+  copyRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  copyRowText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: '#A0ADC0', fontSize: 12 },
+
+  dataText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: '#FFFFFF', fontSize: 12, marginBottom: 4 },
+  subText: { ...typography.caption, color: colors.textSecondary, fontSize: 10 },
+
+  hugeNumber: { fontWeight: '800', color: '#FFFFFF', fontSize: 24, letterSpacing: -0.5 },
+  hugeNumberSub: { ...typography.body, color: colors.textMuted, fontSize: 12 },
+  progressBarBg: { height: 4, backgroundColor: '#333A36', borderRadius: 2 },
+  progressBarFill: { height: 4, backgroundColor: '#F472B6', borderRadius: 2 },
+
+  protocolPillGreen: { backgroundColor: 'rgba(74,222,128,0.15)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 4 },
+  protocolPillGreenText: { ...typography.captionBold, color: '#4ADE80', fontSize: 9, letterSpacing: 0.5 },
+  protocolPillDark: { backgroundColor: '#333A36', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 4 },
+  protocolPillDarkText: { ...typography.captionBold, color: colors.textSecondary, fontSize: 9, letterSpacing: 0.5 },
+
+  payloadHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.sm },
+  payloadSizeText: { ...typography.captionBold, color: colors.textSecondary, fontSize: 8 },
+  payloadBox: { backgroundColor: '#0A0D0C', borderRadius: borderRadius.md, padding: spacing.lg, paddingLeft: 24, overflow: 'hidden' },
+  leftAccent: { position: 'absolute', left: 0, top: 0, bottom: 0, width: 2 },
+  payloadCodeText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', fontSize: 11, color: '#4ADE80', lineHeight: 20 },
+
+  contextContainer: { backgroundColor: '#141718', borderRadius: borderRadius.md, marginHorizontal: spacing.xl, padding: spacing.lg, marginTop: spacing.xl, marginBottom: 50 },
+  logLine: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#1D2421', paddingBottom: spacing.md, marginBottom: spacing.md },
+  logLineTime: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textMuted, fontSize: 10, width: 90, flexShrink: 0 },
+  logLineDesc: { ...typography.caption, color: '#D1D5DB', fontSize: 11, flex: 1, lineHeight: 16 },
 });

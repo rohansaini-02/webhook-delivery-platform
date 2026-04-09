@@ -1,244 +1,177 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
-  View, Text, TouchableOpacity, StyleSheet, ScrollView, Switch, Platform, Alert,
+  View, Text, TouchableOpacity, StyleSheet, ScrollView,
+  Switch, Platform
 } from 'react-native';
-import { Moon, Bell, Mail, Shield, HardDrive, FileDown, ChevronRight, LogOut } from 'lucide-react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import GlassCard from '../components/GlassCard';
-import { colors, spacing, borderRadius, typography, shadows } from '../styles/theme';
-import { useAuth } from '../context/AuthContext';
+import { Search, Bell, RotateCcw, Moon, BookOpen, Headset, Shield, LogOut, Edit2 } from 'lucide-react-native';
+import { colors, spacing, borderRadius, typography } from '../styles/theme';
 
-export default function SettingsScreen({ navigation }: any) {
-  const { userEmail, logout } = useAuth();
-  const [darkMode, setDarkMode] = useState(true);
-  const [pushEnabled, setPushEnabled] = useState(true);
-  const [emailEnabled, setEmailEnabled] = useState(false);
-
-  const handleLogout = async () => {
-    await logout();
-  };
+export default function SettingsScreen() {
+  const [notifications, setNotifications] = React.useState(true);
+  const [autoRetry, setAutoRetry] = React.useState(false);
+  const [darkMode, setDarkMode] = React.useState(true);
 
   return (
     <View style={styles.container}>
+      {/* Search Header */}
+      <View style={styles.headerRow}>
+        <View style={styles.headerLeft}>
+          <View style={styles.headerAvatar}>
+             <Search size={16} color="#FFFFFF" strokeWidth={2.5}/>
+          </View>
+          <Text style={styles.headerTitleText}>The Orchestrator</Text>
+        </View>
+        <TouchableOpacity style={styles.searchBtn}>
+          <Search size={20} color={colors.textSecondary} />
+        </TouchableOpacity>
+      </View>
+
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <Text style={styles.title}>Settings</Text>
-        <Text style={styles.subtitle}>Manage your account and preferences</Text>
-
-        {/* Profile Card */}
-        <GlassCard intensity={15} style={styles.profileCard}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>
-              {userEmail ? userEmail.charAt(0).toUpperCase() : 'A'}
-            </Text>
+        
+        {/* Profile Hero Block */}
+        <View style={styles.profileHero}>
+          <View style={styles.avatarGlow}>
+            <View style={styles.avatarMain}>
+              {/* Replace with an actual Image tag if asset exists, using colored block for now */}
+              <View style={styles.avatarMockup} />
+              <View style={styles.adminBadge}>
+                <Text style={styles.adminBadgeText}>ADMIN PROFILE</Text>
+              </View>
+              <TouchableOpacity style={styles.editBtn}>
+                <Edit2 size={12} color="#000000" />
+              </TouchableOpacity>
+            </View>
           </View>
-          <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>Developer Admin</Text>
-            <Text style={styles.profileEmail}>{userEmail || 'admin@webhookflow.io'}</Text>
-          </View>
-        </GlassCard>
+          
+          <Text style={styles.heroName}>Alex Rivera</Text>
+          <Text style={styles.heroRole}>LEAD INFRASTRUCTURE ENGINEER</Text>
+          <Text style={styles.heroEmail}>alex.rivera@orchestrator.io</Text>
+        </View>
 
-        {/* Appearance */}
-        <Text style={styles.sectionLabel}>Appearance</Text>
-        <GlassCard intensity={15} style={styles.section}>
-          <View style={styles.settingRow}>
-            <View style={styles.settingIcon}>
-              <Moon size={20} color={colors.textPrimary} />
+        {/* SYSTEM PREFERENCES */}
+        <View style={styles.sectionBlock}>
+          <Text style={styles.sectionHeader}>SYSTEM PREFERENCES</Text>
+          
+          <View style={styles.cardBox}>
+            <View style={styles.toggleRow}>
+              <View style={[styles.iconBox, { backgroundColor: 'rgba(74,222,128,0.1)' }]}>
+                <Bell size={16} color="#4ADE80" />
+              </View>
+              <View style={styles.toggleTextCol}>
+                <Text style={styles.toggleTitle}>Notifications</Text>
+                <Text style={styles.toggleSub}>Real-time alerts for node failures</Text>
+              </View>
+              <Switch value={notifications} onValueChange={setNotifications} trackColor={{ false: '#333A36', true: '#4ADE80' }} thumbColor="#FFFFFF" />
             </View>
-            <View style={styles.settingContent}>
-              <Text style={styles.settingTitle}>Dark Mode</Text>
-              <Text style={styles.settingMeta}>Toggle theme</Text>
-            </View>
-            <Switch
-              value={darkMode}
-              onValueChange={(val) => {
-                setDarkMode(val);
-                if (!val) {
-                  Alert.alert('Theme Settings', 'Light mode full support is coming soon! Switching back to dark mode.');
-                  setTimeout(() => setDarkMode(true), 1500);
-                }
-              }}
-              trackColor={{ false: colors.border, true: colors.primaryMuted }}
-              thumbColor={darkMode ? colors.primary : colors.textMuted}
-            />
-          </View>
-        </GlassCard>
 
-        {/* Notifications */}
-        <Text style={styles.sectionLabel}>Notifications</Text>
-        <GlassCard intensity={15} style={styles.section}>
-          <TouchableOpacity style={styles.settingRow} activeOpacity={0.7}>
-            <View style={styles.settingIcon}>
-              <Bell size={20} color={colors.textPrimary} />
+            <View style={styles.toggleRow}>
+              <View style={[styles.iconBox, { backgroundColor: '#1D2421' }]}>
+                <RotateCcw size={16} color="#D1D5DB" />
+              </View>
+              <View style={styles.toggleTextCol}>
+                <Text style={styles.toggleTitle}>Auto-retry</Text>
+                <Text style={styles.toggleSub}>Automatically restart failed instances</Text>
+              </View>
+              <Switch value={autoRetry} onValueChange={setAutoRetry} trackColor={{ false: '#333A36', true: '#4ADE80' }} thumbColor="#A0ADC0" />
             </View>
-            <View style={styles.settingContent}>
-              <Text style={styles.settingTitle}>Push Notifications</Text>
-              <Text style={styles.settingMeta}>Get alerted on delivery failures</Text>
+
+            <View style={[styles.toggleRow, { borderBottomWidth: 0, paddingBottom: 0 }]}>
+              <View style={[styles.iconBox, { backgroundColor: '#1D2421' }]}>
+                <Moon size={16} color="#D1D5DB" />
+              </View>
+              <View style={styles.toggleTextCol}>
+                <Text style={styles.toggleTitle}>Dark Mode</Text>
+                <Text style={styles.toggleSub}>Persistent obsidian interface</Text>
+              </View>
+              <Switch value={darkMode} onValueChange={setDarkMode} trackColor={{ false: '#333A36', true: '#4ADE80' }} thumbColor="#FFFFFF" />
             </View>
-            <Switch
-              value={pushEnabled}
-              onValueChange={setPushEnabled}
-              trackColor={{ false: colors.border, true: colors.primaryMuted }}
-              thumbColor={pushEnabled ? colors.primary : colors.textMuted}
-            />
+          </View>
+        </View>
+
+        {/* RESOURCES & SUPPORT */}
+        <View style={styles.sectionBlock}>
+          <Text style={styles.sectionHeader}>RESOURCES & SUPPORT</Text>
+
+          {/* Doc Card Single */}
+          <TouchableOpacity style={styles.resourceCardFull}>
+            <BookOpen size={18} color="#4ADE80" style={{marginBottom: spacing.sm}} />
+            <Text style={styles.resourceCardTitle}>Documentation</Text>
+            <Text style={styles.resourceCardSub}>API references, CLI guides, and architecture schemas.</Text>
           </TouchableOpacity>
 
-          <View style={styles.divider} />
+          {/* Grid Cards Two */}
+          <View style={styles.resourceGrid}>
+            <TouchableOpacity style={styles.resourceCardHalf}>
+              <Headset size={16} color="#A78BFA" style={{marginBottom: spacing.sm}} />
+              <Text style={styles.resourceCardTitle}>Support</Text>
+              <Text style={styles.resourceCardSub}>Direct line to infrastructure specialists.</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity style={styles.settingRow} activeOpacity={0.7}>
-            <View style={styles.settingIcon}>
-              <Mail size={20} color={colors.textPrimary} />
-            </View>
-            <View style={styles.settingContent}>
-              <Text style={styles.settingTitle}>Email Alerts</Text>
-              <Text style={styles.settingMeta}>Daily digest of system health</Text>
-            </View>
-            <Switch
-              value={emailEnabled}
-              onValueChange={setEmailEnabled}
-              trackColor={{ false: colors.border, true: colors.primaryMuted }}
-              thumbColor={emailEnabled ? colors.primary : colors.textMuted}
-            />
-          </TouchableOpacity>
-        </GlassCard>
-
-        {/* Security */}
-        <Text style={styles.sectionLabel}>Security</Text>
-        <GlassCard intensity={15} style={styles.section}>
-          <TouchableOpacity
-            style={styles.settingRow}
-            activeOpacity={0.7}
-            onPress={() => navigation.navigate('SecuritySettings')}
-          >
-            <View style={styles.settingIcon}>
-              <Shield size={20} color={colors.textPrimary} />
-            </View>
-            <View style={styles.settingContent}>
-              <Text style={styles.settingTitle}>Security Settings</Text>
-              <Text style={styles.settingMeta}>Manage API keys and authentication</Text>
-            </View>
-            <ChevronRight size={22} color={colors.textMuted} />
-          </TouchableOpacity>
-        </GlassCard>
-
-        {/* System */}
-        <Text style={styles.sectionLabel}>System</Text>
-        <GlassCard intensity={15} style={styles.section}>
-          <TouchableOpacity style={styles.settingRow} activeOpacity={0.7}>
-            <View style={styles.settingIcon}>
-              <HardDrive size={20} color={colors.textPrimary} />
-            </View>
-            <View style={styles.settingContent}>
-              <Text style={styles.settingTitle}>Data & Storage</Text>
-              <Text style={styles.settingMeta}>Clear cache, manage local data</Text>
-            </View>
-            <ChevronRight size={22} color={colors.textMuted} />
-          </TouchableOpacity>
-
-          <View style={styles.divider} />
-
-          <TouchableOpacity 
-            style={styles.settingRow} 
-            activeOpacity={0.7}
-            onPress={() => Alert.alert('Export Logs', 'Logs copied to clipboard or exported successfully.')}
-          >
-            <View style={styles.settingIcon}>
-              <FileDown size={20} color={colors.textPrimary} />
-            </View>
-            <View style={styles.settingContent}>
-              <Text style={styles.settingTitle}>Export Logs</Text>
-              <Text style={styles.settingMeta}>Download delivery history as CSV</Text>
-            </View>
-            <ChevronRight size={22} color={colors.textMuted} />
-          </TouchableOpacity>
-        </GlassCard>
-
-        {/* About */}
-        <Text style={styles.sectionLabel}>About</Text>
-        <GlassCard intensity={15} style={styles.section}>
-          <View style={styles.aboutRow}>
-            <Text style={styles.aboutLabel}>Version</Text>
-            <Text style={styles.aboutValue}>1.0.0</Text>
+            <TouchableOpacity style={styles.resourceCardHalf}>
+              <Shield size={16} color="#D1D5DB" style={{marginBottom: spacing.sm}} />
+              <Text style={styles.resourceCardTitle}>Privacy Policy</Text>
+              <Text style={styles.resourceCardSub}>Data handling and security protocols.</Text>
+            </TouchableOpacity>
           </View>
-          <View style={styles.aboutRow}>
-            <Text style={styles.aboutLabel}>Build</Text>
-            <Text style={styles.aboutValue}>2026.03.20</Text>
-          </View>
-          <View style={styles.aboutRow}>
-            <Text style={styles.aboutLabel}>Platform</Text>
-            <Text style={styles.aboutValue}>iOS + Android</Text>
-          </View>
-        </GlassCard>
+        </View>
 
-        {/* Logout */}
-        <TouchableOpacity onPress={handleLogout} activeOpacity={0.85}>
-          <LinearGradient
-            colors={[colors.error, '#FF7043']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.logoutBtn}
-          >
-            <LogOut size={20} color={colors.textPrimary} style={{ marginRight: spacing.sm }} />
-            <Text style={styles.logoutText}>Logout</Text>
-          </LinearGradient>
+        {/* LOGOUT */}
+        <TouchableOpacity style={styles.logoutBtn}>
+          <LogOut size={16} color="#FCA5A5" style={{marginRight: spacing.sm}} />
+          <Text style={styles.logoutBtnText}>Logout from Orchestrator</Text>
         </TouchableOpacity>
 
-        {/* Footer */}
-        <Text style={styles.footer}>WebhookFlow Admin v1.0.0</Text>
-        <Text style={styles.footerSub}>© 2026 All rights reserved</Text>
+        {/* Build Version */}
+        <Text style={styles.versionText}>VERSION 4.2.0-ALPHA • BUILD 88291</Text>
+
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
-  scroll: { paddingHorizontal: spacing.lg, paddingTop: 50, paddingBottom: 100 },
-  title: { ...typography.h1, color: colors.textPrimary, marginBottom: spacing.xs },
-  subtitle: { ...typography.body, color: colors.textSecondary, marginBottom: spacing.xxl },
-  profileCard: {
-    flexDirection: 'row', alignItems: 'center', gap: spacing.lg,
-    padding: spacing.xl,
-    marginBottom: spacing.xxl,
-  },
-  avatar: {
-    width: 50, height: 50, borderRadius: 25,
-    backgroundColor: colors.primaryMuted, alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1, borderColor: colors.borderFocused,
-  },
-  avatarText: { ...typography.h2, color: colors.primary },
-  profileInfo: { flex: 1 },
-  profileName: { ...typography.bodyBold, color: colors.textPrimary },
-  profileEmail: { ...typography.caption, color: colors.textSecondary },
-  sectionLabel: { ...typography.captionBold, color: colors.textMuted, marginBottom: spacing.sm, marginTop: spacing.md, textTransform: 'uppercase', letterSpacing: 1 },
-  section: {
-    marginBottom: spacing.md, overflow: 'hidden',
-  },
-  settingRow: {
-    flexDirection: 'row', alignItems: 'center', padding: spacing.lg, gap: spacing.md,
-  },
-  settingIcon: {
-    width: 40, height: 40, borderRadius: borderRadius.md,
-    backgroundColor: colors.bgInput, alignItems: 'center', justifyContent: 'center',
-  },
-  settingContent: { flex: 1 },
-  settingTitle: { ...typography.bodyBold, color: colors.textPrimary },
-  settingMeta: { ...typography.caption, color: colors.textSecondary, marginTop: 1 },
-  chevron: { fontSize: 22, color: colors.textMuted },
-  divider: { height: 1, backgroundColor: colors.border, marginHorizontal: spacing.lg },
-  aboutRow: {
-    flexDirection: 'row', justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg, paddingVertical: spacing.md,
-    borderBottomWidth: 1, borderBottomColor: colors.border,
-  },
-  aboutLabel: { ...typography.body, color: colors.textSecondary },
-  aboutValue: { ...typography.bodyBold, color: colors.textPrimary },
-  logoutBtn: {
-    flexDirection: 'row', justifyContent: 'center', backgroundColor: colors.error,
-    borderRadius: borderRadius.md, paddingVertical: 16,
-    alignItems: 'center', marginTop: spacing.xl,
-  },
-  logoutText: { ...typography.bodyBold, color: colors.textPrimary },
-  footer: { ...typography.caption, color: colors.info, textAlign: 'center', marginTop: spacing.xxl },
-  footerSub: { ...typography.small, color: colors.textMuted, textAlign: 'center', marginTop: spacing.xs },
+  container: { flex: 1, backgroundColor: '#101416' },
+  scroll: { paddingBottom: 100 },
+  
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: spacing.xl, paddingTop: 50, marginBottom: spacing.lg },
+  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  headerAvatar: { width: 30, height: 30, borderRadius: 15, backgroundColor: 'rgba(255,255,255,0.05)', alignItems: 'center', justifyContent: 'center' },
+  headerTitleText: { ...typography.bodyBold, color: '#4ADE80', fontSize: 13 },
+  searchBtn: { padding: 4 },
+
+  profileHero: { alignItems: 'center', marginVertical: spacing.xl },
+  avatarGlow: { width: 130, height: 130, borderRadius: 65, backgroundColor: 'rgba(74,222,128,0.05)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(74,222,128,0.1)' },
+  avatarMain: { width: 100, height: 100, borderRadius: 50, backgroundColor: '#1A212B', overflow: 'hidden' },
+  avatarMockup: { flex: 1, backgroundColor: '#21334A' },
+  
+  adminBadge: { position: 'absolute', bottom: 6, left: '15%', right: '15%', backgroundColor: 'rgba(0,0,0,0.6)', paddingVertical: 2, borderRadius: 2 },
+  adminBadgeText: { ...typography.captionBold, color: '#FFFFFF', fontSize: 7, textAlign: 'center', letterSpacing: 0.5 },
+  
+  editBtn: { position: 'absolute', bottom: -5, right: -5, backgroundColor: '#4ADE80', width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#101416' },
+
+  heroName: { fontWeight: '800', color: '#FFFFFF', fontSize: 26, marginTop: spacing.md, marginBottom: 2 },
+  heroRole: { ...typography.captionBold, color: colors.textSecondary, fontSize: 9, letterSpacing: 1.5, marginBottom: 4 },
+  heroEmail: { ...typography.body, color: colors.textMuted, fontSize: 12 },
+
+  sectionBlock: { marginHorizontal: spacing.xl, marginBottom: spacing.xl },
+  sectionHeader: { ...typography.captionBold, color: '#FFFFFF', fontSize: 9, letterSpacing: 1.5, marginBottom: spacing.md },
+
+  cardBox: { backgroundColor: '#15191B', borderRadius: borderRadius.md, padding: spacing.lg },
+  toggleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderBottomWidth: 1, borderBottomColor: '#1E2528', paddingBottom: spacing.md, marginBottom: spacing.md },
+  iconBox: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', marginRight: spacing.md },
+  toggleTextCol: { flex: 1, paddingRight: spacing.md },
+  toggleTitle: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 12, marginBottom: 2 },
+  toggleSub: { ...typography.caption, color: colors.textMuted, fontSize: 10, lineHeight: 14 },
+
+  resourceCardFull: { backgroundColor: '#15191B', borderRadius: borderRadius.md, padding: spacing.xl, marginBottom: spacing.md },
+  resourceCardTitle: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 13, marginBottom: 4 },
+  resourceCardSub: { ...typography.caption, color: colors.textSecondary, fontSize: 11, lineHeight: 16 },
+
+  resourceGrid: { flexDirection: 'row', gap: spacing.md },
+  resourceCardHalf: { flex: 1, backgroundColor: '#15191B', borderRadius: borderRadius.md, padding: spacing.lg },
+
+  logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#211215', borderRadius: borderRadius.md, marginHorizontal: spacing.xl, paddingVertical: 16, marginTop: spacing.lg, marginBottom: spacing.xl },
+  logoutBtnText: { ...typography.bodyBold, color: '#FCA5A5', fontSize: 12 },
+
+  versionText: { ...typography.captionBold, color: colors.textMuted, textAlign: 'center', fontSize: 8, letterSpacing: 2 }
 });

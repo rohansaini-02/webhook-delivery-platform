@@ -75,7 +75,7 @@ export default function MainNavigator() {
         tabBarShowLabel: false,
         tabBarShowIcon: true,
         tabBarIndicatorStyle: { height: 0, backgroundColor: 'transparent' },
-        swipeEnabled: true,
+        swipeEnabled: false,
       }}
     >
       <Tab.Screen
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
   },
   tabIconContainer: { alignItems: 'center', justifyContent: 'center', flex: 1, gap: 4, height: 50 },
-  tabLabel: { fontSize: 10, letterSpacing: 0.5 },
+  tabLabel: { fontSize: 13, letterSpacing: 0.5 },
   centerTab: { alignItems: 'center', justifyContent: 'center', marginTop: -32 },
   centerTabInner: {
     width: 68, height: 68, borderRadius: 34,

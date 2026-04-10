@@ -71,6 +71,9 @@ services:
   # Message Broker
   rabbitmq:
     image: rabbitmq:3-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
     healthcheck:
       test: rabbitmq-diagnostics -q check_running && rabbitmq-diagnostics -q check_local_node_health
       interval: 10s

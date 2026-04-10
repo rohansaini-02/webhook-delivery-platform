@@ -6,20 +6,31 @@ import { enqueueDelivery } from '../config/rabbitmq';
 // POST /events  — Ingest a new event
 export const ingestEvent = async (req: Request, res: Response): Promise<void> => {
   const { type, payload }: IncomingEvent = req.body;
+  const adminId = req.admin?.id;
 
   if (!type || !payload) {
     res.status(400).json({ status: 'error', message: 'type and payload are required' });
     return;
   }
 
-  // Persist the event
-  const event = await prisma.event.create({ data: { type, payload: payload as any } });
+  // Persist the event tied to the admin
+  const event = await prisma.event.create({ 
+    data: { 
+      type, 
+      payload: payload as any,
+      adminId 
+    } 
+  });
 
-  // Find all active subscriptions that match this event type
+  // Find all active subscriptions that match this event type AND belong to this admin
   const subscriptions = await prisma.subscription.findMany({
     where: {
+      adminId,
       isActive: true,
-      events: { has: type },
+      OR: [
+        { events: { has: type } },
+        { events: { has: '*' } }
+      ]
     },
   });
 
@@ -31,6 +42,7 @@ export const ingestEvent = async (req: Request, res: Response): Promise<void> =>
           eventId: event.id,
           subscriptionId: sub.id,
           status: 'PENDING',
+          adminId // Tie delivery to admin
         },
       });
       // Enqueue to RabbitMQ
@@ -48,9 +60,10 @@ export const ingestEvent = async (req: Request, res: Response): Promise<void> =>
   });
 };
 
-// GET /events — List all events
+// GET /events — List all events for this admin
 export const getEvents = async (req: Request, res: Response): Promise<void> => {
   const events = await prisma.event.findMany({
+    where: { adminId: req.admin?.id },
     orderBy: { createdAt: 'desc' },
     take: 100,
   });
@@ -60,8 +73,8 @@ export const getEvents = async (req: Request, res: Response): Promise<void> => {
 // GET /events/:id — Get single event + its deliveries
 export const getEventById = async (req: Request, res: Response): Promise<void> => {
   const id: string = String(req.params.id);
-  const event = await prisma.event.findUnique({
-    where: { id },
+  const event = await prisma.event.findFirst({
+    where: { id, adminId: req.admin?.id },
     include: { deliveries: true },
   });
   if (!event) {
@@ -69,4 +82,19 @@ export const getEventById = async (req: Request, res: Response): Promise<void> =
     return;
   }
   res.json({ status: 'ok', data: event });
+};
+
+// GET /events/meta/types — Get unique event types for the admin
+export const getEventTypes = async (req: Request, res: Response): Promise<void> => {
+  const adminId = req.admin?.id;
+  
+  const types = await prisma.event.groupBy({
+    by: ['type'],
+    where: { adminId },
+    _count: { type: true },
+    orderBy: { type: 'asc' }
+  });
+
+  const uniqueTypes = types.map(t => t.type);
+  res.json({ status: 'ok', data: uniqueTypes });
 };

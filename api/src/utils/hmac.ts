@@ -26,6 +26,7 @@ export const verifySignature = (
   signature: string
 ): boolean => {
   const expected = signPayload(secret, payload);
+  if (expected.length !== signature.length) return false;
   return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
 };
 

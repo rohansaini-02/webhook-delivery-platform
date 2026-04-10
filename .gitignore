@@ -48,3 +48,19 @@ dist-ssr
 # OS specific files
 .DS_Store
 Thumbs.db
+
+# Project Specific
+*.ps1
+*.txt
+*.log
+api/logs/*
+admin-app/addBg.js
+admin-app/typescript_errors.log
+
+# Project Specific
+*.ps1
+*.txt
+*.log
+api/logs/*
+admin-app/addBg.js
+admin-app/typescript_errors.log

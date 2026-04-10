@@ -12,13 +12,27 @@ import subscriptionRoutes from './routes/subscription.routes';
 import eventRoutes from './routes/event.routes';
 import deliveryRoutes from './routes/delivery.routes';
 import metricsRoutes from './routes/metrics.routes';
+import authRoutes from './routes/auth.routes';
+import { setupSwagger } from './config/swagger';
 
 const app = express();
+setupSwagger(app as any);
 
 const limiter = rateLimit({
-  windowMs: 1 * 60 * 1000, 
-  max: 60, 
-  message: { status: 'error', message: 'Too many requests, please try again later.' }
+  windowMs: 1 * 60 * 1000, // 1 minute window
+  max: 100, // 100 requests per user per minute
+  keyGenerator: (req) => {
+    // Rate limit per API key (per-user) instead of globally
+    const authHeader = req.headers['authorization'];
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      return authHeader.split(' ')[1];
+    }
+    return req.ip || 'unknown';
+  },
+  message: { status: 'error', message: 'Rate limit exceeded. Please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: { xForwardedForHeader: false, keyGeneratorIpFallback: false, default: false },
 });
 
 // ─── Global Middleware ────────────────────────────────────────────────────────
@@ -30,13 +44,27 @@ app.use('/api/', limiter);
 
 // ─── Health Check (public — no auth required) ─────────────────────────────────
 app.get('/health', async (req: Request, res: Response) => {
+  const checks: Record<string, any> = {
+    database: false,
+    uptime: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString(),
+  };
+
   try {
     await prisma.$queryRaw`SELECT 1`;
-    res.status(200).json({ status: 'ok', service: 'webhook-delivery-api', database: 'connected' });
-  } catch {
-    res.status(503).json({ status: 'error', service: 'webhook-delivery-api', database: 'disconnected' });
-  }
+    checks.database = true;
+  } catch { /* database unreachable */ }
+
+  const healthy = checks.database;
+  res.status(healthy ? 200 : 503).json({
+    status: healthy ? 'ok' : 'degraded',
+    service: 'webhook-delivery-api',
+    checks,
+  });
 });
+
+// ─── Public routes
+app.use('/api/v1/auth', authRoutes);
 
 // ─── Protected Routes (require API key) ──────────────────────────────────────
 app.use('/api/v1/subscriptions', apiKeyAuth, subscriptionRoutes);

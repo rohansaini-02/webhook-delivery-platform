@@ -18,22 +18,27 @@ export const signPayload = (secret: string, payload: string): string => {
 };
 
 /**
- * Verifies an HMAC signature against a payload
+ * Verifies an HMAC signature against a payload using a timing-safe comparison
+ * to prevent timing attacks.
+ * 
+ * @param secret - The subscription's secret key used for signing
+ * @param payload - The raw stringified JSON body received
+ * @param signature - The signature to verify (usually from X-Hub-Signature header)
+ * @returns boolean indication of validity
  */
 export const verifySignature = (
   secret: string,
   payload: string,
   signature: string
 ): boolean => {
-  const expected = signPayload(secret, payload);
-  if (expected.length !== signature.length) return false;
-  return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
+  try {
+    const expected = signPayload(secret, payload);
+    const expectedBuffer = Buffer.from(expected);
+    const signatureBuffer = Buffer.from(signature);
+
+    if (expectedBuffer.length !== signatureBuffer.length) return false;
+    return crypto.timingSafeEqual(expectedBuffer, signatureBuffer);
+  } catch {
+    return false;
+  }
 };
-
-
-
-
-// This file:
-// generates secret
-// signs payload
-// verifies signature

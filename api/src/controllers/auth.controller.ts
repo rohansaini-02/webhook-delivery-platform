@@ -45,6 +45,10 @@ export const register = async (req: Request, res: Response): Promise<void> => {
   });
 };
 
+/**
+ * POST /auth/login
+ * Validates user credentials and returns a secure API Key for session management.
+ */
 export const login = async (req: Request, res: Response): Promise<void> => {
   const { username, password } = req.body;
   logger.info(`Login attempt for user: "${username}"`);

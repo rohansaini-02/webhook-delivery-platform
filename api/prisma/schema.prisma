@@ -17,9 +17,20 @@ model Subscription {
   events      String[]
   isActive    Boolean    @default(true)
   failCount   Int        @default(0)
+  environment Environment @default(PROD)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+  
+  adminId     String?
+  admin       Admin?     @relation(fields: [adminId], references: [id])
   deliveries  Delivery[]
+
+  @@index([adminId])
+}
+
+enum Environment {
+  PROD
+  STAGE
 }
 
 model Event {
@@ -27,7 +38,12 @@ model Event {
   type        String
   payload     Json
   createdAt   DateTime   @default(now())
+  
+  adminId     String?
+  admin       Admin?     @relation(fields: [adminId], references: [id])
   deliveries  Delivery[]
+
+  @@index([adminId])
 }
 
 model Delivery {
@@ -40,13 +56,18 @@ model Delivery {
   nextAttemptAt   DateTime?
   lastStatusCode  Int?
   lastError       String?
+  latencyMs       Int?
   isDlq           Boolean        @default(false)
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
 
   event        Event        @relation(fields: [eventId], references: [id])
   subscription Subscription @relation(fields: [subscriptionId], references: [id])
+  
+  adminId      String?
+  admin        Admin?       @relation(fields: [adminId], references: [id])
 
+  @@index([adminId])
   @@index([eventId])
   @@index([subscriptionId])
   @@index([status])
@@ -58,4 +79,24 @@ enum DeliveryStatus {
   FAILED
   RETRYING
   DLQ
+}
+
+model Admin {
+  id           String       @id @default(uuid())
+  email        String?      @unique
+  username     String       @unique
+  passwordHash String?
+  authProvider AuthProvider @default(LOCAL)
+  apiKey       String       @unique
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  subscriptions Subscription[]
+  deliveries    Delivery[]
+  events        Event[]
+}
+
+enum AuthProvider {
+  LOCAL
+  GOOGLE
 }

@@ -1,5 +1,6 @@
 import amqp from 'amqplib';
 import dotenv from 'dotenv';
+import logger from './logger';
 dotenv.config();
 
 const RABBITMQ_URL = process.env.RABBITMQ_URL || 'amqp://localhost';
@@ -11,11 +12,30 @@ let channel: any = null;
 export const connectRabbitMQ = async (): Promise<void> => {
   try {
     connection = await amqp.connect(RABBITMQ_URL);
+    
+    // Listen for connection errors to prevent process crash
+    connection.on('error', (err: any) => {
+      logger.error('RabbitMQ Connection Error:', err);
+      connection = null;
+    });
+
+    connection.on('close', () => {
+      logger.warn('RabbitMQ Connection Closed.');
+      connection = null;
+      channel = null;
+    });
+
     channel = await connection.createChannel();
+    
+    channel.on('error', (err: any) => {
+      logger.error('RabbitMQ Channel Error:', err);
+      channel = null;
+    });
+
     await channel.assertQueue(DELIVERY_QUEUE, { durable: true });
-    console.log('✅ Connected to RabbitMQ');
+    logger.info('Connected to RabbitMQ');
   } catch (error) {
-    console.error('❌ Failed to connect to RabbitMQ. Ensure it is running:', error);
+    logger.error('Failed to connect to RabbitMQ. Ensure it is running:', error);
     // Don't exit process in local dev if RabbitMQ is down right away, 
     // but log heavily. If this were prod, maybe process.exit(1);
   }
@@ -23,7 +43,7 @@ export const connectRabbitMQ = async (): Promise<void> => {
 
 export const enqueueDelivery = async (deliveryId: string): Promise<boolean> => {
   if (!channel) {
-    console.error('RabbitMQ channel not initialized. Cannot enqueue delivery:', deliveryId);
+    logger.error('RabbitMQ channel not initialized. Cannot enqueue delivery:', { deliveryId });
     return false;
   }
 
@@ -36,9 +56,9 @@ export const closeRabbitMQ = async (): Promise<void> => {
   try {
     if (channel) await channel.close();
     if (connection) await connection.close();
-    console.log('RabbitMQ connection closed.');
+    logger.info('RabbitMQ connection closed.');
   } catch (error) {
-    console.error('Error closing RabbitMQ connection:', error);
+    logger.error('Error closing RabbitMQ connection:', error);
   }
 };
 

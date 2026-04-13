@@ -12,15 +12,22 @@ const DELIVERY_QUEUE = 'webhook_deliveries';
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 /**
- * Exponential backoff with jitter for retry delays.
+ * Calculates the appropriate delay for a retry attempt using an exponential 
+ * backoff strategy with random jitter to prevent "thundering herd" issues.
+ * 
  * Formula: min(base * 2^attempt + jitter, maxDelay)
- * Produces: ~1s → ~2s → ~4s → ~8s → ~16s (capped at 5 min)
+ * 
+ * @param attempt - The current retry attempt number (0-indexed)
+ * @returns The delay in milliseconds
  */
 export const getBackoffDelay = (attempt: number): number => {
-  const base = 1000;        // 1 second
-  const maxDelay = 300000;  // 5 minutes cap
+  const base = 1000;        // Start with 1 second base
+  const maxDelay = 300000;  // Cap at 5 minutes to avoid excessively long delays
   const exponential = base * Math.pow(2, attempt);
-  const jitter = Math.random() * 1000; // 0-1s random jitter
+  
+  // Add a random jitter up to 1 second to distribute retry requests across time
+  const jitter = Math.random() * 1000; 
+  
   return Math.min(exponential + jitter, maxDelay);
 };
 

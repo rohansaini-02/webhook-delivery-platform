@@ -26,6 +26,18 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
+// Handle global response errors (e.g., auto-logout on 401)
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      // Clear local storage if token is invalid or expired
+      await AsyncStorage.removeItem('apiKey');
+    }
+    return Promise.reject(error);
+  }
+);
+
 // ─── Auth ────────────────────────────────────────────────────────────────────
 export const registerUser = (data: any) => api.post('/auth/register', data);
 export const loginSettings = (data: any) => api.post('/auth/login', data);

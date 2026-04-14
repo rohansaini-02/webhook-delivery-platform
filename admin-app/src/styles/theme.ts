@@ -2,7 +2,7 @@
 
 export const colors = {
   // Backgrounds
-  bg: 'transparent',
+  bg: '#0A0E11',
   bgElevated: '#131A16',
   bgCard: 'rgba(19, 26, 22, 0.85)',
   bgCardHover: 'rgba(19, 26, 22, 0.95)',

@@ -23,6 +23,7 @@ export type WebhooksStackParamList = {
   SubscriptionsList: undefined;
   SubscriptionDetails: { subscriptionId: string };
   CreateSubscription: undefined;
+  EventDetails: { deliveryId: string };
 };
 
 export type LogsStackParamList = {

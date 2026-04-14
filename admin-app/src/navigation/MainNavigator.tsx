@@ -18,6 +18,17 @@ import DLQScreen from '../screens/DLQScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import SecurityScreen from '../screens/SecurityScreen';
 
+// ─── Dashboard Stack ─────────────────────────────────────────────────────────
+const DashboardStack = createNativeStackNavigator<any>();
+function DashboardNavigator() {
+  return (
+    <DashboardStack.Navigator screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
+      <DashboardStack.Screen name="DashboardMain" component={DashboardScreen} />
+      <DashboardStack.Screen name="EventDetails" component={EventDetailsScreen} />
+    </DashboardStack.Navigator>
+  );
+}
+
 // ─── Webhooks Stack ──────────────────────────────────────────────────────────
 const WebhooksStack = createNativeStackNavigator<WebhooksStackParamList>();
 function WebhooksNavigator() {
@@ -26,6 +37,7 @@ function WebhooksNavigator() {
       <WebhooksStack.Screen name="SubscriptionsList" component={SubscriptionsListScreen} />
       <WebhooksStack.Screen name="SubscriptionDetails" component={SubscriptionDetailsScreen} />
       <WebhooksStack.Screen name="CreateSubscription" component={CreateSubscriptionScreen} />
+      <WebhooksStack.Screen name="EventDetails" component={EventDetailsScreen} />
     </WebhooksStack.Navigator>
   );
 }
@@ -38,6 +50,17 @@ function LogsNavigator() {
       <LogsStack.Screen name="DeliveryLogs" component={DeliveryLogsScreen} />
       <LogsStack.Screen name="EventDetails" component={EventDetailsScreen} />
     </LogsStack.Navigator>
+  );
+}
+
+// ─── DLQ Stack ──────────────────────────────────────────────────────────────
+const DLQStack = createNativeStackNavigator<any>();
+function DLQNavigator() {
+  return (
+    <DLQStack.Navigator screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
+      <DLQStack.Screen name="DLQMain" component={DLQScreen} />
+      <DLQStack.Screen name="EventDetails" component={EventDetailsScreen} />
+    </DLQStack.Navigator>
   );
 }
 
@@ -60,7 +83,7 @@ function TabIcon({ label, icon: Icon, focused, isDlq = false }: { label: string;
   return (
     <View style={styles.tabIconContainer}>
       <Icon size={24} color={focused ? activeColor : colors.textSecondary} />
-      <Text style={[styles.tabLabel, { color: focused ? activeColor : colors.textSecondary, fontWeight: focused ? '700' : '500' }]}>{label}</Text>
+      <Text numberOfLines={1} adjustsFontSizeToFit style={[styles.tabLabel, { color: focused ? activeColor : colors.textSecondary, fontWeight: focused ? '700' : '500' }]}>{label}</Text>
     </View>
   );
 }
@@ -75,26 +98,28 @@ export default function MainNavigator() {
         tabBarShowLabel: false,
         tabBarShowIcon: true,
         tabBarIndicatorStyle: { height: 0, backgroundColor: 'transparent' },
-        swipeEnabled: false,
+        swipeEnabled: true,
+        animationEnabled: true,
+        tabBarPressColor: 'rgba(255,255,255,0.05)',
       }}
     >
       <Tab.Screen
         name="Webhooks"
         component={WebhooksNavigator}
         options={{
-          tabBarIcon: ({ focused }) => <TabIcon label="SUBS" icon={Radio} focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon label="Subscriptions" icon={Radio} focused={focused} />,
         }}
       />
       <Tab.Screen
         name="Logs"
         component={LogsNavigator}
         options={{
-          tabBarIcon: ({ focused }) => <TabIcon label="LOGS" icon={ClipboardList} focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon label="Logs" icon={ClipboardList} focused={focused} />,
         }}
       />
       <Tab.Screen
         name="DashboardTab"
-        component={DashboardScreen}
+        component={DashboardNavigator}
         options={{
           tabBarIcon: ({ focused }) => (
             <View style={styles.centerTab}>
@@ -104,14 +129,14 @@ export default function MainNavigator() {
               >
                 <LayoutDashboard size={28} color={focused ? colors.textInverse : colors.primary} />
               </LinearGradient>
-              <Text style={[styles.tabLabel, { color: focused ? colors.primary : colors.textSecondary, fontWeight: focused ? '700' : '500', marginTop: 8 }]}>HOME</Text>
+              <Text numberOfLines={1} adjustsFontSizeToFit style={[styles.tabLabel, { color: focused ? colors.primary : colors.textSecondary, fontWeight: focused ? '700' : '500', marginTop: 8 }]}>Dashboard</Text>
             </View>
           ),
         }}
       />
       <Tab.Screen
         name="DLQ"
-        component={DLQScreen}
+        component={DLQNavigator}
         options={{
           tabBarIcon: ({ focused }) => <TabIcon label="DLQ" icon={AlertTriangle} focused={focused} isDlq={true} />,
         }}
@@ -120,7 +145,7 @@ export default function MainNavigator() {
         name="Settings"
         component={SettingsNavigator}
         options={{
-          tabBarIcon: ({ focused }) => <TabIcon label="SET" icon={Settings} focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon label="Settings" icon={Settings} focused={focused} />,
         }}
       />
     </Tab.Navigator>
@@ -132,19 +157,21 @@ const styles = StyleSheet.create({
     backgroundColor: colors.tabBar,
     borderTopWidth: 1,
     borderTopColor: colors.tabBarBorder,
-    height: 85,
-    paddingTop: 10,
-    elevation: 20,
+    height: 95,
+    paddingTop: 8,
+    paddingBottom: 25,
+    elevation: 25,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
+    shadowOpacity: 0.5,
+    shadowRadius: 15,
+    overflow: 'visible',
   },
-  tabIconContainer: { alignItems: 'center', justifyContent: 'center', flex: 1, gap: 4, height: 50 },
-  tabLabel: { fontSize: 13, letterSpacing: 0.5 },
-  centerTab: { alignItems: 'center', justifyContent: 'center', marginTop: -32 },
+  tabIconContainer: { alignItems: 'center', justifyContent: 'center', flex: 1, gap: 4, height: 50, paddingHorizontal: 2 },
+  tabLabel: { fontSize: 10, letterSpacing: 0, textAlign: 'center' },
+  centerTab: { alignItems: 'center', justifyContent: 'center', marginTop: -20, overflow: 'visible', zIndex: 50 },
   centerTabInner: {
-    width: 68, height: 68, borderRadius: 34,
+    width: 64, height: 64, borderRadius: 32,
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
     ...shadows.soft,

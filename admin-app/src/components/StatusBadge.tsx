@@ -18,6 +18,10 @@ const statusConfig: Record<StatusType, { label: string; color: string; bgColor: 
   DISABLED: { label: 'Disabled', color: colors.textMuted, bgColor: colors.bgInput },
 };
 
+/**
+ * Reusable StatusBadge component for the Admin Dashboard.
+ * Supports multiple delivery and subscription states with consistent coloring.
+ */
 export default function StatusBadge({ status, size = 'md' }: StatusBadgeProps) {
   const config = statusConfig[status] || statusConfig.PENDING;
   const isSmall = size === 'sm';

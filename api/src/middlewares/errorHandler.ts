@@ -22,6 +22,15 @@ export const errorHandler = (
     return;
   }
 
+  // Handle Prisma Record Not Found Error (P2025)
+  if ((err as any).code === 'P2025') {
+    res.status(404).json({
+      status: 'error',
+      message: 'The requested resource was not found.',
+    });
+    return;
+  }
+
   res.status(500).json({
     status: 'error',
     message: process.env.NODE_ENV === 'production' ? 'Internal Server Error' : err.message,

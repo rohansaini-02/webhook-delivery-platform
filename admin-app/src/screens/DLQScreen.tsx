@@ -1,20 +1,118 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView,
-  ActivityIndicator, TextInput, Platform
+  ActivityIndicator, TextInput, Platform, Alert
 } from 'react-native';
 import { User, Search, AlertTriangle, RotateCcw, Trash2, Eye, GitBranch, Clock, ChevronRight, ChevronLeft, ChevronUp } from 'lucide-react-native';
 import { colors, spacing, borderRadius, typography } from '../styles/theme';
-import { fetchDeliveries } from '../services/api';
+import { fetchDlqDeliveries, purgeDlq, replayAllDlq, replayDlqItem, fetchEventTypes } from '../services/api';
+import UserAvatar from '../components/UserAvatar';
+import FilterPicker from '../components/FilterPicker';
 
-export default function DLQScreen() {
+export default function DLQScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true);
-  const [expandedId, setExpandedId] = useState<string | null>('id-order-shipment');
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [filterText, setFilterText] = useState('');
+  const [dlqItems, setDlqItems] = useState<any[]>([]);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [activeEventFilter, setActiveEventFilter] = useState('All');
+  const [eventTypes, setEventTypes] = useState<string[]>([]);
+
+  const loadDlq = async (cursor?: string) => {
+    try {
+      if (cursor) {
+        setLoadingMore(true);
+      } else {
+        setLoading(true);
+      }
+
+      const res = await fetchDlqDeliveries(cursor);
+      const { data, pagination } = res.data;
+
+      if (cursor) {
+        setDlqItems(prev => [...prev, ...data]);
+      } else {
+        setDlqItems(data);
+      }
+
+      setNextCursor(pagination?.nextCursor || null);
+      setHasMore(pagination?.hasMore || false);
+    } catch (e) {
+      console.error(e);
+      Alert.alert('Error', 'Failed to load DLQ deliveries');
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  };
+
+  const loadTypes = async () => {
+    try {
+      const res = await fetchEventTypes();
+      const types = res.data.data || [];
+      if (!types.includes('test.dlq')) types.push('test.dlq');
+      setEventTypes(types);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   useEffect(() => {
-    // mock delay
-    setTimeout(() => setLoading(false), 300);
+    loadDlq();
+    loadTypes();
   }, []);
+
+  const handleReplayAll = () => {
+    Alert.alert(
+      'Replay All Messages',
+      `This will re-queue all ${dlqItems.length} failed messages for reprocessing. Continue?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Replay All', style: 'destructive', onPress: async () => {
+            await replayAllDlq();
+            Alert.alert('Queued', 'All messages have been added to the replay queue.');
+            loadDlq();
+          }
+        },
+      ]
+    );
+  };
+
+  const handlePurge = () => {
+    Alert.alert(
+      'Purge Queue',
+      `This will permanently delete all ${dlqItems.length} failed messages. Continue?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Purge All', style: 'destructive', onPress: async () => {
+            await purgeDlq();
+            Alert.alert('Purged', 'All DLQ messages have been permanently deleted.');
+            loadDlq();
+          }
+        },
+      ]
+    );
+  };
+
+  const handleReplayItem = (id: string) => {
+    Alert.alert('Replay', `Replay message ${id}?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Replay', style: 'default', onPress: async () => {
+          await replayDlqItem(id);
+          Alert.alert('Queued', 'Message added to the replay queue.');
+          loadDlq();
+        }
+      },
+    ]);
+  };
+
+  const handleViewItem = (id: string) => {
+    navigation.navigate('EventDetails', { deliveryId: id });
+  };
 
   if (loading) {
     return (
@@ -24,84 +122,58 @@ export default function DLQScreen() {
     );
   }
 
-  const payloadMock = `{
-  "order_id": "ORD-5521",
-  "customer": "Sarah Jenkins",
-  "address": {
-    "street": "1248 Oak Lane",
-    "city": "Mountain View",
-    "zip": "ABC-123",
-    "country": "US"
-  },
-  "metadata": {
-    "retry_count": 5,
-    "last_attempt": "2023-10-24T13:58:04Z",
-    "dead_reason": "VAL_ERR_ZIP"
-  }
-}`;
-
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.headerRow}>
-        <View style={styles.headerLeft}>
-          <View style={styles.avatar}>
-             <User size={16} color="#F87171" />
-          </View>
-          <Text style={styles.headerTitleText}>The Orchestrator</Text>
-          <Text style={styles.slashText}> / DLQ</Text>
-        </View>
-        <TouchableOpacity style={styles.searchBtn}>
-          <Search size={20} color={colors.textSecondary} />
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        
-        {/* Dead Letter Queue Alert Container */}
-        <View style={styles.alertContainer}>
-          <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: 6}}>
-            <AlertTriangle size={12} color="#F87171" style={{marginRight: 6}} />
-            <Text style={styles.alertLabelText}>DEAD LETTER QUEUE ALERT</Text>
-          </View>
-          
-          <Text style={styles.hugeAlertNumber}>1,284</Text>
-          <Text style={styles.alertDescText}>
-            Total permanently failed messages requiring manual resolution. These events have exceeded all retry attempts.
-          </Text>
-          
-          <View style={styles.alertActionsRow}>
-            <TouchableOpacity style={styles.replayAllBtn}>
-              <RotateCcw size={14} color="#FFFFFF" style={{marginRight: 6}} />
-              <Text style={styles.replayAllBtnText}>Replay All</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.purgeBtn}>
-              <Text style={styles.purgeBtnText}>Purge Queue</Text>
-            </TouchableOpacity>
+      {/* Sticky Header Section */}
+      <View style={styles.stickyHeader}>
+        <View style={styles.headerRow}>
+          <View style={styles.headerLeft}>
+            <UserAvatar size={30} />
+            <Text style={styles.headerTitleText}>DLQ</Text>
+            <Text style={styles.slashText}> / Failures</Text>
           </View>
         </View>
 
-        {/* Filter Bar */}
         <View style={styles.searchWrap}>
-          <GitBranch size={14} color={colors.textSecondary} style={styles.searchIcon} />
-          <TextInput 
-            placeholder="Filter by Message ID, Payload, or Status..."
+          <Search size={14} color={colors.textSecondary} style={styles.searchIcon} />
+          <TextInput
+            placeholder="Search by ID or Status..."
             placeholderTextColor={colors.textMuted}
             style={styles.searchInput}
+            value={filterText}
+            onChangeText={setFilterText}
           />
         </View>
 
-        {/* Chip Filters Row */}
-        <View style={styles.chipRow}>
-          <TouchableOpacity style={styles.chipBtn}>
-            <GitBranch size={12} color={colors.textSecondary} style={{marginRight: 6}} />
-            <Text style={styles.chipText}>Topic: All</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.chipBtn}>
-            <Clock size={12} color={colors.textSecondary} style={{marginRight: 6}} />
-            <Text style={styles.chipText}>All Time</Text>
-          </TouchableOpacity>
+        <View style={styles.filterControlsRow}>
+          <FilterPicker 
+            label="Type"
+            value={activeEventFilter}
+            options={['All', ...eventTypes]}
+            onSelect={setActiveEventFilter}
+          />
+        </View>
+      </View>
+
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        {/* Dead Letter Queue Alert Container */}
+        <View style={styles.alertContainer}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+            <AlertTriangle size={12} color="#F87171" style={{ marginRight: 6 }} />
+            <Text style={styles.alertLabelText}>DEAD LETTER QUEUE ALERT</Text>
+          </View>
+
+          <Text style={styles.hugeAlertNumber}>{dlqItems.length}</Text>
+          <Text style={styles.alertDescText}>
+            Total permanently failed messages requiring manual resolution. These events have exceeded all retry attempts.
+          </Text>
+
+          <View style={styles.alertActionsRow}>
+            <TouchableOpacity style={styles.replayAllBtn} onPress={handleReplayAll}>
+              <RotateCcw size={14} color="#FFFFFF" style={{ marginRight: 6 }} />
+              <Text style={styles.replayAllBtnText}>Replay All</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Table Headers */}
@@ -110,100 +182,72 @@ export default function DLQScreen() {
           <Text style={[styles.headerLabel, styles.headerRightLabel]}>ERROR REASON</Text>
         </View>
 
-        {/* Item 1 */}
-        <View style={styles.dlqCard}>
-          <View style={[styles.leftAccent, { backgroundColor: '#F59E0B' }]} />
-          <View style={styles.cardHeaderArea}>
-            <View style={styles.colLeft}>
-              <Text style={[styles.identifierText, { color: '#F59E0B' }]}>payment.auth.v</Text>
-              <View style={styles.idPill}>
-                 <Text style={styles.idPillText}>9F82X_??_PRD</Text>
-              </View>
-            </View>
-            <View style={styles.colRight}>
-              <Text style={styles.reasonTitle}>504: Gateway Timeout</Text>
-              <Text style={styles.reasonSub}>Upstream service "ledger-api"...</Text>
-            </View>
-          </View>
-          <View style={styles.cardActionsArea}>
-             <TouchableOpacity style={styles.iconBtn}><RotateCcw size={14} color={colors.textSecondary} /></TouchableOpacity>
-             <TouchableOpacity style={styles.iconBtn}><Eye size={14} color={colors.textSecondary} /></TouchableOpacity>
-             <TouchableOpacity style={styles.iconBtn}><Trash2 size={14} color={colors.textSecondary} /></TouchableOpacity>
-          </View>
-        </View>
+        {dlqItems.length === 0 && (
+          <Text style={{ color: colors.textMuted, textAlign: 'center', marginTop: 40 }}>No DLQ items found.</Text>
+        )}
 
-        {/* Item 2 (Expanded) */}
-        <View style={[styles.dlqCard, { borderColor: '#F87171' }]}>
-          <View style={[styles.leftAccent, { backgroundColor: '#F59E0B' }]} />
-          
-          <View style={styles.cardHeaderArea}>
-            <View style={styles.colLeft}>
-              <Text style={[styles.identifierText, { color: '#F59E0B' }]}>order.shipment</Text>
-              <View style={styles.idPill}>
-                 <Text style={styles.idPillText}>3K11P_08.SYS</Text>
+        {dlqItems
+          .filter(item => {
+            if (activeEventFilter !== 'All' && item.event.type !== activeEventFilter) return false;
+            if (!filterText) return true;
+            const q = filterText.toLowerCase();
+            return item.id.toLowerCase().includes(q) || item.subscription.url.toLowerCase().includes(q);
+          })
+          .map((item) => {
+            return (
+              <TouchableOpacity
+                key={item.id}
+                style={styles.dlqCard}
+                onPress={() => handleViewItem(item.id)}
+              >
+              <View style={[styles.leftAccent, { backgroundColor: '#F59E0B' }]} />
+              <View style={styles.cardHeaderArea}>
+                <View style={styles.colLeft}>
+                  <Text style={[styles.identifierText, { color: '#F59E0B' }]}>{item.event.type}</Text>
+                  <View style={styles.idPill}>
+                    <Text style={styles.idPillText}>{item.id.substring(0, 8).toUpperCase()}</Text>
+                  </View>
+                </View>
+                <View style={styles.colRight}>
+                  <Text style={styles.reasonTitle}>{item.lastStatusCode || 'Failed'}: {item.lastError || 'Unknown Error'}</Text>
+                  <Text style={styles.reasonSub}>Target: {item.subscription.url}</Text>
+                </View>
               </View>
-            </View>
-            <View style={styles.colRight}>
-              <Text style={styles.reasonTitle}>422: Unprocessable Entity</Text>
-              <Text style={styles.reasonSub}>Validation Error: Zip code 'ABC-123' is invalid for region 'US-CAL'.</Text>
-            </View>
-          </View>
 
-          <View style={styles.chevronRow}>
-            <TouchableOpacity style={styles.chevronBtn} onPress={() => setExpandedId(null)}>
-               <ChevronUp size={14} color="#F87171" />
+              <View style={styles.cardActionsArea}>
+                <TouchableOpacity style={styles.iconBtn} onPress={() => handleReplayItem(item.id)}><RotateCcw size={14} color={colors.textSecondary} /></TouchableOpacity>
+                <TouchableOpacity style={styles.iconBtn} onPress={() => handleViewItem(item.id)}><Eye size={14} color={colors.textSecondary} /></TouchableOpacity>
+                <TouchableOpacity style={styles.iconBtn} onPress={() => Alert.alert('Delete', 'Delete feature mock')}><Trash2 size={14} color={colors.textSecondary} /></TouchableOpacity>
+              </View>
             </TouchableOpacity>
-          </View>
-
-          {/* Expanded Payload Section */}
-          <View style={styles.payloadSection}>
-            <Text style={styles.payloadTitle}>PAYLOAD CONTENT</Text>
-            <View style={styles.payloadCodeBox}>
-               <Text style={styles.payloadCodeText}>{payloadMock}</Text>
-            </View>
-            <View style={styles.payloadActionRow}>
-               <TouchableOpacity style={styles.editPayloadBtn}>
-                 <Text style={styles.editPayloadBtnText}>Edit Payload</Text>
-               </TouchableOpacity>
-               <TouchableOpacity style={styles.replayNowBtn}>
-                 <Text style={styles.replayNowBtnText}>Replay Now</Text>
-               </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-
-        {/* Item 3 */}
-        <View style={styles.dlqCard}>
-          <View style={[styles.leftAccent, { backgroundColor: '#F59E0B' }]} />
-          <View style={styles.cardHeaderArea}>
-            <View style={styles.colLeft}>
-              <Text style={[styles.identifierText, { color: '#F59E0B' }]}>webhook.stripe</Text>
-              <View style={styles.idPill}>
-                 <Text style={styles.idPillText}>0X221_FF_SIG</Text>
-              </View>
-            </View>
-            <View style={styles.colRight}>
-              <Text style={styles.reasonTitle}>401: Unauthorized</Text>
-              <Text style={styles.reasonSub}>Signature verification failed. Key rotation required.</Text>
-            </View>
-          </View>
-          <View style={styles.cardActionsArea}>
-             <TouchableOpacity style={styles.iconBtn}><RotateCcw size={14} color={colors.textSecondary} /></TouchableOpacity>
-             <TouchableOpacity style={styles.iconBtn}><Eye size={14} color={colors.textSecondary} /></TouchableOpacity>
-             <TouchableOpacity style={styles.iconBtn}><Trash2 size={14} color={colors.textSecondary} /></TouchableOpacity>
-          </View>
-        </View>
+          );
+        })}
 
         {/* Pagination Footer */}
-        <View style={styles.paginationFooter}>
-          <Text style={styles.paginationText}>Showing 1-13 of 1,284 failures</Text>
-          <View style={styles.pagesRow}>
-            <TouchableOpacity style={styles.pageBtn}><ChevronLeft size={14} color={colors.textSecondary} /></TouchableOpacity>
-            <TouchableOpacity style={styles.pageBtnActive}><Text style={styles.pageTextActive}>1</Text></TouchableOpacity>
-            <TouchableOpacity style={styles.pageBtn}><Text style={styles.pageText}>2</Text></TouchableOpacity>
-            <TouchableOpacity style={styles.pageBtn}><Text style={styles.pageText}>3</Text></TouchableOpacity>
-            <TouchableOpacity style={styles.pageBtn}><ChevronRight size={14} color={colors.textSecondary} /></TouchableOpacity>
+        {hasMore && (
+          <View style={styles.paginationFooter}>
+            <TouchableOpacity
+              style={[styles.replayAllBtn, { backgroundColor: '#22272A', width: '100%', justifyContent: 'center' }, loadingMore && { opacity: 0.7 }]}
+              onPress={() => loadDlq(nextCursor!)}
+              disabled={loadingMore}
+            >
+              {loadingMore ? (
+                <ActivityIndicator color={colors.textSecondary} />
+              ) : (
+                <Text style={[styles.replayAllBtnText, { color: colors.textSecondary }]}>Load more failures</Text>
+              )}
+            </TouchableOpacity>
           </View>
+        )}
+
+        {/* Danger Zone: Purge Queue */}
+        <View style={styles.dangerZone}>
+          <Text style={styles.dangerTitle}>Danger Zone</Text>
+          <Text style={styles.dangerDesc}>Permanently delete all Dead Letter Queue messages. This action cannot be undone.</Text>
+          <TouchableOpacity style={styles.purgeBtnLine} onPress={handlePurge}>
+            <Trash2 size={14} color="#F87171" style={{ marginRight: 8 }} />
+            <Text style={styles.purgeBtnTextLine}>Purge Entire Queue</Text>
+          </TouchableOpacity>
         </View>
 
 
@@ -213,7 +257,7 @@ export default function DLQScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0F1316' },
+  container: { flex: 1, backgroundColor: colors.bg },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   scroll: { paddingBottom: 120 },
 
@@ -222,30 +266,43 @@ const styles = StyleSheet.create({
   avatar: { width: 30, height: 30, borderRadius: 15, backgroundColor: 'rgba(255, 167, 38, 0.1)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#F59E0B' },
   headerTitleText: { ...typography.bodyBold, color: '#F87171', fontSize: 16 },
   slashText: { ...typography.body, color: colors.textSecondary, fontSize: 16 },
-  searchBtn: { padding: 4 },
+  
+  stickyHeader: { 
+    backgroundColor: colors.bg, 
+    borderBottomWidth: 1, 
+    borderColor: colors.border,
+    paddingBottom: spacing.sm,
+    zIndex: 10
+  },
 
   alertContainer: { marginHorizontal: spacing.xl, marginBottom: spacing.lg, padding: spacing.xl, borderRadius: borderRadius.md, backgroundColor: '#141718', borderWidth: 1, borderColor: 'rgba(248, 113, 113, 0.2)' },
   alertLabelText: { ...typography.captionBold, color: '#F87171', fontSize: 13, letterSpacing: 1 },
   hugeAlertNumber: { fontWeight: '800', fontSize: 38, color: '#FFFFFF', letterSpacing: -1, marginBottom: 4 },
   alertDescText: { ...typography.body, color: colors.textSecondary, fontSize: 15, lineHeight: 18, paddingRight: 20, marginBottom: spacing.xl },
-  
+
   alertActionsRow: { flexDirection: 'row', gap: spacing.md },
   replayAllBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F87171', borderRadius: borderRadius.pill, paddingHorizontal: 16, paddingVertical: 10 },
   replayAllBtnText: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 15 },
-  purgeBtn: { justifyContent: 'center', alignItems: 'center', backgroundColor: '#333A36', borderRadius: borderRadius.pill, paddingHorizontal: 16, paddingVertical: 10 },
-  purgeBtnText: { ...typography.bodyBold, color: '#F87171', fontSize: 15 },
 
-  searchWrap: { 
+  dangerZone: { marginHorizontal: spacing.xl, marginTop: spacing.xl, padding: spacing.lg, borderRadius: borderRadius.md, borderWidth: 1, borderColor: '#331515', backgroundColor: '#1A0E0E' },
+  dangerTitle: { ...typography.bodyBold, color: '#F87171', fontSize: 15, marginBottom: 4 },
+  dangerDesc: { ...typography.caption, color: colors.textSecondary, marginBottom: spacing.md },
+  purgeBtnLine: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: '#331515', borderRadius: borderRadius.pill, paddingHorizontal: 16, paddingVertical: 12, borderWidth: 1, borderColor: '#5C1C1C' },
+  purgeBtnTextLine: { ...typography.bodyBold, color: '#FCA5A5', fontSize: 15 },
+
+  searchWrap: {
     flexDirection: 'row', alignItems: 'center', marginHorizontal: spacing.xl, marginBottom: spacing.md,
     paddingHorizontal: spacing.lg, paddingVertical: 12, borderRadius: borderRadius.md,
-    backgroundColor: '#161B19', borderWidth: 1, borderColor: 'rgba(255,255,255,0.03)' 
+    backgroundColor: '#161B19', borderWidth: 1, borderColor: colors.border
   },
   searchIcon: { marginRight: spacing.sm },
   searchInput: { flex: 1, ...typography.body, color: '#FFFFFF', padding: 0 },
 
-  chipRow: { flexDirection: 'row', marginHorizontal: spacing.xl, marginBottom: spacing.xl, gap: spacing.sm },
-  chipBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#22272A', paddingHorizontal: 12, paddingVertical: 8, borderRadius: borderRadius.pill },
-  chipText: { ...typography.caption, color: colors.textSecondary, fontSize: 14 },
+  filterControlsRow: { 
+    flexDirection: 'row', 
+    marginHorizontal: spacing.xl, 
+    marginBottom: spacing.xs 
+  },
 
   tableHeaders: { flexDirection: 'row', marginHorizontal: spacing.xl, marginBottom: spacing.sm },
   headerLabel: { ...typography.captionBold, color: colors.textMuted, fontSize: 13, letterSpacing: 1 },
@@ -254,7 +311,7 @@ const styles = StyleSheet.create({
 
   dlqCard: { backgroundColor: '#141718', borderRadius: borderRadius.md, marginHorizontal: spacing.xl, marginBottom: spacing.md, borderWidth: 1, borderColor: 'transparent', overflow: 'hidden' },
   leftAccent: { position: 'absolute', left: 0, top: spacing.md, bottom: spacing.md, width: 3, borderTopRightRadius: 2, borderBottomRightRadius: 2 },
-  
+
   cardHeaderArea: { flexDirection: 'row', padding: spacing.lg, paddingLeft: 24, paddingBottom: spacing.sm },
   colLeft: { flex: 1.2, alignItems: 'flex-start', paddingRight: spacing.sm },
   identifierText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', fontSize: 14, marginBottom: spacing.sm, fontWeight: '700' },
@@ -290,5 +347,5 @@ const styles = StyleSheet.create({
   pageText: { ...typography.caption, color: colors.textSecondary },
   pageTextActive: { ...typography.captionBold, color: '#FFFFFF' }
 });
- 
- 
+
+

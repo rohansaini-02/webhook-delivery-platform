@@ -61,4 +61,7 @@ describe('Deliveries API Integration Tests', () => {
       expect(response.body.checks.database).toBe(true);
     });
   });
+  });
 });
+
+// Final test coverage for Delivery pipeline

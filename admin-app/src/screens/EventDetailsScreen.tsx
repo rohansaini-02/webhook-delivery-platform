@@ -160,14 +160,14 @@ export default function EventDetailsScreen({ route, navigation }: any) {
           <View style={styles.payloadHeader}>
             <View style={{flexDirection: 'row', alignItems: 'center', gap: 6}}>
                <UploadCloud size={14} color={colors.textSecondary} />
-               <Text style={[styles.cardHeaderLabel, { marginBottom: 0 }]}>REQUEST PAYLOAD</Text>
+               <Text style={[styles.cardHeaderLabel, { marginBottom: 0 }]}>REQUEST PAYLOAD (TAP TO COPY)</Text>
             </View>
             <Text style={styles.payloadSizeText}>2.4 KB</Text>
           </View>
-          <View style={styles.payloadBox}>
+          <TouchableOpacity activeOpacity={0.7} onPress={() => copyToClipboard(reqPayload)} style={styles.payloadBox}>
             <View style={[styles.leftAccent, { backgroundColor: '#F472B6' }]} />
             <Text style={styles.payloadCodeText}>{reqPayload}</Text>
-          </View>
+          </TouchableOpacity>
         </View>
 
         {/* RESPONSE BODY Block */}
@@ -175,13 +175,13 @@ export default function EventDetailsScreen({ route, navigation }: any) {
           <View style={styles.payloadHeader}>
             <View style={{flexDirection: 'row', alignItems: 'center', gap: 6}}>
                <DownloadCloud size={14} color={colors.textSecondary} />
-               <Text style={[styles.cardHeaderLabel, { marginBottom: 0 }]}>EXECUTION CONTEXT</Text>
+               <Text style={[styles.cardHeaderLabel, { marginBottom: 0 }]}>EXECUTION CONTEXT (TAP TO COPY)</Text>
             </View>
           </View>
-          <View style={styles.payloadBox}>
+          <TouchableOpacity activeOpacity={0.7} onPress={() => copyToClipboard(resPayload)} style={styles.payloadBox}>
             <View style={[styles.leftAccent, { backgroundColor: isFailed ? '#F87171' : '#4ADE80' }]} />
             <Text style={[styles.payloadCodeText, { color: isFailed ? '#F87171' : '#4ADE80' }]}>{resPayload}</Text>
-          </View>
+          </TouchableOpacity>
         </View>
 
         {/* METRICS / PERFORMANCE Block */}

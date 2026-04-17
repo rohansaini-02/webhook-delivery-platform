@@ -2,7 +2,11 @@ import { Request, Response } from 'express';
 import prisma from '../config/db';
 import { generateSecret } from '../utils/hmac';
 
-// GET /subscriptions — List subscriptions with cursor pagination
+/**
+ * GET /subscriptions
+ * Retrieves a paginated list of webhook subscriptions for the authenticated admin.
+ * Uses cursor-based pagination for high performance with large datasets.
+ */
 export const getSubscriptions = async (req: Request, res: Response): Promise<void> => {
   const { cursor, limit: rawLimit } = req.query;
   const limit = Math.min(parseInt(rawLimit as string) || 20, 100);

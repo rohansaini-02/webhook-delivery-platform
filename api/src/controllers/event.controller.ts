@@ -3,7 +3,11 @@ import prisma from '../config/db';
 import { IncomingEvent } from '../types/index';
 import { enqueueDelivery } from '../config/rabbitmq';
 
-// POST /events  — Ingest a new event
+/**
+ * POST /events
+ * Ingests a new event from an external source, persists it, and schedules 
+ * deliveries for all matching active subscriptions (Fan-out pattern).
+ */
 export const ingestEvent = async (req: Request, res: Response): Promise<void> => {
   const { type, payload }: IncomingEvent = req.body;
   const adminId = req.admin?.id;

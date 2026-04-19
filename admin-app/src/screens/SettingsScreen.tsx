@@ -106,9 +106,6 @@ export default function SettingsScreen({ navigation }: any) {
           <View style={styles.avatarGlow}>
             <View style={styles.avatarMain}>
               <UserAvatar size={100} />
-              <View style={styles.adminBadge}>
-                <Text style={styles.adminBadgeText}>ADMIN PROFILE</Text>
-              </View>
             </View>
           </View>
           

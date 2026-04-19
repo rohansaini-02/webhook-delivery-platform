@@ -276,26 +276,26 @@ const styles = StyleSheet.create({
   },
   
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
-  eventType: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 16, marginBottom: 2 },
-  eventId: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textMuted, fontSize: 11, letterSpacing: 1 },
+  eventType: { ...typography.bodyBold, color: '#FFFFFF', marginBottom: 2 },
+  eventId: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textMuted, fontSize: 13, letterSpacing: 1 },
   
   timeSection: { alignItems: 'flex-end' },
-  timeText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textPrimary, fontSize: 13, fontWeight: '600' },
-  dateText: { ...typography.small, color: colors.textMuted, fontSize: 11, marginTop: 2 },
+  timeText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textPrimary, fontSize: 15, fontWeight: '600' },
+  dateText: { ...typography.small, color: colors.textMuted, marginTop: 2 },
 
-  cardBotRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: spacing.sm },
-  statusPill: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 4 },
-  statusDot: { width: 6, height: 6, borderRadius: 3, marginRight: 6 },
-  statusPillText: { ...typography.small, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase', fontSize: 11 },
-  statusCodeText: { ...typography.small, fontWeight: '700', fontSize: 13, marginLeft: -4 },
-  retriesText: { ...typography.small, color: colors.textMuted, fontSize: 12, fontWeight: '500' },
+  cardBotRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: spacing.md },
+  statusPill: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 6 },
+  statusDot: { width: 6, height: 6, borderRadius: 3, marginRight: 8 },
+  statusPillText: { ...typography.captionBold, letterSpacing: 0.5, textTransform: 'uppercase' },
+  statusCodeText: { ...typography.captionBold, marginLeft: 2 },
+  retriesText: { ...typography.small, color: colors.textMuted, fontWeight: '500' },
 
   loadMoreBtn: { 
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm,
     paddingVertical: 14, borderRadius: borderRadius.pill, backgroundColor: '#181C1A', 
     marginTop: spacing.md, borderWidth: 1, borderColor: colors.border
   },
-  loadMoreText: { ...typography.small, fontWeight: '700', color: colors.textSecondary }
+  loadMoreText: { ...typography.captionBold, color: colors.textSecondary }
 });
  
  

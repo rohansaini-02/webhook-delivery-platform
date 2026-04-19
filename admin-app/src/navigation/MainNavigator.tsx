@@ -99,7 +99,7 @@ export default function MainNavigator() {
         tabBarShowIcon: true,
         tabBarIndicatorStyle: { height: 0, backgroundColor: 'transparent' },
         swipeEnabled: true,
-        animationEnabled: true,
+        animationEnabled: false,
         tabBarPressColor: 'rgba(255,255,255,0.05)',
       }}
     >

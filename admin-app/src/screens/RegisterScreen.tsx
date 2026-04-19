@@ -70,9 +70,17 @@ export default function RegisterScreen({ navigation }: any) {
     }
   };
 
+  const isValidPassword = (pass: string) => {
+    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(pass);
+  };
+
   const handleRegister = async () => {
     if (!username || !email || !password) {
       Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+    if (!isValidPassword(password)) {
+      Alert.alert('Error', 'Password does not meet security requirements.');
       return;
     }
     setLoading(true);
@@ -153,7 +161,7 @@ export default function RegisterScreen({ navigation }: any) {
 
           {/* Password */}
           <Text style={styles.label}>Password*</Text>
-          <GlassCard intensity={8} style={styles.inputWrapper}>
+          <GlassCard intensity={8} style={[styles.inputWrapper, { marginBottom: 0 }]}>
             <TextInput
               style={[styles.input, { flex: 1 }]}
               placeholder="Create a strong password"
@@ -166,6 +174,14 @@ export default function RegisterScreen({ navigation }: any) {
               {showPass ? <EyeOff size={18} color={colors.textSecondary} /> : <Eye size={18} color={colors.textSecondary} />}
             </TouchableOpacity>
           </GlassCard>
+
+          {password.length > 0 && !isValidPassword(password) ? (
+            <Text style={styles.warningText}>
+              Password must be at least 8 characters and include uppercase, lowercase, number, and special character.
+            </Text>
+          ) : (
+            <View style={{ height: spacing.sm }} />
+          )}
 
           {/* Register Button */}
           <TouchableOpacity onPress={handleRegister} disabled={loading} activeOpacity={0.85}>
@@ -226,6 +242,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center',
     borderRadius: borderRadius.md, paddingHorizontal: spacing.lg,
     marginBottom: spacing.sm,
+  },
+  warningText: {
+    ...typography.small, color: colors.error, 
+    marginTop: 4, marginBottom: spacing.md, 
+    marginLeft: 4, fontStyle: 'italic',
   },
   input: { flex: 1, ...typography.body, color: colors.textPrimary, paddingVertical: 14 },
   eyeBtn: { padding: spacing.sm },

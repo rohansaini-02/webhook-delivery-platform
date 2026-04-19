@@ -1,65 +1,51 @@
 # 🚀 Webhook Delivery Platform
 
-A robust, enterprise-ready platform for ingesting, managing, and delivering webhooks with high reliability and observability.
+A professional-grade, resilient webhook ingestion and delivery system built with Node.js, RabbitMQ, and PostgreSQL. Features a real-time Admin Monitoring App built with Expo.
 
-## 🏗 Architecture Overview
-The platform uses a decoupled producer-consumer architecture to ensure reliability even under high load:
-1.  **Ingestion API**: Receives incoming events and secures them with HMAC signatures.
-2.  **Message Queue (RabbitMQ)**: Stores events reliably to prevent data loss.
-3.  **Dispatcher Worker**: Consumes events, performs deliveries with exponential backoff retries, and handles failures.
-4.  **Admin UI**: A professional mobile dashboard for monitoring deliveries, managing Dead Letter Queues (DLQ), and configuring subscriptions.
+## 🌟 Key Features
+*   **Reliable Delivery**: Decoupled ingestion using RabbitMQ for high throughput.
+*   **Exponential Backoff**: Automated retry logic with configurable jitter.
+*   **Dead Letter Queue (DLQ)**: Failed deliveries are captured for manual replay.
+*   **HMAC Security**: All webhooks are signed with SHA-256 for consumer verification.
+*   **Neon Dashboard**: Interactive mobile app for monitoring event flows and system health.
 
-## 🛠 Tech Stack
-*   **Backend**: Node.js, Express, TypeScript
-*   **Database**: PostgreSQL (Prisma ORM)
-*   **Messaging**: RabbitMQ (CloudAMQP)
-*   **Admin App**: React Native (Expo), TypeScript
-*   **Styling**: Glassmorphic Neon Design System (Vanilla CSS/React Native Styles)
+## 🏗 System Architecture
+The platform follows a classic **Ingestion → Queue → Dispatcher** flow:
+1. **API (Express)**: Ingests events and validates HMAC signatures.
+2. **RabbitMQ**: Acts as a reliable buffer and retry manager.
+3. **Worker (Node)**: Consumes messages and dispatches to subscriber endpoints.
+4. **Database (Prisma/Postgres)**: Persists all history and delivery states.
 
-## 🚦 Getting Started
+## 🛠 Setup & Installation
 
-### 1. Prerequisites
-*   Node.js (v18+)
-*   Docker (Optional, for RabbitMQ)
-*   PostgreSQL (or a Neon.tech account)
-
-### 2. Backend Setup (`/api`)
+### Backend (API)
 ```bash
 cd api
+cp .env.example .env  # Fill in your Database and RabbitMQ URLs
 npm install
-
-# Copy .env.example to .env and fill in:
-# DATABASE_URL, RABBITMQ_URL, API_KEY
-cp .env.example .env
-
-# Run migrations
 npx prisma migrate dev
-
-# Start development server
 npm run dev
 ```
 
-### 3. Admin App Setup (`/admin-app`)
+### Admin App (Mobile)
 ```bash
 cd admin-app
+cp .env.example .env
 npm install
-
-# Build & Start Expo
 npx expo start
 ```
 
-## ✨ Key Features
-*   **Dynamic Event Filtering**: Auto-discovers event types for precise log searching.
-*   **Reliable Retries**: Custom exponential backoff strategy for failed endpoints.
-*   **DLQ Management**: Integrated replay logic and manual failure investigation.
-*   **Security**: HMAC-SHA256 signature verification for all dispatched payloads.
-*   **Observability**: Real-time delivery logs and system metrics.
+## 📚 Documentation
+Detailed guides are available in the [Project_Documentation](./Project_Documentation) folder:
+*   [System Architecture](./Project_Documentation/02_Architecture.md)
+*   [API Endpoint Overview](./Project_Documentation/03_API_Overview.md)
+*   [Secure Ingestion & HMAC](./Project_Documentation/06_Ingestion_Security.md)
+*   [Setup & Deployment Guide](./Project_Documentation/04_Setup_Guide.md)
+*   [Troubleshooting Guide](./Project_Documentation/05_Troubleshooting.md)
 
-## 📁 Folder Structure
-*   `api/src/controllers`: Business logic for auth, events, and deliveries.
-*   `api/src/workers`: RabbitMQ consumer and delivery logic.
-*   `admin-app/src/screens`: Dashboard, DLQ, and Subscription management.
-*   `admin-app/src/components`: Reusable UI elements (FilterPicker, Badges).
+## 🔍 Common Issues
+*   **Database Timeouts**: Ensure your connection string includes `connect_timeout=60`.
+*   **Network Errors**: Mobile apps must be on the same Wi-Fi as the API server. See the [Troubleshooting Guide](./Project_Documentation/05_Troubleshooting.md) for firewall and tunnel setup.
 
----
-*Developed for professional webhook management and reliability testing.*
+## 🤝 Contribution
+This project was developed as a resilient, production-ready solution for webhook management. For major changes, please open an issue first to discuss what you would like to change.

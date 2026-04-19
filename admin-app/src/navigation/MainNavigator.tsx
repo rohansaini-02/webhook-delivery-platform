@@ -127,7 +127,7 @@ export default function MainNavigator() {
                 colors={focused ? [colors.primary, colors.primarySoft] : [colors.bgCard, colors.bgElevated]}
                 style={[styles.centerTabInner, focused && styles.centerTabInnerActive]}
               >
-                <LayoutDashboard size={28} color={focused ? colors.textInverse : colors.primary} />
+                <LayoutDashboard size={34} color={focused ? colors.textInverse : colors.primary} />
               </LinearGradient>
               <Text numberOfLines={1} adjustsFontSizeToFit style={[styles.tabLabel, { color: focused ? colors.primary : colors.textSecondary, fontWeight: focused ? '700' : '500', marginTop: 8 }]}>Dashboard</Text>
             </View>

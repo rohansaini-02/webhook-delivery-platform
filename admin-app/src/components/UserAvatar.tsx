@@ -11,24 +11,7 @@ interface Props {
 
 export default function UserAvatar({ style, size = 30 }: Props) {
   const { userEmail } = useAuth();
-
-  const getInitials = (email: string | null) => {
-    if (!email) return '';
-    const namePart = email.split('@')[0];
-    const parts = namePart.split(/[._-]/);
-    
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
-    }
-    
-    return namePart.substring(0, 2).toUpperCase();
-  };
-
-  const initials = getInitials(userEmail);
   const radius = size / 2;
-  const avatarUrl = userEmail 
-    ? `https://ui-avatars.com/api/?name=${encodeURIComponent(userEmail)}&background=101416&color=4ADE80&bold=true&size=128`
-    : null;
 
   return (
     <View style={[
@@ -36,16 +19,9 @@ export default function UserAvatar({ style, size = 30 }: Props) {
       { width: size, height: size, borderRadius: radius },
       style
     ]}>
-      {avatarUrl ? (
-        <Image 
-          source={{ uri: avatarUrl }} 
-          style={{ width: size, height: size, borderRadius: radius }} 
-        />
-      ) : (
-        <View style={styles.fallback}>
-          <User size={size * 0.6} color={colors.primary} />
-        </View>
-      )}
+      <View style={styles.fallback}>
+        <User size={size * 0.6} color={colors.primary} />
+      </View>
     </View>
   );
 }

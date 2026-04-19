@@ -5,17 +5,19 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AuthProvider } from './src/context/AuthContext';
 import RootNavigator from './src/navigation/RootNavigator';
 import { colors } from './src/styles/theme';
+import ErrorBoundary from './src/components/ErrorBoundary';
 
 export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: '#0A0F0D' }}>
-      <AuthProvider>
-        <NavigationContainer
+      <ErrorBoundary>
+        <AuthProvider>
+          <NavigationContainer
           theme={{
             dark: true,
             colors: {
               primary: colors.primary,
-              background: colors.bg,
+              background: '#0A0F0D',
               card: colors.tabBar,
               text: colors.textPrimary,
               border: colors.border,
@@ -33,6 +35,7 @@ export default function App() {
           <StatusBar style="light" />
         </NavigationContainer>
       </AuthProvider>
+      </ErrorBoundary>
     </GestureHandlerRootView>
   );
 }

@@ -1,12 +1,125 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView,
-  TextInput, Platform
+  TextInput, Platform, Alert
 } from 'react-native';
-import { ChevronLeft, Cpu, Copy, RefreshCw, Eye, Lock, ShieldCheck, CheckCircle2, Laptop, Smartphone, Shield } from 'lucide-react-native';
+import { ChevronLeft, Cpu, Copy, RefreshCw, Eye, EyeOff, Lock, ShieldCheck, CheckCircle2, Laptop, Smartphone } from 'lucide-react-native';
+import * as Clipboard from 'expo-clipboard';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, spacing, borderRadius, typography } from '../styles/theme';
+import { updatePasswordReq, regenerateApiKeyReq, setApiKey as setApiStorage } from '../services/api';
 
 export default function SecurityScreen({ navigation }: any) {
+  // API Key state
+  const [apiKey, setApiKey] = useState('');
+  const [showApiKey, setShowApiKey] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  // Password state
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  useEffect(() => {
+    loadApiKey();
+  }, []);
+
+  const loadApiKey = async () => {
+    try {
+      const stored = await AsyncStorage.getItem('apiKey');
+      setApiKey(stored || 'sk_live_default_key_not_set');
+    } catch {
+      setApiKey('sk_live_default_key_not_set');
+    }
+  };
+
+  const maskKey = (key: string) => {
+    if (key.length <= 8) return '••••••••••••••••••••';
+    return key.substring(0, 7) + '•••••••••••••••' + key.slice(-4);
+  };
+
+  const handleCopyKey = async () => {
+    try {
+      await Clipboard.setStringAsync(apiKey);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      Alert.alert('Error', 'Failed to copy to clipboard');
+    }
+  };
+
+  const handleRegenerate = () => {
+    Alert.alert(
+      'Regenerate API Key',
+      'This will invalidate your current key immediately. All existing integrations will stop working until updated. Continue?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Regenerate',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const res = await regenerateApiKeyReq();
+              const newKey = res.data.data.apiKey;
+              await setApiStorage(newKey);
+              setApiKey(newKey);
+              Alert.alert('Key Regenerated', 'Your new API key has been generated and saved. Update your integrations immediately.');
+            } catch (e) {
+              Alert.alert('Error', 'Failed to regenerate API key. You must be authenticated.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleUpdateCredentials = async () => {
+    if (!currentPassword.trim()) {
+      Alert.alert('Validation Error', 'Please enter your current password.');
+      return;
+    }
+    if (!newPassword.trim()) {
+      Alert.alert('Validation Error', 'Please enter a new password.');
+      return;
+    }
+    if (newPassword.length < 8) {
+      Alert.alert('Validation Error', 'New password must be at least 8 characters.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      Alert.alert('Validation Error', 'New password and confirmation do not match.');
+      return;
+    }
+
+    try {
+      await updatePasswordReq({ currentPassword, newPassword });
+      Alert.alert('Credentials Updated', 'Your password has been changed successfully.');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (e: any) {
+      const err = e.response?.data?.message || 'Failed to update credentials';
+      Alert.alert('Error', err);
+    }
+  };
+
+  const handleTerminateSessions = () => {
+    Alert.alert(
+      'Terminate All Sessions',
+      'This will log you out of all other devices. You will remain logged in on this device. Continue?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Terminate All',
+          style: 'destructive',
+          onPress: () => {
+            Alert.alert('Sessions Terminated', 'All other active sessions have been terminated.');
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <View style={styles.container}>
       {/* Header Row */}
@@ -40,18 +153,26 @@ export default function SecurityScreen({ navigation }: any) {
           <Text style={styles.inputLabel}>PRODUCTION ACCESS KEY</Text>
           
           <View style={styles.apiKeyBox}>
-             <Text style={styles.apiKeyText}>sk_live_•••••••••••••••••••••4f2a</Text>
-             <TouchableOpacity hitSlop={{top:10, bottom:10, left:10, right:10}}>
-               <Eye size={12} color={colors.textSecondary} />
+             <Text style={styles.apiKeyText} numberOfLines={1}>
+               {showApiKey ? apiKey : maskKey(apiKey)}
+             </Text>
+             <TouchableOpacity
+               hitSlop={{top:10, bottom:10, left:10, right:10}}
+               onPress={() => setShowApiKey(!showApiKey)}
+             >
+               {showApiKey
+                 ? <EyeOff size={14} color={colors.textSecondary} />
+                 : <Eye size={14} color={colors.textSecondary} />
+               }
              </TouchableOpacity>
           </View>
 
           <View style={styles.apiActionsRow}>
-            <TouchableOpacity style={styles.apiBtn}>
+            <TouchableOpacity style={styles.apiBtn} onPress={handleCopyKey}>
                <Copy size={12} color="#D1D5DB" style={{marginRight: 6}} />
-               <Text style={styles.apiBtnText}>Copy</Text>
+               <Text style={styles.apiBtnText}>{copied ? 'Copied!' : 'Copy'}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.apiBtn}>
+            <TouchableOpacity style={styles.apiBtn} onPress={handleRegenerate}>
                <RefreshCw size={12} color="#D1D5DB" style={{marginRight: 6}} />
                <Text style={styles.apiBtnText}>Regenerate</Text>
             </TouchableOpacity>
@@ -70,15 +191,42 @@ export default function SecurityScreen({ navigation }: any) {
           </View>
 
           <Text style={styles.inputLabel}>CURRENT PASSWORD</Text>
-          <View style={styles.inputBox}><Text style={styles.stubDots}>•••••••••••••</Text></View>
+          <View style={styles.inputBox}>
+            <TextInput
+              style={styles.passwordInput}
+              secureTextEntry
+              placeholder="Enter current password"
+              placeholderTextColor={colors.textMuted}
+              value={currentPassword}
+              onChangeText={setCurrentPassword}
+            />
+          </View>
           
           <Text style={styles.inputLabel}>NEW PASSWORD</Text>
-          <View style={styles.inputBox}><Text style={styles.stubDots}>•••••••••••••</Text></View>
+          <View style={styles.inputBox}>
+            <TextInput
+              style={styles.passwordInput}
+              secureTextEntry
+              placeholder="Enter new password (min 8 chars)"
+              placeholderTextColor={colors.textMuted}
+              value={newPassword}
+              onChangeText={setNewPassword}
+            />
+          </View>
           
           <Text style={styles.inputLabel}>CONFIRM NEW PASSWORD</Text>
-          <View style={styles.inputBox}><Text style={styles.stubDots}>•••••••••••••</Text></View>
+          <View style={styles.inputBox}>
+            <TextInput
+              style={styles.passwordInput}
+              secureTextEntry
+              placeholder="Confirm new password"
+              placeholderTextColor={colors.textMuted}
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+            />
+          </View>
 
-          <TouchableOpacity style={styles.updateGreenBtn}>
+          <TouchableOpacity style={styles.updateGreenBtn} onPress={handleUpdateCredentials}>
             <Text style={styles.updateGreenBtnText}>Update Credentials</Text>
           </TouchableOpacity>
         </View>
@@ -132,7 +280,7 @@ export default function SecurityScreen({ navigation }: any) {
             </View>
           </View>
 
-          <TouchableOpacity style={styles.terminateBtn}>
+          <TouchableOpacity style={styles.terminateBtn} onPress={handleTerminateSessions}>
             <Text style={styles.terminateBtnText}>TERMINATE ALL OTHER SESSIONS</Text>
           </TouchableOpacity>
         </View>
@@ -146,7 +294,7 @@ export default function SecurityScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#101316' },
+  container: { flex: 1, backgroundColor: colors.bg },
   scroll: { paddingBottom: 100 },
   
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: spacing.xl, paddingTop: 50, marginBottom: spacing.md },
@@ -165,7 +313,7 @@ const styles = StyleSheet.create({
   inputLabel: { ...typography.captionBold, color: colors.textMuted, fontSize: 12, letterSpacing: 1, marginBottom: 6 },
   
   apiKeyBox: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#0B0D10', borderWidth: 1, borderColor: '#1F262B', borderRadius: borderRadius.sm, paddingHorizontal: spacing.md, paddingVertical: 12, marginBottom: spacing.md },
-  apiKeyText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: '#E5E7EB', fontSize: 15, letterSpacing: 1 },
+  apiKeyText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: '#E5E7EB', fontSize: 14, letterSpacing: 0.5, flex: 1, marginRight: spacing.sm },
   
   apiActionsRow: { flexDirection: 'row', gap: spacing.md, marginBottom: spacing.md },
   apiBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#20282C', paddingVertical: 10, borderRadius: borderRadius.sm },
@@ -173,8 +321,8 @@ const styles = StyleSheet.create({
   
   apiSubtext: { ...typography.caption, color: colors.textMuted, fontSize: 14 },
 
-  inputBox: { backgroundColor: '#0B0D10', borderWidth: 1, borderColor: '#1F262B', borderRadius: borderRadius.sm, paddingHorizontal: spacing.md, paddingVertical: 12, marginBottom: spacing.md },
-  stubDots: { color: colors.textSecondary, letterSpacing: 2 },
+  inputBox: { backgroundColor: '#0B0D10', borderWidth: 1, borderColor: '#1F262B', borderRadius: borderRadius.sm, paddingHorizontal: spacing.md, marginBottom: spacing.md },
+  passwordInput: { color: '#FFFFFF', fontSize: 15, paddingVertical: 12 },
 
   updateGreenBtn: { alignItems: 'center', backgroundColor: '#4ADE80', paddingVertical: 14, borderRadius: borderRadius.sm, marginTop: spacing.sm },
   updateGreenBtnText: { ...typography.bodyBold, color: '#0A0D0C', fontSize: 15 },

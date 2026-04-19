@@ -1,29 +1,102 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView,
-  Switch, Platform
+  Switch, Platform, Alert, Linking
 } from 'react-native';
-import { Search, Bell, RotateCcw, Moon, BookOpen, Headset, Shield, LogOut, Edit2 } from 'lucide-react-native';
+import { User, Bell, RotateCcw, BookOpen, Headset, Shield, LogOut } from 'lucide-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, spacing, borderRadius, typography } from '../styles/theme';
+import { useAuth } from '../context/AuthContext';
+import UserAvatar from '../components/UserAvatar';
 
 export default function SettingsScreen({ navigation }: any) {
-  const [notifications, setNotifications] = React.useState(true);
-  const [autoRetry, setAutoRetry] = React.useState(false);
-  const [darkMode, setDarkMode] = React.useState(true);
+  const { logout, userEmail } = useAuth();
+  const [notifications, setNotifications] = useState(true);
+  const [autoRetry, setAutoRetry] = useState(false);
+
+  // Load saved preferences on mount
+  useEffect(() => {
+    loadPreferences();
+  }, []);
+
+  const loadPreferences = async () => {
+    try {
+      const notifPref = await AsyncStorage.getItem('pref_notifications');
+      const retryPref = await AsyncStorage.getItem('pref_autoRetry');
+      if (notifPref !== null) setNotifications(notifPref === 'true');
+      if (retryPref !== null) setAutoRetry(retryPref === 'true');
+    } catch {}
+  };
+
+  const handleNotificationToggle = async (value: boolean) => {
+    try {
+      setNotifications(value);
+      await AsyncStorage.setItem('pref_notifications', String(value));
+      if (value) {
+        Alert.alert('Notifications Enabled', 'You will receive alerts for delivery failures.');
+      }
+    } catch (error) {
+       Alert.alert('Error', 'Failed to update notification settings.');
+    }
+  };
+
+  const handleAutoRetryToggle = async (value: boolean) => {
+    try {
+      setAutoRetry(value);
+      await AsyncStorage.setItem('pref_autoRetry', String(value));
+      if (value) {
+        Alert.alert('Auto-Retry Enabled', 'System will automatically attempt to restart failing gateway nodes.');
+      }
+    } catch {
+       Alert.alert('Error', 'Failed to save preference.');
+    }
+  };
+
+  const handleDocumentation = () => {
+    Linking.openURL('https://docs.webhookplatform.io').catch(() => {
+      Alert.alert('Documentation', 'API references, CLI guides, and architecture schemas are available at docs.webhookplatform.io');
+    });
+  };
+
+  const handleSupport = () => {
+    Alert.alert('Contact Support', 'Reach our infrastructure specialists at support@orchestrator.io or open a ticket in the dashboard.');
+  };
+
+  const handlePrivacy = () => {
+    Linking.openURL('https://webhookplatform.io/privacy').catch(() => {
+      Alert.alert('Privacy Policy', 'Our data handling and security protocols are available at webhookplatform.io/privacy');
+    });
+  };
+
+  const handleLogout = () => {
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to log out of the Webhook Platform?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await logout();
+            } catch {
+              Alert.alert('Error', 'Failed to log out. Please try again.');
+            }
+          },
+        },
+      ]
+    );
+  };
 
   return (
     <View style={styles.container}>
       {/* Search Header */}
       <View style={styles.headerRow}>
         <View style={styles.headerLeft}>
-          <View style={styles.headerAvatar}>
-             <Search size={16} color="#FFFFFF" strokeWidth={2.5}/>
-          </View>
-          <Text style={styles.headerTitleText}>The Orchestrator</Text>
+          <UserAvatar size={30} />
+          <Text style={styles.headerTitleText}>Settings</Text>
         </View>
-        <TouchableOpacity style={styles.searchBtn}>
-          <Search size={20} color={colors.textSecondary} />
-        </TouchableOpacity>
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
@@ -32,20 +105,16 @@ export default function SettingsScreen({ navigation }: any) {
         <View style={styles.profileHero}>
           <View style={styles.avatarGlow}>
             <View style={styles.avatarMain}>
-              {/* Replace with an actual Image tag if asset exists, using colored block for now */}
-              <View style={styles.avatarMockup} />
+              <UserAvatar size={100} />
               <View style={styles.adminBadge}>
                 <Text style={styles.adminBadgeText}>ADMIN PROFILE</Text>
               </View>
-              <TouchableOpacity style={styles.editBtn}>
-                <Edit2 size={12} color="#000000" />
-              </TouchableOpacity>
             </View>
           </View>
           
-          <Text style={styles.heroName}>Alex Rivera</Text>
-          <Text style={styles.heroRole}>LEAD INFRASTRUCTURE ENGINEER</Text>
-          <Text style={styles.heroEmail}>alex.rivera@orchestrator.io</Text>
+          <Text style={styles.heroName}>{userEmail?.split('@')[0] || 'Administrator'}</Text>
+          <Text style={styles.heroRole}>ENGINEERING LEAD</Text>
+          <Text style={styles.heroEmail}>{userEmail}</Text>
         </View>
 
         {/* ACCOUNT & SECURITY */}
@@ -80,10 +149,12 @@ export default function SettingsScreen({ navigation }: any) {
                 <Text style={styles.toggleTitle}>Notifications</Text>
                 <Text style={styles.toggleSub}>Real-time alerts for node failures</Text>
               </View>
-              <Switch value={notifications} onValueChange={setNotifications} trackColor={{ false: '#333A36', true: '#4ADE80' }} thumbColor="#FFFFFF" />
+              <View onStartShouldSetResponder={() => true} onResponderTerminationRequest={() => false}>
+                <Switch value={notifications} onValueChange={handleNotificationToggle} trackColor={{ false: '#333A36', true: '#4ADE80' }} thumbColor="#FFFFFF" />
+              </View>
             </View>
 
-            <View style={styles.toggleRow}>
+            <View style={[styles.toggleRow, { borderBottomWidth: 0, paddingBottom: 0 }]}>
               <View style={[styles.iconBox, { backgroundColor: '#1D2421' }]}>
                 <RotateCcw size={16} color="#D1D5DB" />
               </View>
@@ -91,18 +162,9 @@ export default function SettingsScreen({ navigation }: any) {
                 <Text style={styles.toggleTitle}>Auto-retry</Text>
                 <Text style={styles.toggleSub}>Automatically restart failed instances</Text>
               </View>
-              <Switch value={autoRetry} onValueChange={setAutoRetry} trackColor={{ false: '#333A36', true: '#4ADE80' }} thumbColor="#A0ADC0" />
-            </View>
-
-            <View style={[styles.toggleRow, { borderBottomWidth: 0, paddingBottom: 0 }]}>
-              <View style={[styles.iconBox, { backgroundColor: '#1D2421' }]}>
-                <Moon size={16} color="#D1D5DB" />
+              <View onStartShouldSetResponder={() => true} onResponderTerminationRequest={() => false}>
+                <Switch value={autoRetry} onValueChange={handleAutoRetryToggle} trackColor={{ false: '#333A36', true: '#4ADE80' }} thumbColor="#A0ADC0" />
               </View>
-              <View style={styles.toggleTextCol}>
-                <Text style={styles.toggleTitle}>Dark Mode</Text>
-                <Text style={styles.toggleSub}>Persistent obsidian interface</Text>
-              </View>
-              <Switch value={darkMode} onValueChange={setDarkMode} trackColor={{ false: '#333A36', true: '#4ADE80' }} thumbColor="#FFFFFF" />
             </View>
           </View>
         </View>
@@ -111,22 +173,20 @@ export default function SettingsScreen({ navigation }: any) {
         <View style={styles.sectionBlock}>
           <Text style={styles.sectionHeader}>RESOURCES & SUPPORT</Text>
 
-          {/* Doc Card Single */}
-          <TouchableOpacity style={styles.resourceCardFull}>
+          <TouchableOpacity style={styles.resourceCardFull} onPress={handleDocumentation}>
             <BookOpen size={18} color="#4ADE80" style={{marginBottom: spacing.sm}} />
             <Text style={styles.resourceCardTitle}>Documentation</Text>
             <Text style={styles.resourceCardSub}>API references, CLI guides, and architecture schemas.</Text>
           </TouchableOpacity>
 
-          {/* Grid Cards Two */}
           <View style={styles.resourceGrid}>
-            <TouchableOpacity style={styles.resourceCardHalf}>
+            <TouchableOpacity style={styles.resourceCardHalf} onPress={handleSupport}>
               <Headset size={16} color="#A78BFA" style={{marginBottom: spacing.sm}} />
               <Text style={styles.resourceCardTitle}>Support</Text>
               <Text style={styles.resourceCardSub}>Direct line to infrastructure specialists.</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.resourceCardHalf}>
+            <TouchableOpacity style={styles.resourceCardHalf} onPress={handlePrivacy}>
               <Shield size={16} color="#D1D5DB" style={{marginBottom: spacing.sm}} />
               <Text style={styles.resourceCardTitle}>Privacy Policy</Text>
               <Text style={styles.resourceCardSub}>Data handling and security protocols.</Text>
@@ -135,9 +195,9 @@ export default function SettingsScreen({ navigation }: any) {
         </View>
 
         {/* LOGOUT */}
-        <TouchableOpacity style={styles.logoutBtn}>
+        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
           <LogOut size={16} color="#FCA5A5" style={{marginRight: spacing.sm}} />
-          <Text style={styles.logoutBtnText}>Logout from Orchestrator</Text>
+          <Text style={styles.logoutBtnText}>Logout from platform</Text>
         </TouchableOpacity>
 
         {/* Build Version */}
@@ -149,7 +209,7 @@ export default function SettingsScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#101416' },
+  container: { flex: 1, backgroundColor: colors.bg },
   scroll: { paddingBottom: 100 },
   
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: spacing.xl, paddingTop: 50, marginBottom: spacing.lg },
@@ -165,8 +225,6 @@ const styles = StyleSheet.create({
   
   adminBadge: { position: 'absolute', bottom: 6, left: '15%', right: '15%', backgroundColor: 'rgba(0,0,0,0.6)', paddingVertical: 2, borderRadius: 2 },
   adminBadgeText: { ...typography.captionBold, color: '#FFFFFF', fontSize: 11, textAlign: 'center', letterSpacing: 0.5 },
-  
-  editBtn: { position: 'absolute', bottom: -5, right: -5, backgroundColor: '#4ADE80', width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#101416' },
 
   heroName: { fontWeight: '800', color: '#FFFFFF', fontSize: 28, marginTop: spacing.md, marginBottom: 2 },
   heroRole: { ...typography.captionBold, color: colors.textSecondary, fontSize: 13, letterSpacing: 1.5, marginBottom: 4 },

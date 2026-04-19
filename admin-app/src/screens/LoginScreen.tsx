@@ -8,27 +8,96 @@ import { LinearGradient } from 'expo-linear-gradient';
 import GlassCard from '../components/GlassCard';
 import { colors, spacing, borderRadius, typography } from '../styles/theme';
 import { useAuth } from '../context/AuthContext';
+import { googleAuth } from '../services/api';
+import * as AuthSession from 'expo-auth-session';
+import * as Google from 'expo-auth-session/providers/google';
+import * as WebBrowser from 'expo-web-browser';
+
+WebBrowser.maybeCompleteAuthSession();
+
+const EXPO_CLIENT_ID = process.env.EXPO_PUBLIC_EXPO_CLIENT_ID;
 
 export default function LoginScreen({ navigation }: any) {
   const { login } = useAuth();
-  const [email, setEmail] = useState('');
-  const [apiKey, setApiKey] = useState('');
-  const [showKey, setShowKey] = useState(false);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Use the Expo Proxy for physical devices
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    clientId: EXPO_CLIENT_ID,
+    redirectUri: AuthSession.makeRedirectUri({
+      scheme: 'webhook-admin',
+      path: 'auth/callback'
+    }),
+  });
+
+  // Handle Auth Response
+  React.useEffect(() => {
+    if (response?.type === 'success') {
+      const { code } = response.params;
+      if (code) {
+        // Google Auth Successful
+        handleGoogleCode(code);
+      }
+    } else if (response?.type === 'error') {
+      console.error('[Auth] Google response error:', response);
+      setError('Google Login failed. Please try again.');
+    }
+  }, [response]);
+
+  const handleGoogleCode = async (code: string) => {
+    setLoading(true);
+    try {
+      const redirectUri = AuthSession.makeRedirectUri({
+        scheme: 'webhook-admin',
+        path: 'auth/callback'
+      });
+      
+      console.log('[Auth] Sending code to backend for verification...');
+      // We send the code AND the matching redirectUri so the backend can verify
+      const res = await googleAuth({ code, redirectUri });
+      const { apiKey, username: returnedUsername } = res.data.data;
+      
+      // Successful login handled by navigation
+      await login(returnedUsername, apiKey);
+    } catch (e: any) {
+      console.error('[Auth] Backend exchange failed:', e.response?.data || e.message);
+      setError(e.response?.data?.message || 'Failed to verify Google account with server.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleLogin = async () => {
-    if (!email.trim() || !apiKey.trim()) {
-      setError('Please enter both email and API key');
+    if (!username.trim() || !password.trim()) {
+      setError('Please enter both username and password');
       return;
     }
     setLoading(true);
     setError('');
     try {
-      await login(email.trim(), apiKey.trim());
+      const { loginSettings } = require('../services/api');
+      const res = await loginSettings({ username: username.trim(), password: password.trim() });
+      const { apiKey, username: returnedUsername } = res.data.data;
+      await login(returnedUsername, apiKey);
     } catch (e: any) {
-      setError('Invalid credentials. Please try again.');
+      setError(e.response?.data?.message || 'Invalid credentials. Please try again.');
     } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      await promptAsync();
+    } catch (e: any) {
+      console.error('Google Auth Error:', e);
+      setError('Google Auth Failed. Please try again.');
       setLoading(false);
     }
   };
@@ -61,37 +130,36 @@ export default function LoginScreen({ navigation }: any) {
             Sign in to monitor your webhook delivery engine
           </Text>
 
-          {/* Email input */}
-          <Text style={styles.label}>Email address*</Text>
+          {/* Username input */}
+          <Text style={styles.label}>Username*</Text>
           <GlassCard intensity={8} style={styles.inputWrapper}>
             <TextInput
               style={styles.input}
-              placeholder="admin@example.com"
+              placeholder="admin"
               placeholderTextColor={colors.textMuted}
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
+              value={username}
+              onChangeText={setUsername}
               autoCapitalize="none"
             />
           </GlassCard>
 
-          {/* API Key input */}
-          <Text style={styles.label}>API Key*</Text>
+          {/* Password input */}
+          <Text style={styles.label}>Password*</Text>
           <GlassCard intensity={8} style={styles.inputWrapper}>
             <TextInput
               style={[styles.input, { flex: 1 }]}
-              placeholder="Enter your API key"
+              placeholder="Enter your password"
               placeholderTextColor={colors.textMuted}
-              value={apiKey}
-              onChangeText={setApiKey}
-              secureTextEntry={!showKey}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
               autoCapitalize="none"
             />
             <TouchableOpacity
-              onPress={() => setShowKey(!showKey)}
+              onPress={() => setShowPassword(!showPassword)}
               style={styles.eyeBtn}
             >
-              {showKey ? <EyeOff size={18} color={colors.textSecondary} /> : <Eye size={18} color={colors.textSecondary} />}
+              {showPassword ? <EyeOff size={18} color={colors.textSecondary} /> : <Eye size={18} color={colors.textSecondary} />}
             </TouchableOpacity>
           </GlassCard>
 
@@ -125,26 +193,7 @@ export default function LoginScreen({ navigation }: any) {
             </LinearGradient>
           </TouchableOpacity>
 
-          {/* Divider */}
-          <View style={styles.divider}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>Or continue with</Text>
-            <View style={styles.dividerLine} />
-          </View>
 
-          {/* Social Buttons */}
-          <View style={styles.socialRow}>
-            <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.7}>
-              <GlassCard intensity={15} style={styles.socialBtn}>
-                <Text style={styles.socialBtnText}>G  Google</Text>
-              </GlassCard>
-            </TouchableOpacity>
-            <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.7}>
-              <GlassCard intensity={15} style={styles.socialBtn}>
-                <Text style={styles.socialBtnText}>  Apple</Text>
-              </GlassCard>
-            </TouchableOpacity>
-          </View>
 
           {/* Footer */}
           <View style={styles.footer}>
@@ -198,19 +247,15 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm, borderRadius: borderRadius.md,
     paddingVertical: 16, alignItems: 'center',
   },
-  primaryBtnText: { ...typography.bodyBold, color: colors.textInverse },
-  divider: {
-    flexDirection: 'row', alignItems: 'center',
-    marginVertical: spacing.xxl,
+  primaryBtnText: { ...typography.bodyBold, color: colors.textInverse, fontSize: 16 },
+  orDivider: { flexDirection: 'row', alignItems: 'center', marginVertical: spacing.xl },
+  orLine: { flex: 1, height: 1, backgroundColor: colors.border },
+  orText: { marginHorizontal: spacing.md, ...typography.captionBold, color: colors.textMuted },
+  googleBtn: {
+    borderRadius: borderRadius.md, paddingVertical: 16, alignItems: 'center',
+    backgroundColor: '#ffffff', borderWidth: 1, borderColor: colors.borderFocused
   },
-  dividerLine: { flex: 1, height: 1, backgroundColor: colors.border },
-  dividerText: { ...typography.caption, color: colors.textMuted, marginHorizontal: spacing.md },
-  socialRow: { flexDirection: 'row', gap: spacing.md },
-  socialBtn: {
-    borderRadius: borderRadius.md,
-    paddingVertical: 14, alignItems: 'center',
-  },
-  socialBtnText: { ...typography.bodyBold, color: colors.textPrimary },
+  googleBtnText: { ...typography.bodyBold, color: '#000000', fontSize: 16 },
   footer: { flexDirection: 'row', justifyContent: 'center', marginTop: spacing.xxxl },
   footerText: { ...typography.body, color: colors.textSecondary },
   footerLink: { ...typography.bodyBold, color: colors.primary },

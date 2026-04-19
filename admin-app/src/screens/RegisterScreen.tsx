@@ -1,27 +1,101 @@
 import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView,
-  Platform, ScrollView, ActivityIndicator,
+  Platform, ScrollView, ActivityIndicator, Alert,
 } from 'react-native';
 import { Zap, Eye, EyeOff, Sparkles } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import GlassCard from '../components/GlassCard';
+import { registerUser, googleAuth } from '../services/api';
 import { colors, spacing, borderRadius, typography } from '../styles/theme';
+import { useAuth } from '../context/AuthContext';
+import * as AuthSession from 'expo-auth-session';
+import * as Google from 'expo-auth-session/providers/google';
+import * as WebBrowser from 'expo-web-browser';
+
+WebBrowser.maybeCompleteAuthSession();
+
+const EXPO_CLIENT_ID = process.env.EXPO_PUBLIC_EXPO_CLIENT_ID;
 
 export default function RegisterScreen({ navigation }: any) {
-  const [fullName, setFullName] = useState('');
+  const { login } = useAuth();
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleRegister = async () => {
+  // Use the Expo Proxy for physical devices
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    clientId: EXPO_CLIENT_ID,
+    redirectUri: AuthSession.makeRedirectUri({
+      scheme: 'webhook-admin',
+      path: 'auth/callback'
+    }),
+  });
+
+  // Handle Auth Response
+  React.useEffect(() => {
+    if (response?.type === 'success') {
+      const { code } = response.params;
+      if (code) {
+        console.log('[Auth] Google Auth Successful! Code received:', code);
+        handleGoogleCode(code);
+      }
+    } else if (response?.type === 'error') {
+      console.error('[Auth] Google register response error:', response);
+      Alert.alert('Error', 'Google registration failed. Please try again.');
+    }
+  }, [response]);
+
+  const handleGoogleCode = async (code: string) => {
     setLoading(true);
-    // Registration logic will be implemented with backend auth
-    setTimeout(() => {
+    try {
+      const redirectUri = AuthSession.makeRedirectUri({
+        scheme: 'webhook-admin',
+        path: 'auth/callback'
+      });
+      
+      console.log('[Auth] Sending registration code to server...');
+      const res = await googleAuth({ code, redirectUri });
+      const { apiKey, username: returnedUsername } = res.data.data;
+      
+      console.log('[Auth] Registration Successful! Logged in as:', returnedUsername);
+      await login(returnedUsername, apiKey);
+    } catch (e: any) {
+      console.error('[Auth] Registration exchange failed:', e.response?.data || e.message);
+      Alert.alert('Error', e.response?.data?.message || 'Failed to verify Google account with server.');
+    } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRegister = async () => {
+    if (!username || !email || !password) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+    setLoading(true);
+    try {
+      await registerUser({ username, email, password });
+      Alert.alert('Success', 'Account created successfully! You can now log in.');
       navigation.navigate('Login');
-    }, 1500);
+    } catch (e: any) {
+      Alert.alert('Error', e.response?.data?.message || 'Registration failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignUp = async () => {
+    setLoading(true);
+    try {
+      await promptAsync();
+    } catch (e: any) {
+      console.error('Google Auth Error:', e);
+      Alert.alert('Error', 'Google Auth Failed. Please try again.');
+      setLoading(false);
+    }
   };
 
   return (
@@ -50,15 +124,16 @@ export default function RegisterScreen({ navigation }: any) {
             Set up your admin account to manage webhook deliveries
           </Text>
 
-          {/* Full Name */}
-          <Text style={styles.label}>Full Name*</Text>
+          {/* Username */}
+          <Text style={styles.label}>Username*</Text>
           <GlassCard intensity={8} style={styles.inputWrapper}>
             <TextInput
               style={styles.input}
-              placeholder="Alex Smith"
+              placeholder="alex_smith123"
               placeholderTextColor={colors.textMuted}
-              value={fullName}
-              onChangeText={setFullName}
+              value={username}
+              onChangeText={setUsername}
+              autoCapitalize="none"
             />
           </GlassCard>
 
@@ -111,26 +186,7 @@ export default function RegisterScreen({ navigation }: any) {
             </LinearGradient>
           </TouchableOpacity>
 
-          {/* Divider */}
-          <View style={styles.divider}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>Or continue with</Text>
-            <View style={styles.dividerLine} />
-          </View>
 
-          {/* Social Buttons */}
-          <View style={styles.socialRow}>
-            <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.7}>
-              <GlassCard intensity={15} style={styles.socialBtn}>
-                <Text style={styles.socialBtnText}>G  Google</Text>
-              </GlassCard>
-            </TouchableOpacity>
-            <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.7}>
-              <GlassCard intensity={15} style={styles.socialBtn}>
-                <Text style={styles.socialBtnText}>  Apple</Text>
-              </GlassCard>
-            </TouchableOpacity>
-          </View>
 
           {/* Footer */}
           <View style={styles.footer}>
@@ -177,16 +233,15 @@ const styles = StyleSheet.create({
     marginTop: spacing.xxl, borderRadius: borderRadius.md,
     paddingVertical: 16, alignItems: 'center',
   },
-  primaryBtnText: { ...typography.bodyBold, color: colors.textInverse },
-  divider: { flexDirection: 'row', alignItems: 'center', marginVertical: spacing.xxl },
-  dividerLine: { flex: 1, height: 1, backgroundColor: colors.border },
-  dividerText: { ...typography.caption, color: colors.textMuted, marginHorizontal: spacing.md },
-  socialRow: { flexDirection: 'row', gap: spacing.md },
-  socialBtn: {
-    borderRadius: borderRadius.md,
-    paddingVertical: 14, alignItems: 'center',
+  primaryBtnText: { ...typography.bodyBold, color: colors.textInverse, fontSize: 16 },
+  orDivider: { flexDirection: 'row', alignItems: 'center', marginVertical: spacing.xl },
+  orLine: { flex: 1, height: 1, backgroundColor: colors.border },
+  orText: { marginHorizontal: spacing.md, ...typography.captionBold, color: colors.textMuted },
+  googleBtn: {
+    borderRadius: borderRadius.md, paddingVertical: 16, alignItems: 'center',
+    backgroundColor: '#ffffff', borderWidth: 1, borderColor: colors.borderFocused
   },
-  socialBtnText: { ...typography.bodyBold, color: colors.textPrimary },
+  googleBtnText: { ...typography.bodyBold, color: '#000000', fontSize: 16 },
   footer: { flexDirection: 'row', justifyContent: 'center', marginTop: spacing.xxxl },
   footerText: { ...typography.body, color: colors.textSecondary },
   footerLink: { ...typography.bodyBold, color: colors.primary },

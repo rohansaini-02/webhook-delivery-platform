@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import logger from '../config/logger';
 
 /**
  * Centralized error handling middleware.
@@ -10,10 +11,20 @@ export const errorHandler = (
   res: Response,
   _next: NextFunction
 ): void => {
-  console.error('[ErrorHandler]', err.stack);
+  logger.error('[ErrorHandler]', { message: err.message, stack: err.stack });
+
+  // Handle Prisma connection errors
+  if (err.message.includes('Can\'t reach database server') || err.name === 'PrismaClientInitializationError') {
+    res.status(503).json({
+      status: 'error',
+      message: 'Database connection failed. Please check your internet connection or try again later.',
+    });
+    return;
+  }
+
   res.status(500).json({
     status: 'error',
-    message: err.message || 'Internal Server Error',
+    message: process.env.NODE_ENV === 'production' ? 'Internal Server Error' : err.message,
   });
 };
 

@@ -1,43 +1,46 @@
 import { Request, Response, NextFunction } from 'express';
+import prisma from '../config/db';
 
 /**
  * API Key Authentication Middleware
  *
- * Checks for a valid API key in the Authorization header.
- * Header format: Authorization: Bearer <API_KEY>
- *
- * The API key must match the API_KEY env variable.
- * This guards all admin/management routes.
+ * Checks for a valid API key in the Authorization header or x-api-key header.
  */
-export const apiKeyAuth = (req: Request, res: Response, next: NextFunction): void => {
+export const apiKeyAuth = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const authHeader = req.headers['authorization'];
+  const xApiKey = req.headers['x-api-key'];
+  let providedKey: string | undefined;
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    providedKey = authHeader.split(' ')[1];
+  } else if (xApiKey && typeof xApiKey === 'string') {
+    providedKey = xApiKey;
+  }
+
+  if (!providedKey) {
     res.status(401).json({
       status: 'error',
-      message: 'Missing or invalid Authorization header. Format: Bearer <API_KEY>',
+      message: 'Missing or invalid authentication. Provide API Key in "Authorization: Bearer <KEY>" or "x-api-key" header.',
     });
     return;
   }
 
-  const providedKey = authHeader.split(' ')[1];
-  const validKey = process.env.API_KEY;
-
-  if (!validKey) {
-    res.status(500).json({
-      status: 'error',
-      message: 'Server is missing API_KEY configuration.',
+  try {
+    const admin = await prisma.admin.findUnique({
+      where: { apiKey: providedKey },
     });
-    return;
-  }
 
-  if (providedKey !== validKey) {
-    res.status(403).json({
-      status: 'error',
-      message: 'Forbidden: Invalid API key.',
-    });
-    return;
-  }
+    if (!admin) {
+      res.status(403).json({
+        status: 'error',
+        message: 'Forbidden: Invalid API key.',
+      });
+      return;
+    }
 
-  next();
+    req.admin = admin; // Attach admin to request
+    next();
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+  }
 };

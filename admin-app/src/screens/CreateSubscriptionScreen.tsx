@@ -10,7 +10,29 @@ import { colors, spacing, borderRadius, typography } from '../styles/theme';
 export default function CreateSubscriptionScreen({ navigation }: any) {
   const [url, setUrl] = useState('');
   const [loading, setLoading] = useState(false);
-  const [env, setEnv] = useState<'prod'|'stage'>('prod');
+  const [env, setEnv] = useState<'prod' | 'stage'>('prod');
+  const [selectedEvents, setSelectedEvents] = useState<string[]>(['*']);
+
+  const eventOptions = [
+    { id: '*', label: 'All Events', desc: 'Listen to every system activity' },
+    { id: 'user.signup', label: 'User Signup', desc: 'New user registration events' },
+    { id: 'payment.success', label: 'Payment Success', desc: 'Completed transaction triggers' },
+    { id: 'subscription.updated', label: 'Sub Updated', desc: 'Billing plan changes' },
+  ];
+
+  const toggleEvent = (id: string) => {
+    if (id === '*') {
+      setSelectedEvents(['*']);
+      return;
+    }
+    const newEvents = selectedEvents.filter(e => e !== '*');
+    if (newEvents.includes(id)) {
+      const filtered = newEvents.filter(e => e !== id);
+      setSelectedEvents(filtered.length === 0 ? ['*'] : filtered);
+    } else {
+      setSelectedEvents([...newEvents, id]);
+    }
+  };
 
   const handleCreate = async () => {
     if (!url.trim()) {
@@ -19,7 +41,11 @@ export default function CreateSubscriptionScreen({ navigation }: any) {
     }
     setLoading(true);
     try {
-      await createSubscription({ url: url.trim(), events: ['*'] });
+      await createSubscription({ 
+        url: url.trim(), 
+        events: selectedEvents,
+        environment: env.toUpperCase() as any
+      });
       navigation.goBack();
     } catch (e: any) {
       Alert.alert('Error', e.response?.data?.message || 'Failed to create subscription');
@@ -111,6 +137,28 @@ export default function CreateSubscriptionScreen({ navigation }: any) {
           )}
         </TouchableOpacity>
 
+        <Text style={[styles.label, {marginTop: spacing.xl}]}>SELECT EVENTS</Text>
+        <View style={styles.eventGrid}>
+          {eventOptions.map(opt => {
+            const isSelected = selectedEvents.includes(opt.id);
+            return (
+              <TouchableOpacity
+                key={opt.id}
+                style={[styles.eventItem, isSelected && styles.eventItemActive]}
+                onPress={() => toggleEvent(opt.id)}
+              >
+                <View style={[styles.checkbox, isSelected && styles.checkboxActive]}>
+                  {isSelected && <CheckCircle2 size={12} color="#FFFFFF" />}
+                </View>
+                <View style={{flex: 1}}>
+                  <Text style={[styles.eventLabel, isSelected && {color: '#FFFFFF'}]}>{opt.label}</Text>
+                  <Text style={styles.eventDesc} numberOfLines={1}>{opt.desc}</Text>
+                </View>
+              </TouchableOpacity>
+            )
+          })}
+        </View>
+
         <Text style={[styles.label, {marginTop: spacing.xl}]}>INITIAL HANDSHAKE PAYLOAD</Text>
         <View style={styles.codeBlock}>
           <Text style={styles.codeText}>{payloadPreview}</Text>
@@ -137,7 +185,7 @@ export default function CreateSubscriptionScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0B0E0D' },
+  container: { flex: 1, backgroundColor: colors.bg },
   scroll: { flexGrow: 1, paddingHorizontal: spacing.xl, paddingBottom: 40, paddingTop: 50 },
   
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.xxl },
@@ -192,5 +240,17 @@ const styles = StyleSheet.create({
   
   footerInfo: { alignItems: 'center', marginBottom: spacing.xl },
   footerInfoText: { ...typography.small, color: 'rgba(255,255,255,0.1)', letterSpacing: 1.5, fontSize: 13, fontWeight: '700' },
+
+  eventGrid: { gap: spacing.sm },
+  eventItem: { 
+    flexDirection: 'row', alignItems: 'center', 
+    backgroundColor: '#0E1110', padding: spacing.md, 
+    borderRadius: borderRadius.md, borderWidth: 1, borderColor: 'rgba(255,255,255,0.01)' 
+  },
+  eventItemActive: { backgroundColor: 'rgba(74, 222, 128, 0.05)', borderColor: 'rgba(74, 222, 128, 0.2)' },
+  checkbox: { width: 18, height: 18, borderRadius: 4, borderWidth: 1, borderColor: colors.border, marginRight: spacing.md, alignItems: 'center', justifyContent: 'center' },
+  checkboxActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+  eventLabel: { ...typography.bodyBold, color: colors.textSecondary, fontSize: 14 },
+  eventDesc: { ...typography.small, color: colors.textMuted, fontSize: 12 },
 });
  

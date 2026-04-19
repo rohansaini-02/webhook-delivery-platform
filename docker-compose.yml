@@ -1,32 +1,84 @@
-version: '3.8'
-
 services:
-  postgres:
-    image: postgres:15-alpine
-    container_name: webhook_db
+  # Main API Service
+  api:
+    build:
+      context: ./api
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: webhook_db
-    ports:
-      - '5432:5432'
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
+      - DATABASE_URL=postgresql://${DB_USER:-user}:${DB_PASSWORD:-password}@db:5432/${DB_NAME:-webhook_db}?schema=public
+      - RABBITMQ_URL=amqp://rabbitmq
+      - API_KEY=${API_KEY:-dev-secret-api-key-12345}
+      - DELIVERY_TIMEOUT_MS=5000
+      - MAX_RETRY_ATTEMPTS=5
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - webhook-network
 
+  # Dispatcher Worker Service (reusing api image)
+  worker:
+    build:
+      context: ./api
+    command: npm run worker
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER:-user}:${DB_PASSWORD:-password}@db:5432/${DB_NAME:-webhook_db}?schema=public
+      - RABBITMQ_URL=amqp://rabbitmq
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - webhook-network
+
+  # Frontend Admin App
+  admin-app:
+    build:
+      context: ./admin-app
+    networks:
+      - webhook-network
+
+  # Reverse Proxy / Gateway
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api
+      - admin-app
+    networks:
+      - webhook-network
+
+  # Database
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=${DB_USER:-user}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-password}
+      - POSTGRES_DB=${DB_NAME:-webhook_db}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-user} -d ${DB_NAME:-webhook_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - webhook-network
+
+  # Message Broker
   rabbitmq:
     image: rabbitmq:3-management-alpine
-    container_name: webhook_rabbitmq
-    environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
-    ports:
-      - '5672:5672'    # AMQP protocol port
-      - '15672:15672'  # Management UI port
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-    restart: unless-stopped
+    healthcheck:
+      test: rabbitmq-diagnostics -q check_running && rabbitmq-diagnostics -q check_local_node_health
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - webhook-network
 
-volumes:
-  postgres_data:
-  rabbitmq_data:
+networks:
+  webhook-network:
+    driver: bridge

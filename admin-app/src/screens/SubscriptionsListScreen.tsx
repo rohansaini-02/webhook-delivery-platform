@@ -1,26 +1,47 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  View, Text, TouchableOpacity, StyleSheet, FlatList,
+  View, Text, TouchableOpacity, StyleSheet, FlatList, TextInput,
   RefreshControl, ActivityIndicator, Dimensions
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { User, Search, Plus, MoreVertical, Link, Sliders, ChevronRight } from 'lucide-react-native';
 import { colors, spacing, borderRadius, typography, shadows } from '../styles/theme';
 import { fetchSubscriptions } from '../services/api';
+import UserAvatar from '../components/UserAvatar';
 
 export default function SubscriptionsListScreen({ navigation }: any) {
   const [subscriptions, setSubscriptions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(false);
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async (cursor?: string) => {
     try {
-      const res = await fetchSubscriptions();
-      setSubscriptions(res.data.data || []);
+      if (cursor) {
+        setLoadingMore(true);
+      } else {
+        setLoading(true);
+      }
+      
+      const res = await fetchSubscriptions(cursor);
+      const { data, pagination } = res.data;
+      
+      if (cursor) {
+        setSubscriptions(prev => [...prev, ...(data || [])]);
+      } else {
+        setSubscriptions(data || []);
+      }
+      
+      setNextCursor(pagination?.nextCursor || null);
+      setHasMore(pagination?.hasMore || false);
     } catch (e) {
       console.error('Subscriptions load error:', e);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
       setRefreshing(false);
     }
   }, []);
@@ -28,9 +49,13 @@ export default function SubscriptionsListScreen({ navigation }: any) {
   useEffect(() => { loadData(); }, [loadData]);
 
   const renderCard = ({ item, index }: any) => {
-    const mockStat = index === 2 ? { rate: '-- %', active: false } : { rate: ['99.98%', '98.42%', '99.10%'][index] || '99.98%', active: true };
-    const successRateStr = mockStat.rate;
-    const isActive = item.isActive !== undefined ? item.isActive : mockStat.active;
+    let successRateStr = '-- %';
+    if (item._count && item._count.deliveries > 0) {
+      const total = item._count.deliveries;
+      const fails = item.failCount || 0;
+      successRateStr = ((1 - fails / total) * 100).toFixed(2) + '%';
+    }
+    const isActive = item.isActive;
 
     return (
       <TouchableOpacity
@@ -84,12 +109,11 @@ export default function SubscriptionsListScreen({ navigation }: any) {
     );
   }
 
-  const displayData = subscriptions.length > 0 ? subscriptions : [
-    { id: '1', url: 'https://api.payments.internal/v1/webhook', isActive: true },
-    { id: '2', url: 'https://marketing-tool.io/inbound/events', isActive: true },
-    { id: '3', url: 'https://inventory-v1.internal/sync', isActive: false },
-    { id: '4', url: 'https://bigquery-streamer.cloud.google/webhook', isActive: true },
-  ];
+  const displayData = subscriptions.filter((s: any) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return s.url?.toLowerCase().includes(q) || extractName(s.url).toLowerCase().includes(q);
+  });
 
   return (
     <View style={styles.container}>
@@ -97,16 +121,11 @@ export default function SubscriptionsListScreen({ navigation }: any) {
       <BlurView intensity={50} tint="dark" style={styles.headerContainer}>
         <View style={styles.header}>
           <View style={styles.headerLeft}>
-            <View style={styles.avatar}>
-              <User size={20} color={colors.textPrimary} />
-            </View>
+            <UserAvatar size={36} />
             <View>
-              <Text style={styles.headerTitle}>The Orchestrator</Text>
+              <Text style={styles.headerTitle}>Subscriptions</Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.searchBtnTop}>
-            <Search size={22} color={colors.textSecondary} />
-          </TouchableOpacity>
         </View>
       </BlurView>
 
@@ -124,22 +143,41 @@ export default function SubscriptionsListScreen({ navigation }: any) {
             
             <View style={styles.searchContainer}>
               <Search size={18} color="#666" style={styles.searchIcon} />
-              <Text style={styles.searchText}>Search by endpoint name or destinat</Text>
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search by endpoint name or destination..."
+                placeholderTextColor="#666"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
             </View>
           </View>
         }
         ListFooterComponent={
-          displayData.length > 0 ? (
-            <View style={styles.listFooter}>
-              <View style={styles.footerIconContainer}>
-                <Sliders size={32} color="#444" strokeWidth={1.5} />
+          <>
+            {loadingMore && (
+              <View style={{ paddingVertical: 20 }}>
+                <ActivityIndicator color={colors.primary} />
               </View>
-              <Text style={styles.listFooterText}>
-                Orchestrating 124,592 deliveries in{'\n'}the last 24 hours
-              </Text>
-            </View>
-          ) : null
+            )}
+            {displayData.length > 0 && !hasMore ? (
+              <View style={styles.listFooter}>
+                <View style={styles.footerIconContainer}>
+                  <Sliders size={32} color="#444" strokeWidth={1.5} />
+                </View>
+                <Text style={styles.listFooterText}>
+                  Orchestrating 124,592 deliveries in{'\n'}the last 24 hours
+                </Text>
+              </View>
+            ) : null}
+          </>
         }
+        onEndReached={() => {
+          if (hasMore && !loadingMore && !searchQuery) {
+            loadData(nextCursor!);
+          }
+        }}
+        onEndReachedThreshold={0.5}
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <Link size={48} color={colors.textMuted} style={{ marginBottom: spacing.md }} />
@@ -202,7 +240,7 @@ const styles = StyleSheet.create({
   
   searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#181C1A', borderRadius: 12, paddingHorizontal: 16, height: 48 },
   searchIcon: { marginRight: 12 },
-  searchText: { fontSize: 15, color: '#666' },
+  searchInput: { flex: 1, fontSize: 15, color: '#FFFFFF', padding: 0 },
 
   list: { paddingHorizontal: spacing.xl, paddingBottom: 140, paddingTop: spacing.xs },
   

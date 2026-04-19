@@ -1,0 +1,28 @@
+config:
+  target: "http://localhost:3000/api/v1"
+  phases:
+    - duration: 60
+      arrivalRate: 5
+      rampTo: 50
+      name: "Warm up and ramp up"
+    - duration: 120
+      arrivalRate: 50
+      name: "Sustained load"
+  defaults:
+    headers:
+      Authorization: "Bearer dev-secret-api-key-12345"
+      Content-Type: "application/json"
+
+scenarios:
+  - name: "Ingest Webhook Events"
+    flow:
+      - post:
+          url: "/events"
+          json:
+            type: "order.created"
+            payload:
+              orderId: "{{ $randomString() }}"
+              amount: "{{ $randomNumber(10, 500) }}"
+              currency: "USD"
+              customer:
+                email: "customer_{{ $randomNumber(1, 10000) }}@example.com"

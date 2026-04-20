@@ -1,13 +1,108 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, FlatList,
-  RefreshControl, ActivityIndicator, Platform, TextInput, ScrollView
+  RefreshControl, ActivityIndicator, Platform, TextInput, ScrollView,
+  Animated, Pressable
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import { User, Search, Filter, Calendar, ChevronDown, ChevronUp, RotateCcw, ChevronRight } from 'lucide-react-native';
 import { fetchDeliveries, fetchEventTypes } from '../services/api';
 import { colors, spacing, borderRadius, typography, shadows } from '../styles/theme';
 import UserAvatar from '../components/UserAvatar';
 import FilterPicker from '../components/FilterPicker';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+const LogCard = React.memo(({ log, timeStr, dateStr, statusColor, statusBg, statusBorder, statusText, statusCode, onPress }: any) => {
+  const scale = React.useRef(new Animated.Value(1)).current;
+  const translateY = React.useRef(new Animated.Value(0)).current;
+  const glowOpacity = React.useRef(new Animated.Value(0.3)).current;
+
+  const animateIn = () => {
+    Animated.parallel([
+      Animated.spring(scale, { toValue: 1.01, useNativeDriver: true }),
+      Animated.spring(translateY, { toValue: -2, useNativeDriver: true }),
+      Animated.timing(glowOpacity, { toValue: 1, duration: 250, useNativeDriver: true })
+    ]).start();
+  };
+
+  const animateOut = () => {
+    Animated.parallel([
+      Animated.spring(scale, { toValue: 1, useNativeDriver: true }),
+      Animated.spring(translateY, { toValue: 0, useNativeDriver: true }),
+      Animated.timing(glowOpacity, { toValue: 0.3, duration: 250, useNativeDriver: true })
+    ]).start();
+  };
+
+  return (
+    <AnimatedPressable
+      onPress={onPress}
+      onPressIn={animateIn}
+      onPressOut={animateOut}
+      {...(Platform.OS === 'web' ? { onHoverIn: animateIn, onHoverOut: animateOut } : {})}
+      style={[
+        styles.logCardContainer,
+        { transform: [{ scale }, { translateY }] }
+      ]}
+    >
+      {/* Glow Layer */}
+      <Animated.View style={[styles.glowLayer, { opacity: glowOpacity, shadowColor: statusColor }]} />
+      
+      {/* Base Glass Layer */}
+      <View style={styles.glassContainer}>
+        {Platform.OS === 'web' ? (
+          <View style={[styles.absoluteFill, { backgroundColor: 'rgba(20,25,22,0.7)', backdropFilter: 'blur(20px)' } as any]} />
+        ) : (
+          <BlurView intensity={25} tint="dark" style={styles.absoluteFill} />
+        )}
+        
+        {/* Gradients */}
+        <LinearGradient
+          colors={['rgba(20,25,22,0.9)', 'rgba(24,20,28,0.88)', 'rgba(10,15,12,0.85)']} 
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.absoluteFill}
+        />
+        <LinearGradient
+          colors={['rgba(120, 255, 180, 0.08)', 'transparent', 'transparent']}
+          start={{ x: 1, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={styles.absoluteFill}
+        />
+        
+        {/* Content */}
+        <View style={styles.cardContent}>
+          <View style={styles.cardHeader}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.eventType} numberOfLines={1}>{log.event?.type}</Text>
+              <Text style={styles.eventId}>{log.id.substring(0, 16).toUpperCase()}</Text>
+            </View>
+            <View style={styles.timeSection}>
+              <Text style={styles.timeText}>{timeStr}</Text>
+              <Text style={styles.dateText}>{dateStr}</Text>
+            </View>
+          </View>
+
+          <View style={styles.cardBotRow}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+              <View style={[styles.statusPill, { backgroundColor: statusBg, borderColor: statusBorder }]}>
+                <View style={[styles.statusDot, { backgroundColor: statusColor, shadowColor: statusColor, shadowOpacity: 0.8, shadowRadius: 4, shadowOffset: { width: 0, height: 0 } }]} />
+                <Text style={[styles.statusPillText, { color: statusColor }]}>{statusText}</Text>
+              </View>
+              <Text style={[styles.statusCodeText, { color: statusColor }]}>{statusCode}</Text>
+            </View>
+
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+              <Text style={styles.retriesText}>{log.attempts ? log.attempts - 1 : 0} retries</Text>
+              <ChevronRight size={18} color={colors.textMuted} />
+            </View>
+          </View>
+        </View>
+      </View>
+    </AnimatedPressable>
+  );
+});
 
 export default function DeliveryLogsScreen({ route, navigation }: any) {
   const [logs, setLogs] = useState<any[]>([]);
@@ -114,6 +209,14 @@ export default function DeliveryLogsScreen({ route, navigation }: any) {
 
   return (
     <View style={styles.container}>
+      {/* Background with Dark Gradient and Diffusion Spots */}
+      <LinearGradient
+        colors={['#101512', '#0A0E11', '#060907']}
+        style={StyleSheet.absoluteFill}
+      />
+      <View style={[styles.lightSpot, { top: -100, right: -100 }]} />
+      <View style={[styles.lightSpot, { bottom: 100, left: -100 }]} />
+
       {/* Sticky Header Section */}
       <View style={styles.stickyHeader}>
         <View style={styles.headerRow}>
@@ -156,53 +259,42 @@ export default function DeliveryLogsScreen({ route, navigation }: any) {
           const timeStr = new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
           const dateStr = new Date(log.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' });
 
-          let statusColor = colors.primary;
-          let statusBg = 'rgba(74,222,128,0.1)';
+          let statusColor = '#4ADE80';
+          let statusBg = 'rgba(0,255,150,0.08)';
+          let statusBorder = 'rgba(0,255,150,0.2)';
           let statusText = log.status;
           let statusCode = log.lastStatusCode ? `${log.lastStatusCode} OK` : '---';
 
           if (log.status === 'SUCCESS') {
-            statusColor = colors.success;
-            statusBg = 'rgba(0,230,118,0.1)';
+            statusColor = '#4ADE80';
+            statusBg = 'rgba(0,255,150,0.08)';
+            statusBorder = 'rgba(0,255,150,0.2)';
             statusCode = `${log.lastStatusCode || 200} OK`;
           } else if (log.status === 'FAILED' || log.status === 'DLQ') {
-            statusColor = colors.error;
-            statusBg = 'rgba(255,82,82,0.1)';
+            statusColor = '#FF5252';
+            statusBg = 'rgba(255,82,82,0.08)';
+            statusBorder = 'rgba(255,82,82,0.2)';
             statusCode = `${log.lastStatusCode || 500} ERROR`;
           } else if (log.status === 'RETRYING' || log.status === 'PENDING') {
-            statusColor = colors.warning;
-            statusBg = 'rgba(255,179,0,0.1)';
+            statusColor = '#FFB300';
+            statusBg = 'rgba(255,179,0,0.08)';
+            statusBorder = 'rgba(255,179,0,0.2)';
             statusCode = log.lastStatusCode ? `${log.lastStatusCode} RETRY` : 'WAITING';
           }
 
           return (
-            <TouchableOpacity key={log.id} activeOpacity={0.8} style={[styles.logCard, { borderLeftColor: statusColor }]} onPress={() => handleLogPress(log.id)}>
-              <View style={styles.cardHeader}>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.eventType} numberOfLines={1}>{log.event?.type}</Text>
-                  <Text style={styles.eventId}>{log.id.substring(0, 16).toUpperCase()}</Text>
-                </View>
-                <View style={styles.timeSection}>
-                  <Text style={styles.timeText}>{timeStr}</Text>
-                  <Text style={styles.dateText}>{dateStr}</Text>
-                </View>
-              </View>
-
-              <View style={styles.cardBotRow}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-                  <View style={[styles.statusPill, { backgroundColor: statusBg }]}>
-                    <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
-                    <Text style={[styles.statusPillText, { color: statusColor }]}>{statusText}</Text>
-                  </View>
-                  <Text style={[styles.statusCodeText, { color: statusColor }]}>{statusCode}</Text>
-                </View>
-
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                  <Text style={styles.retriesText}>{log.attempts ? log.attempts - 1 : 0} retries</Text>
-                  <ChevronRight size={18} color={colors.textMuted} />
-                </View>
-              </View>
-            </TouchableOpacity>
+            <LogCard
+              key={log.id}
+              log={log}
+              timeStr={timeStr}
+              dateStr={dateStr}
+              statusColor={statusColor}
+              statusBg={statusBg}
+              statusBorder={statusBorder}
+              statusText={statusText}
+              statusCode={statusCode}
+              onPress={() => handleLogPress(log.id)}
+            />
           );
         })}
 
@@ -235,15 +327,23 @@ export default function DeliveryLogsScreen({ route, navigation }: any) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
+  lightSpot: {
+    position: 'absolute',
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: 'rgba(0, 255, 150, 0.04)',
+    ...(Platform.OS === 'web' ? { filter: 'blur(80px)' } as any : {}),
+  },
 
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: spacing.xl, paddingTop: 60, marginBottom: spacing.lg },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   headerTitleText: { ...typography.bodyBold, color: '#4ADE80', fontSize: 16 },
 
   stickyHeader: {
-    backgroundColor: colors.bg,
+    backgroundColor: 'rgba(10, 14, 11, 0.85)',
     borderBottomWidth: 1,
-    borderColor: colors.border,
+    borderColor: 'rgba(255,255,255,0.03)',
     paddingBottom: spacing.lg,
     zIndex: 10
   },
@@ -264,31 +364,69 @@ const styles = StyleSheet.create({
 
   list: { paddingHorizontal: spacing.xl, paddingBottom: 100 },
 
-  logCard: {
-    padding: spacing.lg,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.bgElevated,
-    borderLeftWidth: 4,
+  logCardContainer: {
     marginBottom: spacing.md,
-    ...shadows.soft,
+    borderRadius: borderRadius.md,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.6,
+    shadowRadius: 40,
+    elevation: 8,
+  },
+  glowLayer: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: borderRadius.md,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.08,
+    shadowRadius: 25,
+    elevation: 4,
+    backgroundColor: 'transparent',
+  },
+  glassContainer: {
+    borderRadius: borderRadius.md,
+    overflow: 'hidden',
     borderWidth: 1,
-    borderColor: colors.borderCard
+    borderColor: 'rgba(255,255,255,0.06)',
+    borderTopWidth: 1, // inner highlight
+    borderTopColor: 'rgba(255,255,255,0.15)',
+  },
+  absoluteFill: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  cardContent: {
+    padding: spacing.lg,
   },
 
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
-  eventType: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 17, marginBottom: 2 },
-  eventId: { ...typography.small, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textMuted, letterSpacing: 1, fontSize: 14 },
+  eventType: { 
+    ...typography.bodyBold, color: 'rgba(255,255,255,0.9)', fontSize: 17, marginBottom: 2,
+    textShadowColor: 'rgba(0,0,0,0.5)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2,
+  },
+  eventId: { 
+    ...typography.small, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: 'rgba(255,255,255,0.6)', letterSpacing: 0.5, fontSize: 14,
+    textShadowColor: 'rgba(0,0,0,0.5)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2,
+  },
 
   timeSection: { alignItems: 'flex-end' },
-  timeText: { ...typography.bodyBold, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textPrimary, fontSize: 16 },
-  dateText: { ...typography.small, color: colors.textMuted, marginTop: 2, fontSize: 14 },
+  timeText: { 
+    ...typography.bodyBold, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: 'rgba(255,255,255,0.9)', fontSize: 16,
+    textShadowColor: 'rgba(0,0,0,0.5)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2,
+  },
+  dateText: { 
+    ...typography.small, color: 'rgba(255,255,255,0.6)', marginTop: 2, fontSize: 14, letterSpacing: 0.5,
+  },
 
   cardBotRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: spacing.sm },
-  statusPill: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 4 },
+  statusPill: { 
+    flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, borderWidth: 1
+  },
   statusDot: { width: 6, height: 6, borderRadius: 3, marginRight: 6 },
-  statusPillText: { ...typography.small, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase', fontSize: 14 },
-  statusCodeText: { ...typography.bodyBold, marginLeft: -4, fontSize: 15 },
-  retriesText: { ...typography.small, color: colors.textMuted, fontWeight: '500', fontSize: 14 },
+  statusPillText: { ...typography.small, fontWeight: '600', letterSpacing: 0.5, textTransform: 'uppercase', fontSize: 13 },
+  statusCodeText: { 
+    ...typography.bodyBold, marginLeft: -4, fontSize: 15,
+    textShadowColor: 'rgba(0,0,0,0.5)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2,
+  },
+  retriesText: { ...typography.small, color: 'rgba(255,255,255,0.6)', fontWeight: '500', fontSize: 14, letterSpacing: 0.5 },
 
   loadMoreBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm,

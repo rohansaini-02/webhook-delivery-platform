@@ -1,15 +1,28 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
+import { Platform } from 'react-native';
 
-// Auto-detect backend IP from Expo's dev server
+// Auto-detect backend IP
 const debuggerHost = Constants.expoConfig?.hostUri;
-let ip = '10.110.155.246';
-if (debuggerHost && !debuggerHost.includes('exp.direct')) {
-  ip = debuggerHost.split(':')[0];
+let ip = '10.110.155.246'; // Fallback to hardcoded IP
+
+if (__DEV__) {
+  if (!Constants.isDevice && Platform.OS === 'android') {
+    // Android Emulator maps host's localhost to 10.0.2.2
+    ip = '10.0.2.2';
+  } else if (!Constants.isDevice && Platform.OS === 'ios') {
+    // iOS Simulator maps host's localhost to 127.0.0.1
+    ip = '127.0.0.1';
+  } else if (debuggerHost && !debuggerHost.includes('exp.direct')) {
+    // Physical device, use dev server IP
+    ip = debuggerHost.split(':')[0];
+  }
 }
 
-const API_BASE = `http://${ip}:3000/api/v1`;
+// 1. Prioritize explicitly provided URL (Best for dealing with AP Isolation on physical devices)
+// 2. Fall back to local LAN IP resolution
+const API_BASE = process.env.EXPO_PUBLIC_API_URL || `http://${ip}:3000/api/v1`;
 
 const api = axios.create({
   baseURL: API_BASE,

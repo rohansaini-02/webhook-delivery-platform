@@ -58,7 +58,14 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
-  const admin = await prisma.admin.findUnique({ where: { username } });
+  const admin = await prisma.admin.findFirst({
+    where: {
+      OR: [
+        { username: username },
+        { email: username }
+      ]
+    }
+  });
   if (!admin) {
     logger.warn(`Login failed: User "${username}" not found in database.`);
     res.status(401).json({ status: 'error', message: 'Invalid credentials' });

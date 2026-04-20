@@ -84,7 +84,11 @@ export default function LoginScreen({ navigation }: any) {
       const { apiKey, username: returnedUsername } = res.data.data;
       await login(returnedUsername, apiKey);
     } catch (e: any) {
-      setError(e.response?.data?.message || 'Invalid credentials. Please try again.');
+      if (e.message?.includes('Network Error')) {
+        setError('Network Connection Failed. Ensure your API is running and accessible.');
+      } else {
+        setError(e.response?.data?.message || 'Invalid credentials. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

@@ -7,6 +7,7 @@ import { User, Search, Star, CheckCircle, AlertTriangle, Inbox } from 'lucide-re
 import { colors, spacing, borderRadius, typography } from '../styles/theme';
 import { fetchMetrics, fetchDeliveries } from '../services/api';
 import UserAvatar from '../components/UserAvatar';
+import PremiumCard from '../components/PremiumCard';
 
 const { width } = Dimensions.get('window');
 
@@ -138,51 +139,51 @@ export default function DashboardScreen({ navigation }: any) {
         <View style={styles.gridContainer}>
           <View style={styles.gridRow}>
             {/* TOTAL EVENTS */}
-            <View style={styles.gridCard}>
+            <PremiumCard glowColor="#4ADE80" style={styles.gridCard}>
               <View style={styles.cardHeaderRow}>
                 <Text style={styles.cardHeaderLabel}>TOTAL EVENTS</Text>
                 <Star size={12} color="#4ADE80" />
               </View>
               <Text style={styles.hugeMetricLeft}>{m.events}</Text>
               <Text style={[styles.metricSubInfo, { color: '#4ADE80' }]}>+12.5% from peak</Text>
-            </View>
+            </PremiumCard>
 
             {/* SUCCESSFUL */}
-            <View style={styles.gridCard}>
+            <PremiumCard glowColor="#4ADE80" style={styles.gridCard}>
               <View style={styles.cardHeaderRow}>
                 <Text style={styles.cardHeaderLabel}>SUCCESSFUL</Text>
                 <CheckCircle size={12} color="#4ADE80" />
               </View>
               <Text style={styles.hugeMetricLeft}>{m.success}</Text>
               <View style={{ height: 3, backgroundColor: '#4ADE80', borderRadius: 2, marginTop: 10, width: '90%' }} />
-            </View>
+            </PremiumCard>
           </View>
 
           <View style={styles.gridRow}>
             {/* FAILED */}
-            <View style={styles.gridCard}>
+            <PremiumCard glowColor="#F87171" style={styles.gridCard}>
               <View style={styles.cardHeaderRow}>
                 <Text style={styles.cardHeaderLabel}>FAILED</Text>
                 <AlertTriangle size={12} color="#F87171" />
               </View>
               <Text style={styles.hugeMetricLeft}>{m.failed}</Text>
               <Text style={[styles.metricSubInfo, { color: '#F87171' }]}>-5% from avg</Text>
-            </View>
+            </PremiumCard>
 
             {/* DLQ COUNT */}
-            <View style={styles.gridCard}>
+            <PremiumCard glowColor="#A78BFA" style={styles.gridCard}>
               <View style={styles.cardHeaderRow}>
                 <Text style={styles.cardHeaderLabel}>DLQ COUNT</Text>
                 <Inbox size={12} color="#A78BFA" />
               </View>
               <Text style={styles.hugeMetricLeft}>{m.dlq}</Text>
               <Text style={[styles.metricSubInfo, { color: colors.textSecondary }]}>Pending action</Text>
-            </View>
+            </PremiumCard>
           </View>
         </View>
 
         {/* System Throughput */}
-        <View style={styles.cardSection}>
+        <PremiumCard style={styles.cardSection}>
           <View style={styles.chartHeaderRow}>
             <View>
               <Text style={styles.sectionTitle}>System Throughput</Text>
@@ -208,10 +209,10 @@ export default function DashboardScreen({ navigation }: any) {
               );
             })}
           </View>
-        </View>
+        </PremiumCard>
 
         {/* Recent Deliveries */}
-        <View style={styles.cardSection}>
+        <PremiumCard style={styles.cardSection}>
           <Text style={styles.sectionTitle}>Recent Deliveries</Text>
           <Text style={styles.sectionSubtitle}>LIVE INGEST MONITORING</Text>
 
@@ -261,7 +262,7 @@ export default function DashboardScreen({ navigation }: any) {
           <TouchableOpacity style={styles.viewAllDarkBtn} onPress={() => navigation.getParent()?.navigate('Logs')}>
             <Text style={styles.viewAllDarkBtnText}>VIEW ALL STREAMS</Text>
           </TouchableOpacity>
-        </View>
+        </PremiumCard>
 
         <View style={{ height: 100 }} />
 
@@ -291,13 +292,13 @@ const styles = StyleSheet.create({
 
   gridContainer: { marginHorizontal: spacing.xl, marginBottom: spacing.xl, gap: spacing.md },
   gridRow: { flexDirection: 'row', gap: spacing.md },
-  gridCard: { flex: 1, backgroundColor: '#141718', borderRadius: borderRadius.md, padding: spacing.md, paddingVertical: spacing.lg },
+  gridCard: { flex: 1, borderRadius: borderRadius.md, padding: spacing.md, paddingVertical: spacing.lg },
   cardHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
   cardHeaderLabel: { ...typography.captionBold, color: colors.textMuted, fontSize: 13, letterSpacing: 1 },
   hugeMetricLeft: { fontWeight: '800', fontSize: 32, color: '#FFFFFF', letterSpacing: -0.5, marginBottom: 2 },
   metricSubInfo: { ...typography.caption, fontSize: 14 },
 
-  cardSection: { backgroundColor: '#141718', borderRadius: borderRadius.md, marginHorizontal: spacing.xl, padding: spacing.lg, marginBottom: spacing.md },
+  cardSection: { borderRadius: borderRadius.md, marginHorizontal: spacing.xl, padding: spacing.lg, marginBottom: spacing.md },
 
   chartHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: spacing.xl },
   sectionTitle: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 16, marginBottom: 2 },

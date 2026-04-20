@@ -139,46 +139,62 @@ export default function DashboardScreen({ navigation }: any) {
         <View style={styles.gridContainer}>
           <View style={styles.gridRow}>
             {/* TOTAL EVENTS */}
-            <View style={styles.gridCard}>
+            <TouchableOpacity 
+              activeOpacity={0.8}
+              style={styles.gridCard}
+              onPress={() => navigation.getParent()?.navigate('Logs', { screen: 'DeliveryLogs', params: { status: 'All' } })}
+            >
               <View style={styles.cardHeaderRow}>
                 <Text style={styles.cardHeaderLabel}>TOTAL EVENTS</Text>
                 <Star size={12} color="#4ADE80" />
               </View>
               <Text style={styles.hugeMetricLeft}>{m.events}</Text>
               <Text style={[styles.metricSubInfo, { color: '#4ADE80' }]}>+12.5% from peak</Text>
-            </View>
+            </TouchableOpacity>
             
             {/* SUCCESSFUL */}
-            <View style={styles.gridCard}>
+            <TouchableOpacity 
+              activeOpacity={0.8}
+              style={styles.gridCard}
+              onPress={() => navigation.getParent()?.navigate('Logs', { screen: 'DeliveryLogs', params: { status: 'SUCCESS' } })}
+            >
               <View style={styles.cardHeaderRow}>
                 <Text style={styles.cardHeaderLabel}>SUCCESSFUL</Text>
                 <CheckCircle size={12} color="#4ADE80" />
               </View>
               <Text style={styles.hugeMetricLeft}>{m.success}</Text>
               <View style={{ height: 3, backgroundColor: '#4ADE80', borderRadius: 2, marginTop: 10, width: '90%' }} />
-            </View>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.gridRow}>
             {/* FAILED */}
-            <View style={styles.gridCard}>
+            <TouchableOpacity 
+              activeOpacity={0.8}
+              style={styles.gridCard}
+              onPress={() => navigation.getParent()?.navigate('Logs', { screen: 'DeliveryLogs', params: { status: 'FAILED' } })}
+            >
               <View style={styles.cardHeaderRow}>
                 <Text style={styles.cardHeaderLabel}>FAILED</Text>
                 <AlertTriangle size={12} color="#F87171" />
               </View>
               <Text style={styles.hugeMetricLeft}>{m.failed}</Text>
               <Text style={[styles.metricSubInfo, { color: '#F87171' }]}>-5% from avg</Text>
-            </View>
+            </TouchableOpacity>
 
             {/* DLQ COUNT */}
-            <View style={styles.gridCard}>
+            <TouchableOpacity 
+              activeOpacity={0.8}
+              style={styles.gridCard}
+              onPress={() => navigation.getParent()?.navigate('DLQ')}
+            >
               <View style={styles.cardHeaderRow}>
                 <Text style={styles.cardHeaderLabel}>DLQ COUNT</Text>
                 <Inbox size={12} color="#A78BFA" />
               </View>
               <Text style={styles.hugeMetricLeft}>{m.dlq}</Text>
               <Text style={[styles.metricSubInfo, { color: colors.textSecondary }]}>Pending action</Text>
-            </View>
+            </TouchableOpacity>
           </View>
         </View>
 

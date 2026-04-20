@@ -66,6 +66,12 @@ export default function DeliveryLogsScreen({ route, navigation }: any) {
     loadTypes();
   }, [loadData]);
 
+  useEffect(() => {
+    if (route.params?.status) {
+      setActiveStatusFilter(route.params.status);
+    }
+  }, [route.params?.status]);
+
   const filteredLogs = logs.filter((log: any) => {
     // 1. Status Filter
     if (activeStatusFilter !== 'All') {

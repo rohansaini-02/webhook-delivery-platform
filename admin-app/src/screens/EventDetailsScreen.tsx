@@ -157,7 +157,6 @@ export default function EventDetailsScreen({ route, navigation }: any) {
           <View style={styles.progressBarBg}>
              <View style={[styles.progressBarFill, { width: `${(data.attempts / data.maxAttempts) * 100}%`, backgroundColor: isFailed ? colors.error : colors.success }]} />
           </View>
-          </View>
         </PremiumCard>
 
         {/* REQUEST PAYLOAD Block */}

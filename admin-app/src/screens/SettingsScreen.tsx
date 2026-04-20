@@ -169,24 +169,24 @@ export default function SettingsScreen({ navigation }: any) {
         <View style={styles.sectionBlock}>
           <Text style={styles.sectionHeader}>RESOURCES & SUPPORT</Text>
 
-          <TouchableOpacity style={styles.resourceCardFull} onPress={handleDocumentation}>
+          <View style={styles.resourceCardFull}>
             <BookOpen size={18} color="#4ADE80" style={{ marginBottom: spacing.sm }} />
             <Text style={styles.resourceCardTitle}>Documentation</Text>
             <Text style={styles.resourceCardSub}>API references, CLI guides, and architecture schemas.</Text>
-          </TouchableOpacity>
+          </View>
 
           <View style={styles.resourceGrid}>
-            <TouchableOpacity style={styles.resourceCardHalf} onPress={handleSupport}>
+            <View style={styles.resourceCardHalf}>
               <Headset size={16} color="#A78BFA" style={{ marginBottom: spacing.sm }} />
               <Text style={styles.resourceCardTitle}>Support</Text>
               <Text style={styles.resourceCardSub}>Direct line to infrastructure specialists.</Text>
-            </TouchableOpacity>
+            </View>
 
-            <TouchableOpacity style={styles.resourceCardHalf} onPress={handlePrivacy}>
+            <View style={styles.resourceCardHalf}>
               <Shield size={16} color="#D1D5DB" style={{ marginBottom: spacing.sm }} />
               <Text style={styles.resourceCardTitle}>Privacy Policy</Text>
               <Text style={styles.resourceCardSub}>Data handling and security protocols.</Text>
-            </TouchableOpacity>
+            </View>
           </View>
         </View>
 

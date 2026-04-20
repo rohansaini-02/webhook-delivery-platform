@@ -8,6 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, spacing, borderRadius, typography } from '../styles/theme';
 import { useAuth } from '../context/AuthContext';
 import UserAvatar from '../components/UserAvatar';
+import PremiumCard from '../components/PremiumCard';
 
 export default function SettingsScreen({ navigation }: any) {
   const { logout, userEmail } = useAuth();
@@ -116,77 +117,82 @@ export default function SettingsScreen({ navigation }: any) {
         {/* ACCOUNT & SECURITY */}
         <View style={styles.sectionBlock}>
           <Text style={styles.sectionHeader}>ACCOUNT & SECURITY</Text>
-          <TouchableOpacity
-            style={[styles.cardBox, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}
+          <PremiumCard
+            style={styles.cardBox}
             onPress={() => navigation.navigate('SecuritySettings')}
           >
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <View style={[styles.iconBox, { backgroundColor: 'rgba(74,222,128,0.1)', marginRight: 16 }]}>
-                <Shield size={16} color="#4ADE80" />
-              </View>
-              <View>
-                <Text style={styles.toggleTitle}>Security & Access</Text>
-                <Text style={styles.toggleSub}>API Keys, Passwords, Active Sessions</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: spacing.lg }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={[styles.iconBox, { backgroundColor: 'rgba(74,222,128,0.1)', marginRight: 16 }]}>
+                  <Shield size={16} color="#4ADE80" />
+                </View>
+                <View>
+                  <Text style={styles.toggleTitle}>Security & Access</Text>
+                  <Text style={styles.toggleSub}>API Keys, Passwords, Active Sessions</Text>
+                </View>
               </View>
             </View>
-          </TouchableOpacity>
+          </PremiumCard>
         </View>
 
         {/* SYSTEM PREFERENCES */}
         <View style={styles.sectionBlock}>
           <Text style={styles.sectionHeader}>SYSTEM PREFERENCES</Text>
-
-          <View style={styles.cardBox}>
-            <View style={styles.toggleRow}>
-              <View style={[styles.iconBox, { backgroundColor: 'rgba(74,222,128,0.1)' }]}>
-                <Bell size={16} color="#4ADE80" />
+          <PremiumCard>
+            <View style={{ padding: spacing.lg }}>
+              <View style={styles.toggleRow}>
+                <View style={[styles.iconBox, { backgroundColor: 'rgba(74,222,128,0.1)' }]}>
+                  <Bell size={16} color="#4ADE80" />
+                </View>
+                <View style={styles.toggleTextCol}>
+                  <Text style={styles.toggleTitle}>Notifications</Text>
+                  <Text style={styles.toggleSub}>Real-time alerts for node failures</Text>
+                </View>
+                <View onStartShouldSetResponder={() => true} onResponderTerminationRequest={() => false}>
+                  <Switch value={notifications} onValueChange={handleNotificationToggle} trackColor={{ false: '#333A36', true: '#4ADE80' }} thumbColor="#FFFFFF" />
+                </View>
               </View>
-              <View style={styles.toggleTextCol}>
-                <Text style={styles.toggleTitle}>Notifications</Text>
-                <Text style={styles.toggleSub}>Real-time alerts for node failures</Text>
-              </View>
-              <View onStartShouldSetResponder={() => true} onResponderTerminationRequest={() => false}>
-                <Switch value={notifications} onValueChange={handleNotificationToggle} trackColor={{ false: '#333A36', true: '#4ADE80' }} thumbColor="#FFFFFF" />
+              <View style={[styles.toggleRow, { borderBottomWidth: 0, paddingBottom: 0, marginBottom: 0 }]}>
+                <View style={[styles.iconBox, { backgroundColor: '#1D2421' }]}>
+                  <RotateCcw size={16} color="#D1D5DB" />
+                </View>
+                <View style={styles.toggleTextCol}>
+                  <Text style={styles.toggleTitle}>Auto-retry</Text>
+                  <Text style={styles.toggleSub}>Automatically restart failed instances</Text>
+                </View>
+                <View onStartShouldSetResponder={() => true} onResponderTerminationRequest={() => false}>
+                  <Switch value={autoRetry} onValueChange={handleAutoRetryToggle} trackColor={{ false: '#333A36', true: '#4ADE80' }} thumbColor="#A0ADC0" />
+                </View>
               </View>
             </View>
-
-            <View style={[styles.toggleRow, { borderBottomWidth: 0, paddingBottom: 0 }]}>
-              <View style={[styles.iconBox, { backgroundColor: '#1D2421' }]}>
-                <RotateCcw size={16} color="#D1D5DB" />
-              </View>
-              <View style={styles.toggleTextCol}>
-                <Text style={styles.toggleTitle}>Auto-retry</Text>
-                <Text style={styles.toggleSub}>Automatically restart failed instances</Text>
-              </View>
-              <View onStartShouldSetResponder={() => true} onResponderTerminationRequest={() => false}>
-                <Switch value={autoRetry} onValueChange={handleAutoRetryToggle} trackColor={{ false: '#333A36', true: '#4ADE80' }} thumbColor="#A0ADC0" />
-              </View>
-            </View>
-          </View>
+          </PremiumCard>
         </View>
 
         {/* RESOURCES & SUPPORT */}
         <View style={styles.sectionBlock}>
           <Text style={styles.sectionHeader}>RESOURCES & SUPPORT</Text>
-
-          <View style={styles.resourceCardFull}>
-            <BookOpen size={18} color="#4ADE80" style={{ marginBottom: spacing.sm }} />
-            <Text style={styles.resourceCardTitle}>Documentation</Text>
-            <Text style={styles.resourceCardSub}>API references, CLI guides, and architecture schemas.</Text>
-          </View>
-
+          <PremiumCard onPress={handleDocumentation}>
+            <View style={{ padding: spacing.xl }}>
+              <BookOpen size={18} color="#4ADE80" style={{ marginBottom: spacing.sm }} />
+              <Text style={styles.resourceCardTitle}>Documentation</Text>
+              <Text style={styles.resourceCardSub}>API references, CLI guides, and architecture schemas.</Text>
+            </View>
+          </PremiumCard>
           <View style={styles.resourceGrid}>
-            <View style={styles.resourceCardHalf}>
-              <Headset size={16} color="#A78BFA" style={{ marginBottom: spacing.sm }} />
-              <Text style={styles.resourceCardTitle}>Support</Text>
-              <Text style={styles.resourceCardSub}>Direct line to infrastructure specialists.</Text>
-            </View>
-
-            <View style={styles.resourceCardHalf}>
-              <Shield size={16} color="#D1D5DB" style={{ marginBottom: spacing.sm }} />
-              <Text style={styles.resourceCardTitle}>Privacy Policy</Text>
-              <Text style={styles.resourceCardSub}>Data handling and security protocols.</Text>
-            </View>
+            <PremiumCard onPress={handleSupport} glowColor="#A78BFA" style={{ flex: 1 }}>
+              <View style={{ padding: spacing.lg }}>
+                <Headset size={16} color="#A78BFA" style={{ marginBottom: spacing.sm }} />
+                <Text style={styles.resourceCardTitle}>Support</Text>
+                <Text style={styles.resourceCardSub}>Direct line to infrastructure specialists.</Text>
+              </View>
+            </PremiumCard>
+            <PremiumCard onPress={handlePrivacy} glowColor="#D1D5DB" style={{ flex: 1 }}>
+              <View style={{ padding: spacing.lg }}>
+                <Shield size={16} color="#D1D5DB" style={{ marginBottom: spacing.sm }} />
+                <Text style={styles.resourceCardTitle}>Privacy Policy</Text>
+                <Text style={styles.resourceCardSub}>Data handling and security protocols.</Text>
+              </View>
+            </PremiumCard>
           </View>
         </View>
 
@@ -229,19 +235,19 @@ const styles = StyleSheet.create({
   sectionBlock: { marginHorizontal: spacing.xl, marginBottom: spacing.xl },
   sectionHeader: { ...typography.captionBold, color: '#FFFFFF', fontSize: 13, letterSpacing: 1.5, marginBottom: spacing.md },
 
-  cardBox: { backgroundColor: '#15191B', borderRadius: borderRadius.md, padding: spacing.lg },
+  cardBox: { borderRadius: borderRadius.md },
   toggleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderBottomWidth: 1, borderBottomColor: '#1E2528', paddingBottom: spacing.md, marginBottom: spacing.md },
   iconBox: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', marginRight: spacing.md },
   toggleTextCol: { flex: 1, paddingRight: spacing.md },
   toggleTitle: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 15, marginBottom: 2 },
   toggleSub: { ...typography.caption, color: colors.textMuted, fontSize: 14, lineHeight: 14 },
 
-  resourceCardFull: { backgroundColor: '#15191B', borderRadius: borderRadius.md, padding: spacing.xl, marginBottom: spacing.md },
+  resourceCardFull: { borderRadius: borderRadius.md, marginBottom: spacing.md },
   resourceCardTitle: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 16, marginBottom: 4 },
   resourceCardSub: { ...typography.caption, color: colors.textSecondary, fontSize: 14, lineHeight: 16 },
 
   resourceGrid: { flexDirection: 'row', gap: spacing.md },
-  resourceCardHalf: { flex: 1, backgroundColor: '#15191B', borderRadius: borderRadius.md, padding: spacing.lg },
+  resourceCardHalf: { flex: 1, borderRadius: borderRadius.md },
 
   logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#211215', borderRadius: borderRadius.md, marginHorizontal: spacing.xl, paddingVertical: 16, marginTop: spacing.lg, marginBottom: spacing.xl },
   logoutBtnText: { ...typography.bodyBold, color: '#FCA5A5', fontSize: 15 },

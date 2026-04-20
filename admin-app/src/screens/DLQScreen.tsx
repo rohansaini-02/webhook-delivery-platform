@@ -8,6 +8,7 @@ import { colors, spacing, borderRadius, typography } from '../styles/theme';
 import { fetchDlqDeliveries, purgeDlq, replayAllDlq, replayDlqItem, fetchEventTypes } from '../services/api';
 import UserAvatar from '../components/UserAvatar';
 import FilterPicker from '../components/FilterPicker';
+import PremiumCard from '../components/PremiumCard';
 
 export default function DLQScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true);
@@ -157,7 +158,7 @@ export default function DLQScreen({ navigation }: any) {
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         {/* Dead Letter Queue Alert Container */}
-        <View style={styles.alertContainer}>
+        <PremiumCard style={styles.alertContainer} glowColor="#F87171">
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
             <AlertTriangle size={12} color="#F87171" style={{ marginRight: 6 }} />
             <Text style={styles.alertLabelText}>DEAD LETTER QUEUE ALERT</Text>
@@ -174,7 +175,7 @@ export default function DLQScreen({ navigation }: any) {
               <Text style={styles.replayAllBtnText}>Replay All</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </PremiumCard>
 
         {/* Table Headers */}
         <View style={styles.tableHeaders}>
@@ -195,9 +196,10 @@ export default function DLQScreen({ navigation }: any) {
           })
           .map((item) => {
             return (
-              <TouchableOpacity
+              <PremiumCard
                 key={item.id}
                 style={styles.dlqCard}
+                glowColor="#F59E0B"
                 onPress={() => handleViewItem(item.id)}
               >
               <View style={[styles.leftAccent, { backgroundColor: '#F59E0B' }]} />
@@ -219,7 +221,7 @@ export default function DLQScreen({ navigation }: any) {
                 <TouchableOpacity style={styles.iconBtn} onPress={() => handleViewItem(item.id)}><Eye size={14} color={colors.textSecondary} /></TouchableOpacity>
                 <TouchableOpacity style={styles.iconBtn} onPress={() => Alert.alert('Delete', 'Delete feature mock')}><Trash2 size={14} color={colors.textSecondary} /></TouchableOpacity>
               </View>
-            </TouchableOpacity>
+            </PremiumCard>
           );
         })}
 
@@ -241,14 +243,14 @@ export default function DLQScreen({ navigation }: any) {
         )}
 
         {/* Danger Zone: Purge Queue */}
-        <View style={styles.dangerZone}>
+        <PremiumCard style={styles.dangerZone} glowColor="#F87171">
           <Text style={styles.dangerTitle}>Danger Zone</Text>
           <Text style={styles.dangerDesc}>Permanently delete all Dead Letter Queue messages. This action cannot be undone.</Text>
           <TouchableOpacity style={styles.purgeBtnLine} onPress={handlePurge}>
             <Trash2 size={14} color="#F87171" style={{ marginRight: 8 }} />
             <Text style={styles.purgeBtnTextLine}>Purge Entire Queue</Text>
           </TouchableOpacity>
-        </View>
+        </PremiumCard>
 
 
       </ScrollView>
@@ -275,7 +277,7 @@ const styles = StyleSheet.create({
     zIndex: 10
   },
 
-  alertContainer: { marginHorizontal: spacing.xl, marginBottom: spacing.lg, padding: spacing.xl, borderRadius: borderRadius.md, backgroundColor: '#141718', borderWidth: 1, borderColor: 'rgba(248, 113, 113, 0.2)' },
+  alertContainer: { marginHorizontal: spacing.xl, marginBottom: spacing.lg, padding: spacing.xl, borderRadius: borderRadius.md },
   alertLabelText: { ...typography.captionBold, color: '#F87171', fontSize: 13, letterSpacing: 1 },
   hugeAlertNumber: { fontWeight: '800', fontSize: 32, color: '#FFFFFF', letterSpacing: -0.5, marginBottom: 4 },
   alertDescText: { ...typography.body, color: colors.textSecondary, fontSize: 14, lineHeight: 20, paddingRight: 20, marginBottom: spacing.xl },
@@ -284,7 +286,7 @@ const styles = StyleSheet.create({
   replayAllBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F87171', borderRadius: borderRadius.pill, paddingHorizontal: 16, paddingVertical: 10 },
   replayAllBtnText: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 15 },
 
-  dangerZone: { marginHorizontal: spacing.xl, marginTop: spacing.xl, padding: spacing.lg, borderRadius: borderRadius.md, borderWidth: 1, borderColor: '#331515', backgroundColor: '#1A0E0E' },
+  dangerZone: { marginHorizontal: spacing.xl, marginTop: spacing.xl, padding: spacing.lg, borderRadius: borderRadius.md },
   dangerTitle: { ...typography.bodyBold, color: '#F87171', fontSize: 15, marginBottom: 4 },
   dangerDesc: { ...typography.caption, color: colors.textSecondary, marginBottom: spacing.md },
   purgeBtnLine: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: '#331515', borderRadius: borderRadius.pill, paddingHorizontal: 16, paddingVertical: 12, borderWidth: 1, borderColor: '#5C1C1C' },
@@ -309,7 +311,7 @@ const styles = StyleSheet.create({
   headerLeftLabel: { flex: 1.2 },
   headerRightLabel: { flex: 2 },
 
-  dlqCard: { backgroundColor: '#141718', borderRadius: borderRadius.md, marginHorizontal: spacing.xl, marginBottom: spacing.md, borderWidth: 1, borderColor: 'transparent', overflow: 'hidden' },
+  dlqCard: { borderRadius: borderRadius.md, marginHorizontal: spacing.xl, marginBottom: spacing.md, overflow: 'hidden' },
   leftAccent: { position: 'absolute', left: 0, top: spacing.md, bottom: spacing.md, width: 3, borderTopRightRadius: 2, borderBottomRightRadius: 2 },
 
   cardHeaderArea: { flexDirection: 'row', padding: spacing.lg, paddingLeft: 24, paddingBottom: spacing.sm },

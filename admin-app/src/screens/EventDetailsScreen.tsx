@@ -7,6 +7,7 @@ import { ChevronLeft, RotateCcw, Copy, UploadCloud, DownloadCloud } from 'lucide
 import * as Clipboard from 'expo-clipboard';
 import { colors, spacing, borderRadius, typography, shadows } from '../styles/theme';
 import { fetchDelivery, replayDlqItem } from '../services/api';
+import PremiumCard from '../components/PremiumCard';
 
 export default function EventDetailsScreen({ route, navigation }: any) {
   const { deliveryId } = route.params;
@@ -95,7 +96,10 @@ export default function EventDetailsScreen({ route, navigation }: any) {
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 
         {/* Action Header Card */}
-        <View style={styles.alertCard}>
+        <PremiumCard 
+          style={styles.alertCard} 
+          glowColor={isFailed ? '#F87171' : '#4ADE80'}
+        >
           <View style={[styles.alertCardIndicator, { backgroundColor: isFailed ? '#F87171' : '#4ADE80' }]} />
           
           <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md}}>
@@ -128,10 +132,10 @@ export default function EventDetailsScreen({ route, navigation }: any) {
               <Text style={styles.viewLogsBtnText}>Back to Logs</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </PremiumCard>
 
         {/* DATA GRID */}
-        <View style={styles.metricsCard}>
+        <PremiumCard style={styles.metricsCard}>
           <Text style={styles.cardHeaderLabel}>BASIC INFORMATION</Text>
           <PropertyRow label="EVENT ID" value={deliveryId} isMonospace />
           <PropertyRow label="TIMESTAMP" value={new Date(data.createdAt).toLocaleString()} />
@@ -141,10 +145,10 @@ export default function EventDetailsScreen({ route, navigation }: any) {
             valueColor={isFailed ? colors.error : colors.success} 
           />
           <PropertyRow label="PROTOCOL" value="HTTP/1.1 (JSON)" isLast />
-        </View>
+        </PremiumCard>
 
         {/* RETRIES Card */}
-        <View style={styles.dataCard}>
+        <PremiumCard style={styles.dataCard}>
           <Text style={styles.cardHeaderLabel}>DELIVERY ATTEMPTS</Text>
           <View style={{flexDirection: 'row', alignItems: 'baseline', marginBottom: spacing.md}}>
             <Text style={styles.hugeNumber}>{data.attempts}</Text>
@@ -153,39 +157,44 @@ export default function EventDetailsScreen({ route, navigation }: any) {
           <View style={styles.progressBarBg}>
              <View style={[styles.progressBarFill, { width: `${(data.attempts / data.maxAttempts) * 100}%`, backgroundColor: isFailed ? colors.error : colors.success }]} />
           </View>
-        </View>
+          </View>
+        </PremiumCard>
 
         {/* REQUEST PAYLOAD Block */}
-        <View style={{ marginTop: spacing.md, paddingHorizontal: spacing.xl }}>
-          <View style={styles.payloadHeader}>
-            <View style={{flexDirection: 'row', alignItems: 'center', gap: 6}}>
-               <UploadCloud size={14} color={colors.textSecondary} />
-               <Text style={[styles.cardHeaderLabel, { marginBottom: 0 }]}>REQUEST PAYLOAD (TAP TO COPY)</Text>
+        <PremiumCard style={{ marginTop: spacing.md, marginHorizontal: spacing.xl }}>
+          <View style={{ padding: spacing.lg }}>
+            <View style={styles.payloadHeader}>
+              <View style={{flexDirection: 'row', alignItems: 'center', gap: 6}}>
+                 <UploadCloud size={14} color={colors.textSecondary} />
+                 <Text style={[styles.cardHeaderLabel, { marginBottom: 0 }]}>REQUEST PAYLOAD (TAP TO COPY)</Text>
+              </View>
+              <Text style={styles.payloadSizeText}>2.4 KB</Text>
             </View>
-            <Text style={styles.payloadSizeText}>2.4 KB</Text>
+            <TouchableOpacity activeOpacity={0.7} onPress={() => copyToClipboard(reqPayload)} style={styles.payloadBox}>
+              <View style={[styles.leftAccent, { backgroundColor: '#F472B6' }]} />
+              <Text style={styles.payloadCodeText}>{reqPayload}</Text>
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity activeOpacity={0.7} onPress={() => copyToClipboard(reqPayload)} style={styles.payloadBox}>
-            <View style={[styles.leftAccent, { backgroundColor: '#F472B6' }]} />
-            <Text style={styles.payloadCodeText}>{reqPayload}</Text>
-          </TouchableOpacity>
-        </View>
+        </PremiumCard>
 
         {/* RESPONSE BODY Block */}
-        <View style={{ marginTop: spacing.xl, paddingHorizontal: spacing.xl }}>
-          <View style={styles.payloadHeader}>
-            <View style={{flexDirection: 'row', alignItems: 'center', gap: 6}}>
-               <DownloadCloud size={14} color={colors.textSecondary} />
-               <Text style={[styles.cardHeaderLabel, { marginBottom: 0 }]}>EXECUTION CONTEXT (TAP TO COPY)</Text>
+        <PremiumCard style={{ marginTop: spacing.xl, marginHorizontal: spacing.xl }} glowColor={isFailed ? '#F87171' : '#4ADE80'}>
+          <View style={{ padding: spacing.lg }}>
+            <View style={styles.payloadHeader}>
+              <View style={{flexDirection: 'row', alignItems: 'center', gap: 6}}>
+                 <DownloadCloud size={14} color={colors.textSecondary} />
+                 <Text style={[styles.cardHeaderLabel, { marginBottom: 0 }]}>EXECUTION CONTEXT (TAP TO COPY)</Text>
+              </View>
             </View>
+            <TouchableOpacity activeOpacity={0.7} onPress={() => copyToClipboard(resPayload)} style={styles.payloadBox}>
+              <View style={[styles.leftAccent, { backgroundColor: isFailed ? '#F87171' : '#4ADE80' }]} />
+              <Text style={[styles.payloadCodeText, { color: isFailed ? '#F87171' : '#4ADE80' }]}>{resPayload}</Text>
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity activeOpacity={0.7} onPress={() => copyToClipboard(resPayload)} style={styles.payloadBox}>
-            <View style={[styles.leftAccent, { backgroundColor: isFailed ? '#F87171' : '#4ADE80' }]} />
-            <Text style={[styles.payloadCodeText, { color: isFailed ? '#F87171' : '#4ADE80' }]}>{resPayload}</Text>
-          </TouchableOpacity>
-        </View>
+        </PremiumCard>
 
         {/* METRICS / PERFORMANCE Block */}
-        <View style={styles.metricsCard}>
+        <PremiumCard style={styles.metricsCard}>
           <Text style={styles.cardHeaderLabel}>PERFORMANCE METRICS</Text>
           
           <PropertyRow 
@@ -195,7 +204,7 @@ export default function EventDetailsScreen({ route, navigation }: any) {
           />
           <PropertyRow label="EVENT TYPE" value={data.event?.type} />
           <PropertyRow label="DESTINATION" value={data.subscription?.url} isMonospace isLast />
-        </View>
+        </PremiumCard>
 
       </ScrollView>
     </View>
@@ -213,15 +222,11 @@ const styles = StyleSheet.create({
   headerTitleText: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 20 },
  
   alertCard: { 
-    backgroundColor: colors.bgElevated, 
     borderRadius: borderRadius.lg, 
     marginHorizontal: spacing.xl, 
     padding: spacing.xl, 
     marginBottom: spacing.md, 
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: colors.borderCard,
-    ...shadows.card
   },
   alertCardIndicator: { position: 'absolute', left: 0, right: 0, top: 0, height: 3 },
   
@@ -239,25 +244,17 @@ const styles = StyleSheet.create({
   viewLogsBtnText: { ...typography.small, fontWeight: '700', color: colors.textInverse },
  
   dataCard: { 
-    backgroundColor: colors.bgElevated, 
     borderRadius: borderRadius.lg, 
     marginHorizontal: spacing.xl, 
     padding: spacing.xl, 
     marginBottom: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.borderCard,
-    ...shadows.card
   },
   metricsCard: {
-    backgroundColor: colors.bgElevated,
     borderRadius: borderRadius.lg,
     marginHorizontal: spacing.xl,
     padding: spacing.xl,
     marginBottom: spacing.md,
     marginTop: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.borderCard,
-    ...shadows.card
   },
   cardHeaderLabel: { ...typography.small, color: colors.textMuted, fontWeight: '700', letterSpacing: 1.5, marginBottom: spacing.xl, textTransform: 'uppercase' },
   

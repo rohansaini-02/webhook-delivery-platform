@@ -205,10 +205,13 @@ export default function SecurityScreen({ navigation }: any) {
               autoCapitalize="none"
             />
             <TouchableOpacity 
-              style={styles.eyeBtn}
+              hitSlop={{top:10, bottom:10, left:10, right:10}}
               onPress={() => setShowCurrentPassword(!showCurrentPassword)}
             >
-              {showCurrentPassword ? <EyeOff size={20} color="#FFFFFF" /> : <Eye size={20} color="#FFFFFF" />}
+              {showCurrentPassword 
+                ? <EyeOff size={16} color={colors.textSecondary} /> 
+                : <Eye size={16} color={colors.textSecondary} />
+              }
             </TouchableOpacity>
           </View>
           
@@ -224,10 +227,13 @@ export default function SecurityScreen({ navigation }: any) {
               autoCapitalize="none"
             />
             <TouchableOpacity 
-              style={styles.eyeBtn}
+              hitSlop={{top:10, bottom:10, left:10, right:10}}
               onPress={() => setShowNewPassword(!showNewPassword)}
             >
-              {showNewPassword ? <EyeOff size={20} color="#FFFFFF" /> : <Eye size={20} color="#FFFFFF" />}
+              {showNewPassword 
+                ? <EyeOff size={16} color={colors.textSecondary} /> 
+                : <Eye size={16} color={colors.textSecondary} />
+              }
             </TouchableOpacity>
           </View>
           
@@ -243,10 +249,13 @@ export default function SecurityScreen({ navigation }: any) {
               autoCapitalize="none"
             />
             <TouchableOpacity 
-              style={styles.eyeBtn}
+              hitSlop={{top:10, bottom:10, left:10, right:10}}
               onPress={() => setShowConfirmPassword(!showConfirmPassword)}
             >
-              {showConfirmPassword ? <EyeOff size={20} color="#FFFFFF" /> : <Eye size={20} color="#FFFFFF" />}
+              {showConfirmPassword 
+                ? <EyeOff size={16} color={colors.textSecondary} /> 
+                : <Eye size={16} color={colors.textSecondary} />
+              }
             </TouchableOpacity>
           </View>
 
@@ -345,9 +354,8 @@ const styles = StyleSheet.create({
   
   apiSubtext: { ...typography.caption, color: colors.textMuted, fontSize: 14 },
 
-  inputBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#0B0D10', borderWidth: 1, borderColor: '#1F262B', borderRadius: borderRadius.sm, paddingLeft: spacing.md, paddingRight: 4, marginBottom: spacing.md },
+  inputBox: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#0B0D10', borderWidth: 1, borderColor: '#1F262B', borderRadius: borderRadius.sm, paddingHorizontal: spacing.md, marginBottom: spacing.md },
   passwordInput: { flex: 1, color: '#FFFFFF', fontSize: 15, paddingVertical: 12 },
-  eyeBtn: { padding: 8, justifyContent: 'center', alignItems: 'center' },
 
   updateGreenBtn: { alignItems: 'center', backgroundColor: '#4ADE80', paddingVertical: 14, borderRadius: borderRadius.sm, marginTop: spacing.sm },
   updateGreenBtnText: { ...typography.bodyBold, color: '#0A0D0C', fontSize: 15 },

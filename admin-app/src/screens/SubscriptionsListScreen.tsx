@@ -8,6 +8,7 @@ import { User, Search, Plus, MoreVertical, Link, Sliders, ChevronRight } from 'l
 import { colors, spacing, borderRadius, typography, shadows } from '../styles/theme';
 import { fetchSubscriptions } from '../services/api';
 import UserAvatar from '../components/UserAvatar';
+import PremiumCard from '../components/PremiumCard';
 
 export default function SubscriptionsListScreen({ navigation }: any) {
   const [subscriptions, setSubscriptions] = useState<any[]>([]);
@@ -58,8 +59,8 @@ export default function SubscriptionsListScreen({ navigation }: any) {
     const isActive = item.isActive;
 
     return (
-      <TouchableOpacity
-        activeOpacity={0.8}
+      <PremiumCard
+        glowColor={isActive ? colors.success : '#555555'}
         style={[styles.cardWrapper, { borderLeftColor: isActive ? colors.success : '#333333' }]}
         onPress={() => navigation.navigate('SubscriptionDetails', { subscriptionId: item.id })}
       >
@@ -97,7 +98,7 @@ export default function SubscriptionsListScreen({ navigation }: any) {
             <ChevronRight size={20} color={colors.textSecondary} />
           </View>
         </View>
-      </TouchableOpacity>
+      </PremiumCard>
     );
   };
 
@@ -247,7 +248,7 @@ const styles = StyleSheet.create({
 
   list: { paddingHorizontal: spacing.xl, paddingBottom: 140, paddingTop: spacing.xs },
   
-  cardWrapper: { marginBottom: spacing.md, borderRadius: 12, overflow: 'hidden', backgroundColor: '#161B19', borderLeftWidth: 4 },
+  cardWrapper: { marginBottom: spacing.md, borderRadius: 12, overflow: 'hidden', borderLeftWidth: 4 },
   cardInner: { padding: spacing.md, paddingLeft: 16 },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.xs },
   cardTitleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },

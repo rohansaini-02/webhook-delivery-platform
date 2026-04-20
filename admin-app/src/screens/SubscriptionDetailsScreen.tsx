@@ -8,6 +8,7 @@ import * as Clipboard from 'expo-clipboard';
 import { colors, spacing, borderRadius, typography } from '../styles/theme';
 import { fetchSubscription, updateSubscription, deleteSubscription, ingestEvent, fetchEventTypes } from '../services/api';
 import { Send, Zap, Plus, X as XIcon } from 'lucide-react-native';
+import PremiumCard from '../components/PremiumCard';
 
 export default function SubscriptionDetailsScreen({ route, navigation }: any) {
   const { subscriptionId } = route.params;
@@ -240,7 +241,7 @@ export default function SubscriptionDetailsScreen({ route, navigation }: any) {
 
         {/* Metric Cards */}
         {/* 1. Performance History */}
-        <View style={styles.card}>
+        <PremiumCard style={styles.card}>
           <View style={styles.cardHeaderRow}>
             <Text style={styles.cardHeaderLabel}>PERFORMANCE HISTORY</Text>
             <Text style={[styles.cardHeaderLabelRight, { color: '#4ADE80' }]}>+2.4% vs last 24h</Text>
@@ -257,27 +258,27 @@ export default function SubscriptionDetailsScreen({ route, navigation }: any) {
               />
             ))}
           </View>
-        </View>
+        </PremiumCard>
 
         {/* 2. Success Rate */}
-        <View style={styles.card}>
+        <PremiumCard style={styles.card}>
           <Text style={styles.cardHeaderLabel}>SUCCESS RATE</Text>
           <Text style={[styles.hugeMetric, { color: '#4ADE80' }]}>{successRateStr}</Text>
           <Text style={styles.metricSubInfo}>{sub?._count?.deliveries || 0} delivered</Text>
-        </View>
+        </PremiumCard>
 
         {/* 3. Avg Latency */}
-        <View style={styles.card}>
+        <PremiumCard style={styles.card}>
           <Text style={styles.cardHeaderLabel}>AVG LATENCY</Text>
           <View style={{flexDirection: 'row', alignItems: 'baseline'}}>
             <Text style={[styles.hugeMetric, { color: '#FFFFFF' }]}>{avgLatency}</Text>
             <Text style={styles.hugeMetricSuffix}>ms</Text>
           </View>
           <Text style={styles.metricSubInfo}>P95 distribution</Text>
-        </View>
+        </PremiumCard>
 
         {/* Delivery Endpoint */}
-        <View style={[styles.card, { marginTop: spacing.md }]}>
+        <PremiumCard style={[styles.card, { marginTop: spacing.md }]}>
           <View style={[styles.cardHeaderRow, { justifyContent: 'flex-start', marginBottom: spacing.lg }]}>
             <View style={styles.endpointIconWrapper}>
               <Plug size={14} color="#4ADE80" />
@@ -304,20 +305,20 @@ export default function SubscriptionDetailsScreen({ route, navigation }: any) {
               {showSecret ? <EyeOff size={16} color={colors.textSecondary}/> : <Eye size={16} color={colors.textSecondary} />}
             </TouchableOpacity>
           </View>
-        </View>
+        </PremiumCard>
 
         {/* Latest Payload */}
-        <View style={styles.payloadCardWrapper}>
+        <PremiumCard style={styles.payloadCardWrapper}>
           <View style={styles.payloadHeader}>
             <Text style={[styles.cardHeaderLabel, { marginBottom: 0 }]}>LATEST PAYLOAD</Text>
           </View>
           <View style={styles.payloadBox}>
             <Text style={styles.payloadText}>{payloadStr}</Text>
           </View>
-        </View>
+        </PremiumCard>
 
         {/* Event Filters */}
-        <View style={styles.card}>
+        <PremiumCard style={styles.card}>
           <View style={styles.cardHeaderRow}>
             <Text style={styles.cardHeaderLabel}>EVENT FILTERS</Text>
             {!showAddFilter && (
@@ -393,10 +394,10 @@ export default function SubscriptionDetailsScreen({ route, navigation }: any) {
               <Text style={{color: colors.textMuted, fontSize: 13}}>No filters active. Receiving all events (*).</Text>
             )}
           </View>
-        </View>
+        </PremiumCard>
 
         {/* Trigger Test Event */}
-        <View style={styles.card}>
+        <PremiumCard style={styles.card}>
           <View style={[styles.cardHeaderRow, { marginBottom: spacing.lg }]}>
             <View style={[styles.endpointIconWrapper, { backgroundColor: 'rgba(74, 222, 128, 0.1)' }]}>
               <Zap size={14} color="#4ADE80" />
@@ -434,10 +435,10 @@ export default function SubscriptionDetailsScreen({ route, navigation }: any) {
               </>
             )}
           </TouchableOpacity>
-        </View>
+        </PremiumCard>
 
         {/* Subscription Logs */}
-        <View style={styles.card}>
+        <PremiumCard style={styles.card}>
           <Text style={styles.cardHeaderLabel}>SUBSCRIPTION LOGS</Text>
           
           {deliveries.slice(0, 5).map((log, index) => {
@@ -471,7 +472,7 @@ export default function SubscriptionDetailsScreen({ route, navigation }: any) {
           <TouchableOpacity style={styles.viewAllBtn} onPress={() => navigation.getParent()?.navigate('Logs')}>
             <Text style={styles.viewAllBtnText}>VIEW ALL LOGS</Text>
           </TouchableOpacity>
-        </View>
+        </PremiumCard>
 
       </ScrollView>
     </View>
@@ -509,7 +510,7 @@ const styles = StyleSheet.create({
   },
   deleteBtnText: { ...typography.captionBold, color: '#FF7070', fontSize: 13, fontWeight: '700' },
 
-  card: { backgroundColor: '#181C1F', borderRadius: borderRadius.lg, marginHorizontal: spacing.xl, padding: spacing.xl, marginBottom: spacing.md, borderWidth: 1, borderColor: '#22272A' },
+  card: { borderRadius: borderRadius.lg, marginHorizontal: spacing.xl, padding: spacing.xl, marginBottom: spacing.md },
   
   cardHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.lg },
   cardHeaderLabel: { ...typography.captionBold, color: colors.textMuted, fontSize: 11, letterSpacing: 1.5 },
@@ -532,7 +533,7 @@ const styles = StyleSheet.create({
   inputValueGreen: { ...typography.body, color: '#4ADE80', fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', fontSize: 14, flex: 1, marginRight: spacing.md, fontWeight: '600' },
   inputValueWhite: { ...typography.body, color: '#FFFFFF', letterSpacing: 4, fontSize: 14, flex: 1, marginRight: spacing.md, paddingTop: 4 },
 
-  payloadCardWrapper: { backgroundColor: '#181C1F', borderRadius: borderRadius.lg, marginHorizontal: spacing.xl, marginBottom: spacing.md, borderWidth: 1, borderColor: '#22272A' },
+  payloadCardWrapper: { borderRadius: borderRadius.lg, marginHorizontal: spacing.xl, marginBottom: spacing.md },
   payloadHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: spacing.xl, paddingTop: spacing.xl, paddingBottom: spacing.sm },
   payloadBox: { padding: spacing.xl, paddingTop: 0 },
   payloadText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', fontSize: 13, color: '#D1D5DB', lineHeight: 20 },

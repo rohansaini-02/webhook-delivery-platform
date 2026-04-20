@@ -183,7 +183,7 @@ export default function DLQScreen({ navigation }: any) {
         </View>
 
         {dlqItems.length === 0 && (
-          <Text style={{ color: colors.textMuted, textAlign: 'center', marginTop: 40 }}>No DLQ items found.</Text>
+          <Text style={{ color: colors.textMuted, textAlign: 'center', marginTop: 40, marginBottom: 40 }}>No DLQ items found.</Text>
         )}
 
         {dlqItems
@@ -271,14 +271,14 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bg, 
     borderBottomWidth: 1, 
     borderColor: colors.border,
-    paddingBottom: spacing.sm,
+    paddingBottom: spacing.lg,
     zIndex: 10
   },
 
   alertContainer: { marginHorizontal: spacing.xl, marginBottom: spacing.lg, padding: spacing.xl, borderRadius: borderRadius.md, backgroundColor: '#141718', borderWidth: 1, borderColor: 'rgba(248, 113, 113, 0.2)' },
   alertLabelText: { ...typography.captionBold, color: '#F87171', fontSize: 13, letterSpacing: 1 },
-  hugeAlertNumber: { fontWeight: '800', fontSize: 38, color: '#FFFFFF', letterSpacing: -1, marginBottom: 4 },
-  alertDescText: { ...typography.body, color: colors.textSecondary, fontSize: 15, lineHeight: 18, paddingRight: 20, marginBottom: spacing.xl },
+  hugeAlertNumber: { fontWeight: '800', fontSize: 32, color: '#FFFFFF', letterSpacing: -0.5, marginBottom: 4 },
+  alertDescText: { ...typography.body, color: colors.textSecondary, fontSize: 14, lineHeight: 20, paddingRight: 20, marginBottom: spacing.xl },
 
   alertActionsRow: { flexDirection: 'row', gap: spacing.md },
   replayAllBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F87171', borderRadius: borderRadius.pill, paddingHorizontal: 16, paddingVertical: 10 },
@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs 
   },
 
-  tableHeaders: { flexDirection: 'row', marginHorizontal: spacing.xl, marginBottom: spacing.sm },
+  tableHeaders: { flexDirection: 'row', marginHorizontal: spacing.xl, paddingLeft: 24, paddingRight: spacing.lg, marginBottom: spacing.sm },
   headerLabel: { ...typography.captionBold, color: colors.textMuted, fontSize: 13, letterSpacing: 1 },
   headerLeftLabel: { flex: 1.2 },
   headerRightLabel: { flex: 2 },

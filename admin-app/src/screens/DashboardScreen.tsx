@@ -54,9 +54,9 @@ export default function DashboardScreen({ navigation }: any) {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { 
+  useEffect(() => {
     loadData();
-    
+
     // Set up 15s polling for dashboard metrics
     const interval = setInterval(() => {
       loadData();
@@ -107,7 +107,7 @@ export default function DashboardScreen({ navigation }: any) {
   const maxChartValue = Math.max(...chartBars, 1); // Avoid division by zero
   const today = new Date().getDay();
   const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-  const chartDays = Array.from({length: 7}, (_, i) => days[(today - 6 + i + 7) % 7]);
+  const chartDays = Array.from({ length: 7 }, (_, i) => days[(today - 6 + i + 7) % 7]);
 
   return (
     <View style={styles.container}>
@@ -120,7 +120,7 @@ export default function DashboardScreen({ navigation }: any) {
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        
+
         {/* Search Input */}
         <View style={styles.searchWrap}>
           <Search size={16} color={colors.textMuted} style={styles.searchIcon} />
@@ -139,62 +139,46 @@ export default function DashboardScreen({ navigation }: any) {
         <View style={styles.gridContainer}>
           <View style={styles.gridRow}>
             {/* TOTAL EVENTS */}
-            <TouchableOpacity 
-              activeOpacity={0.8}
-              style={styles.gridCard}
-              onPress={() => navigation.getParent()?.navigate('Logs', { screen: 'DeliveryLogs', params: { status: 'All' } })}
-            >
+            <View style={styles.gridCard}>
               <View style={styles.cardHeaderRow}>
                 <Text style={styles.cardHeaderLabel}>TOTAL EVENTS</Text>
                 <Star size={12} color="#4ADE80" />
               </View>
               <Text style={styles.hugeMetricLeft}>{m.events}</Text>
               <Text style={[styles.metricSubInfo, { color: '#4ADE80' }]}>+12.5% from peak</Text>
-            </TouchableOpacity>
-            
+            </View>
+
             {/* SUCCESSFUL */}
-            <TouchableOpacity 
-              activeOpacity={0.8}
-              style={styles.gridCard}
-              onPress={() => navigation.getParent()?.navigate('Logs', { screen: 'DeliveryLogs', params: { status: 'SUCCESS' } })}
-            >
+            <View style={styles.gridCard}>
               <View style={styles.cardHeaderRow}>
                 <Text style={styles.cardHeaderLabel}>SUCCESSFUL</Text>
                 <CheckCircle size={12} color="#4ADE80" />
               </View>
               <Text style={styles.hugeMetricLeft}>{m.success}</Text>
               <View style={{ height: 3, backgroundColor: '#4ADE80', borderRadius: 2, marginTop: 10, width: '90%' }} />
-            </TouchableOpacity>
+            </View>
           </View>
 
           <View style={styles.gridRow}>
             {/* FAILED */}
-            <TouchableOpacity 
-              activeOpacity={0.8}
-              style={styles.gridCard}
-              onPress={() => navigation.getParent()?.navigate('Logs', { screen: 'DeliveryLogs', params: { status: 'FAILED' } })}
-            >
+            <View style={styles.gridCard}>
               <View style={styles.cardHeaderRow}>
                 <Text style={styles.cardHeaderLabel}>FAILED</Text>
                 <AlertTriangle size={12} color="#F87171" />
               </View>
               <Text style={styles.hugeMetricLeft}>{m.failed}</Text>
               <Text style={[styles.metricSubInfo, { color: '#F87171' }]}>-5% from avg</Text>
-            </TouchableOpacity>
+            </View>
 
             {/* DLQ COUNT */}
-            <TouchableOpacity 
-              activeOpacity={0.8}
-              style={styles.gridCard}
-              onPress={() => navigation.getParent()?.navigate('DLQ')}
-            >
+            <View style={styles.gridCard}>
               <View style={styles.cardHeaderRow}>
                 <Text style={styles.cardHeaderLabel}>DLQ COUNT</Text>
                 <Inbox size={12} color="#A78BFA" />
               </View>
               <Text style={styles.hugeMetricLeft}>{m.dlq}</Text>
               <Text style={[styles.metricSubInfo, { color: colors.textSecondary }]}>Pending action</Text>
-            </TouchableOpacity>
+            </View>
           </View>
         </View>
 
@@ -205,9 +189,9 @@ export default function DashboardScreen({ navigation }: any) {
               <Text style={styles.sectionTitle}>System Throughput</Text>
               <Text style={styles.sectionSubtitle}>LAST 7 DAYS ACTIVE PROCESSING</Text>
             </View>
-            <View style={{flexDirection: 'row', gap: 6}}>
-              <View style={[styles.dotLegend, { backgroundColor: '#4ADE80' }]}/>
-              <View style={[styles.dotLegend, { backgroundColor: '#A78BFA' }]}/>
+            <View style={{ flexDirection: 'row', gap: 6 }}>
+              <View style={[styles.dotLegend, { backgroundColor: '#4ADE80' }]} />
+              <View style={[styles.dotLegend, { backgroundColor: '#A78BFA' }]} />
             </View>
           </View>
 
@@ -231,10 +215,10 @@ export default function DashboardScreen({ navigation }: any) {
         <View style={styles.cardSection}>
           <Text style={styles.sectionTitle}>Recent Deliveries</Text>
           <Text style={styles.sectionSubtitle}>LIVE INGEST MONITORING</Text>
-          
+
           <View style={styles.streamList}>
             {recentDeliveries.length === 0 ? (
-               <Text style={{color: colors.textMuted, fontSize: 14, textAlign: 'center', padding: 20}}>No deliveries recorded today.</Text>
+              <Text style={{ color: colors.textMuted, fontSize: 14, textAlign: 'center', padding: 20 }}>No deliveries recorded today.</Text>
             ) : null}
             {recentDeliveries.filter(d => {
               if (!searchQuery) return true;
@@ -244,43 +228,43 @@ export default function DashboardScreen({ navigation }: any) {
               const isLast = index === filteredArr.length - 1;
               const date = new Date(delivery.createdAt);
               const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-              
+
               let statusColor = '#A78BFA';
               let statusBg = 'rgba(167,139,250,0.15)';
               if (delivery.status === 'SUCCESS') { statusColor = '#4ADE80'; statusBg = 'rgba(74,222,128,0.15)'; }
               else if (delivery.status === 'FAILED' || delivery.status === 'DLQ') { statusColor = '#F87171'; statusBg = 'rgba(248,113,113,0.15)'; }
 
               return (
-                <TouchableOpacity 
-                  key={delivery.id} 
+                <TouchableOpacity
+                  key={delivery.id}
                   style={[styles.streamItem, isLast && { borderBottomWidth: 0, paddingBottom: 0 }]}
                   onPress={() => handleLogPress(delivery.id)}
                 >
-                    {delivery.status === 'RETRYING' && (
-                        <View style={{position: 'absolute', left: -16, top: 0, bottom: 0, width: 2, backgroundColor: '#A78BFA'}} />
-                    )}
-                    <View style={styles.streamLeft}>
-                      <Text style={styles.streamIdText}>{delivery.event?.id?.substring(0, 12)}</Text>
-                      <Text style={styles.streamNameText}>{delivery.event?.type}</Text>
+                  {delivery.status === 'RETRYING' && (
+                    <View style={{ position: 'absolute', left: -16, top: 0, bottom: 0, width: 2, backgroundColor: '#A78BFA' }} />
+                  )}
+                  <View style={styles.streamLeft}>
+                    <Text style={styles.streamIdText}>{delivery.event?.id?.substring(0, 12)}</Text>
+                    <Text style={styles.streamNameText}>{delivery.event?.type}</Text>
+                  </View>
+                  <View style={styles.streamRight}>
+                    <View style={[styles.statusPill, { backgroundColor: statusBg }]}>
+                      <Text style={[styles.statusPillText, { color: statusColor }]}>{delivery.status}</Text>
                     </View>
-                    <View style={styles.streamRight}>
-                      <View style={[styles.statusPill, { backgroundColor: statusBg }]}>
-                        <Text style={[styles.statusPillText, { color: statusColor }]}>{delivery.status}</Text>
-                      </View>
-                      <Text style={styles.streamTimeText}>{timeStr}</Text>
-                    </View>
+                    <Text style={styles.streamTimeText}>{timeStr}</Text>
+                  </View>
                 </TouchableOpacity>
               )
             })}
           </View>
-          
+
           {/* View All Streams Footer */}
           <TouchableOpacity style={styles.viewAllDarkBtn} onPress={() => navigation.getParent()?.navigate('Logs')}>
             <Text style={styles.viewAllDarkBtnText}>VIEW ALL STREAMS</Text>
           </TouchableOpacity>
         </View>
 
-        <View style={{height: 100}} />
+        <View style={{ height: 100 }} />
 
       </ScrollView>
     </View>
@@ -298,10 +282,10 @@ const styles = StyleSheet.create({
   headerTitleText: { ...typography.bodyBold, color: '#4ADE80', fontSize: 16 },
   searchBtn: { padding: 4 },
 
-  searchWrap: { 
+  searchWrap: {
     flexDirection: 'row', alignItems: 'center', marginHorizontal: spacing.xl, marginBottom: spacing.lg,
     paddingHorizontal: spacing.lg, paddingVertical: 14, borderRadius: borderRadius.md,
-    backgroundColor: '#161B19', borderWidth: 1, borderColor: 'rgba(255,255,255,0.03)' 
+    backgroundColor: '#161B19', borderWidth: 1, borderColor: 'rgba(255,255,255,0.03)'
   },
   searchIcon: { marginRight: spacing.sm },
   searchInput: { flex: 1, ...typography.body, color: colors.textPrimary, paddingVertical: 4 },
@@ -315,7 +299,7 @@ const styles = StyleSheet.create({
   metricSubInfo: { ...typography.caption, fontSize: 14 },
 
   cardSection: { backgroundColor: '#141718', borderRadius: borderRadius.md, marginHorizontal: spacing.xl, padding: spacing.lg, marginBottom: spacing.md },
-  
+
   chartHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: spacing.xl },
   sectionTitle: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 16, marginBottom: 2 },
   sectionSubtitle: { ...typography.captionBold, color: colors.textMuted, fontSize: 12, letterSpacing: 1 },
@@ -332,21 +316,21 @@ const styles = StyleSheet.create({
   streamLeft: { flex: 1 },
   streamIdText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: '#FFFFFF', fontSize: 15, marginBottom: 4 },
   streamNameText: { ...typography.caption, color: colors.textSecondary },
-  
+
   streamRight: { alignItems: 'flex-end', justifyContent: 'center' },
   statusPill: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, marginBottom: 4 },
   statusPillText: { ...typography.captionBold, fontSize: 12, letterSpacing: 0.5 },
   streamTimeText: { ...typography.caption, color: colors.textSecondary, fontSize: 14 },
 
-  viewAllDarkBtn: { 
-    alignItems: 'center', justifyContent: 'center', 
-    backgroundColor: '#0A0D0C', borderRadius: borderRadius.md, 
-    paddingVertical: 14, marginTop: spacing.md 
+  viewAllDarkBtn: {
+    alignItems: 'center', justifyContent: 'center',
+    backgroundColor: '#0A0D0C', borderRadius: borderRadius.md,
+    paddingVertical: 14, marginTop: spacing.md
   },
   viewAllDarkBtnText: { ...typography.bodyBold, color: '#4ADE80', fontSize: 14, letterSpacing: 0.5 },
   emptyState: { paddingVertical: spacing.xxxl, alignItems: 'center' },
   emptyStateText: { ...typography.body, color: colors.textMuted, textAlign: 'center', paddingHorizontal: spacing.xxl },
 });
- 
- 
- 
+
+
+

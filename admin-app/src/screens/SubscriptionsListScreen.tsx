@@ -238,9 +238,12 @@ const styles = StyleSheet.create({
   pageTitle: { ...typography.h1, color: colors.textPrimary, marginBottom: 6, fontSize: 28, letterSpacing: -0.5 },
   pageSubtitle: { fontSize: 15, color: '#A0A0A0', lineHeight: 18, marginBottom: spacing.xl },
   
-  searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#181C1A', borderRadius: 12, paddingHorizontal: 16, height: 48 },
-  searchIcon: { marginRight: 12 },
-  searchInput: { flex: 1, fontSize: 15, color: '#FFFFFF', padding: 0 },
+  searchContainer: { 
+    flexDirection: 'row', alignItems: 'center', backgroundColor: '#181C1A', 
+    borderRadius: borderRadius.md, paddingHorizontal: spacing.lg, paddingVertical: 12 
+  },
+  searchIcon: { marginRight: spacing.sm },
+  searchInput: { flex: 1, fontSize: 16, color: '#FFFFFF', padding: 0 },
 
   list: { paddingHorizontal: spacing.xl, paddingBottom: 140, paddingTop: spacing.xs },
   

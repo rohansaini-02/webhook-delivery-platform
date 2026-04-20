@@ -284,11 +284,11 @@ const styles = StyleSheet.create({
 
   searchWrap: {
     flexDirection: 'row', alignItems: 'center', marginHorizontal: spacing.xl, marginBottom: spacing.lg,
-    paddingHorizontal: spacing.lg, paddingVertical: 14, borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.lg, paddingVertical: 12, borderRadius: borderRadius.md,
     backgroundColor: '#161B19', borderWidth: 1, borderColor: 'rgba(255,255,255,0.03)'
   },
   searchIcon: { marginRight: spacing.sm },
-  searchInput: { flex: 1, ...typography.body, color: colors.textPrimary, paddingVertical: 4 },
+  searchInput: { flex: 1, ...typography.body, color: colors.textPrimary, padding: 0, fontSize: 16 },
 
   gridContainer: { marginHorizontal: spacing.xl, marginBottom: spacing.xl, gap: spacing.md },
   gridRow: { flexDirection: 'row', gap: spacing.md },

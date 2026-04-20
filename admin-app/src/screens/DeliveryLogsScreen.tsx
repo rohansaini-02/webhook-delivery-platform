@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, FlatList,
   RefreshControl, ActivityIndicator, Platform, TextInput, ScrollView
@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
 
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: spacing.xl, paddingTop: 60, marginBottom: spacing.lg },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  headerTitleText: { ...typography.h3, color: colors.primary, fontWeight: '700' },
+  headerTitleText: { ...typography.bodyBold, color: '#4ADE80', fontSize: 16 },
 
   stickyHeader: {
     backgroundColor: colors.bg,
@@ -276,19 +276,19 @@ const styles = StyleSheet.create({
   },
 
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
-  eventType: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 16, marginBottom: 2 },
-  eventId: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textMuted, fontSize: 11, letterSpacing: 1 },
+  eventType: { ...typography.bodyBold, color: '#FFFFFF', marginBottom: 2 },
+  eventId: { ...typography.caption, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textMuted, letterSpacing: 1 },
 
   timeSection: { alignItems: 'flex-end' },
-  timeText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textPrimary, fontSize: 13, fontWeight: '600' },
-  dateText: { ...typography.small, color: colors.textMuted, fontSize: 11, marginTop: 2 },
+  timeText: { ...typography.small, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textPrimary, fontWeight: '600' },
+  dateText: { ...typography.small, color: colors.textMuted, marginTop: 2 },
 
   cardBotRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: spacing.sm },
   statusPill: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 4 },
   statusDot: { width: 6, height: 6, borderRadius: 3, marginRight: 6 },
-  statusPillText: { ...typography.small, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase', fontSize: 11 },
-  statusCodeText: { ...typography.small, fontWeight: '700', fontSize: 13, marginLeft: -4 },
-  retriesText: { ...typography.small, color: colors.textMuted, fontSize: 12, fontWeight: '500' },
+  statusPillText: { ...typography.small, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase' },
+  statusCodeText: { ...typography.small, fontWeight: '700', marginLeft: -4 },
+  retriesText: { ...typography.small, color: colors.textMuted, fontWeight: '500' },
 
   loadMoreBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm,

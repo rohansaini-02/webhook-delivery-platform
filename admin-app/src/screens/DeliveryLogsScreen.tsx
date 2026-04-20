@@ -276,19 +276,19 @@ const styles = StyleSheet.create({
   },
 
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
-  eventType: { ...typography.bodyBold, color: '#FFFFFF', marginBottom: 2 },
-  eventId: { ...typography.caption, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textMuted, letterSpacing: 1 },
+  eventType: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 16, marginBottom: 2 },
+  eventId: { ...typography.caption, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textMuted, letterSpacing: 1, fontSize: 12 },
 
   timeSection: { alignItems: 'flex-end' },
-  timeText: { ...typography.small, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textPrimary, fontWeight: '600' },
-  dateText: { ...typography.small, color: colors.textMuted, marginTop: 2 },
+  timeText: { ...typography.small, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textPrimary, fontWeight: '600', fontSize: 14 },
+  dateText: { ...typography.small, color: colors.textMuted, marginTop: 2, fontSize: 12 },
 
   cardBotRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: spacing.sm },
   statusPill: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 4 },
   statusDot: { width: 6, height: 6, borderRadius: 3, marginRight: 6 },
-  statusPillText: { ...typography.small, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase' },
-  statusCodeText: { ...typography.small, fontWeight: '700', marginLeft: -4 },
-  retriesText: { ...typography.small, color: colors.textMuted, fontWeight: '500' },
+  statusPillText: { ...typography.small, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase', fontSize: 12 },
+  statusCodeText: { ...typography.small, fontWeight: '700', marginLeft: -4, fontSize: 13 },
+  retriesText: { ...typography.small, color: colors.textMuted, fontWeight: '500', fontSize: 13 },
 
   loadMoreBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm,

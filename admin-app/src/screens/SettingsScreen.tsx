@@ -25,7 +25,7 @@ export default function SettingsScreen({ navigation }: any) {
       const retryPref = await AsyncStorage.getItem('pref_autoRetry');
       if (notifPref !== null) setNotifications(notifPref === 'true');
       if (retryPref !== null) setAutoRetry(retryPref === 'true');
-    } catch {}
+    } catch { }
   };
 
   const handleNotificationToggle = async (value: boolean) => {
@@ -36,7 +36,7 @@ export default function SettingsScreen({ navigation }: any) {
         Alert.alert('Notifications Enabled', 'You will receive alerts for delivery failures.');
       }
     } catch (error) {
-       Alert.alert('Error', 'Failed to update notification settings.');
+      Alert.alert('Error', 'Failed to update notification settings.');
     }
   };
 
@@ -48,7 +48,7 @@ export default function SettingsScreen({ navigation }: any) {
         Alert.alert('Auto-Retry Enabled', 'System will automatically attempt to restart failing gateway nodes.');
       }
     } catch {
-       Alert.alert('Error', 'Failed to save preference.');
+      Alert.alert('Error', 'Failed to save preference.');
     }
   };
 
@@ -100,7 +100,7 @@ export default function SettingsScreen({ navigation }: any) {
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        
+
         {/* Profile Hero Block */}
         <View style={styles.profileHero}>
           <View style={styles.avatarGlow}>
@@ -108,16 +108,15 @@ export default function SettingsScreen({ navigation }: any) {
               <UserAvatar size={100} />
             </View>
           </View>
-          
+
           <Text style={styles.heroName}>{userEmail?.split('@')[0] || 'Administrator'}</Text>
           <Text style={styles.heroRole}>ENGINEERING LEAD</Text>
-          <Text style={styles.heroEmail}>{userEmail}</Text>
         </View>
 
         {/* ACCOUNT & SECURITY */}
         <View style={styles.sectionBlock}>
           <Text style={styles.sectionHeader}>ACCOUNT & SECURITY</Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.cardBox, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}
             onPress={() => navigation.navigate('SecuritySettings')}
           >
@@ -136,7 +135,7 @@ export default function SettingsScreen({ navigation }: any) {
         {/* SYSTEM PREFERENCES */}
         <View style={styles.sectionBlock}>
           <Text style={styles.sectionHeader}>SYSTEM PREFERENCES</Text>
-          
+
           <View style={styles.cardBox}>
             <View style={styles.toggleRow}>
               <View style={[styles.iconBox, { backgroundColor: 'rgba(74,222,128,0.1)' }]}>
@@ -171,20 +170,20 @@ export default function SettingsScreen({ navigation }: any) {
           <Text style={styles.sectionHeader}>RESOURCES & SUPPORT</Text>
 
           <TouchableOpacity style={styles.resourceCardFull} onPress={handleDocumentation}>
-            <BookOpen size={18} color="#4ADE80" style={{marginBottom: spacing.sm}} />
+            <BookOpen size={18} color="#4ADE80" style={{ marginBottom: spacing.sm }} />
             <Text style={styles.resourceCardTitle}>Documentation</Text>
             <Text style={styles.resourceCardSub}>API references, CLI guides, and architecture schemas.</Text>
           </TouchableOpacity>
 
           <View style={styles.resourceGrid}>
             <TouchableOpacity style={styles.resourceCardHalf} onPress={handleSupport}>
-              <Headset size={16} color="#A78BFA" style={{marginBottom: spacing.sm}} />
+              <Headset size={16} color="#A78BFA" style={{ marginBottom: spacing.sm }} />
               <Text style={styles.resourceCardTitle}>Support</Text>
               <Text style={styles.resourceCardSub}>Direct line to infrastructure specialists.</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.resourceCardHalf} onPress={handlePrivacy}>
-              <Shield size={16} color="#D1D5DB" style={{marginBottom: spacing.sm}} />
+              <Shield size={16} color="#D1D5DB" style={{ marginBottom: spacing.sm }} />
               <Text style={styles.resourceCardTitle}>Privacy Policy</Text>
               <Text style={styles.resourceCardSub}>Data handling and security protocols.</Text>
             </TouchableOpacity>
@@ -193,7 +192,7 @@ export default function SettingsScreen({ navigation }: any) {
 
         {/* LOGOUT */}
         <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-          <LogOut size={16} color="#FCA5A5" style={{marginRight: spacing.sm}} />
+          <LogOut size={16} color="#FCA5A5" style={{ marginRight: spacing.sm }} />
           <Text style={styles.logoutBtnText}>Logout from platform</Text>
         </TouchableOpacity>
 
@@ -208,7 +207,7 @@ export default function SettingsScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   scroll: { paddingBottom: 100 },
-  
+
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: spacing.xl, paddingTop: 50, marginBottom: spacing.lg },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   headerAvatar: { width: 30, height: 30, borderRadius: 15, backgroundColor: 'rgba(255,255,255,0.05)', alignItems: 'center', justifyContent: 'center' },
@@ -219,7 +218,7 @@ const styles = StyleSheet.create({
   avatarGlow: { width: 130, height: 130, borderRadius: 65, backgroundColor: 'rgba(74,222,128,0.05)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(74,222,128,0.1)' },
   avatarMain: { width: 100, height: 100, borderRadius: 50, backgroundColor: '#1A212B', overflow: 'hidden' },
   avatarMockup: { flex: 1, backgroundColor: '#21334A' },
-  
+
   adminBadge: { position: 'absolute', bottom: 6, left: '15%', right: '15%', backgroundColor: 'rgba(0,0,0,0.6)', paddingVertical: 2, borderRadius: 2 },
   adminBadgeText: { ...typography.captionBold, color: '#FFFFFF', fontSize: 11, textAlign: 'center', letterSpacing: 0.5 },
 

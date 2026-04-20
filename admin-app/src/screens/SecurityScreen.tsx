@@ -19,6 +19,9 @@ export default function SecurityScreen({ navigation }: any) {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     loadApiKey();
@@ -194,36 +197,45 @@ export default function SecurityScreen({ navigation }: any) {
           <View style={styles.inputBox}>
             <TextInput
               style={styles.passwordInput}
-              secureTextEntry
+              secureTextEntry={!showCurrentPassword}
               placeholder="Enter current password"
               placeholderTextColor={colors.textMuted}
               value={currentPassword}
               onChangeText={setCurrentPassword}
             />
+            <TouchableOpacity onPress={() => setShowCurrentPassword(!showCurrentPassword)}>
+              {showCurrentPassword ? <EyeOff size={16} color={colors.textSecondary} /> : <Eye size={16} color={colors.textSecondary} />}
+            </TouchableOpacity>
           </View>
           
           <Text style={styles.inputLabel}>NEW PASSWORD</Text>
           <View style={styles.inputBox}>
             <TextInput
               style={styles.passwordInput}
-              secureTextEntry
+              secureTextEntry={!showNewPassword}
               placeholder="Enter new password (min 8 chars)"
               placeholderTextColor={colors.textMuted}
               value={newPassword}
               onChangeText={setNewPassword}
             />
+            <TouchableOpacity onPress={() => setShowNewPassword(!showNewPassword)}>
+              {showNewPassword ? <EyeOff size={16} color={colors.textSecondary} /> : <Eye size={16} color={colors.textSecondary} />}
+            </TouchableOpacity>
           </View>
           
           <Text style={styles.inputLabel}>CONFIRM NEW PASSWORD</Text>
           <View style={styles.inputBox}>
             <TextInput
               style={styles.passwordInput}
-              secureTextEntry
+              secureTextEntry={!showConfirmPassword}
               placeholder="Confirm new password"
               placeholderTextColor={colors.textMuted}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
             />
+            <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+              {showConfirmPassword ? <EyeOff size={16} color={colors.textSecondary} /> : <Eye size={16} color={colors.textSecondary} />}
+            </TouchableOpacity>
           </View>
 
           <TouchableOpacity style={styles.updateGreenBtn} onPress={handleUpdateCredentials}>
@@ -321,8 +333,8 @@ const styles = StyleSheet.create({
   
   apiSubtext: { ...typography.caption, color: colors.textMuted, fontSize: 14 },
 
-  inputBox: { backgroundColor: '#0B0D10', borderWidth: 1, borderColor: '#1F262B', borderRadius: borderRadius.sm, paddingHorizontal: spacing.md, marginBottom: spacing.md },
-  passwordInput: { color: '#FFFFFF', fontSize: 15, paddingVertical: 12 },
+  inputBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#0B0D10', borderWidth: 1, borderColor: '#1F262B', borderRadius: borderRadius.sm, paddingHorizontal: spacing.md, marginBottom: spacing.md },
+  passwordInput: { flex: 1, color: '#FFFFFF', fontSize: 15, paddingVertical: 12 },
 
   updateGreenBtn: { alignItems: 'center', backgroundColor: '#4ADE80', paddingVertical: 14, borderRadius: borderRadius.sm, marginTop: spacing.sm },
   updateGreenBtnText: { ...typography.bodyBold, color: '#0A0D0C', fontSize: 15 },

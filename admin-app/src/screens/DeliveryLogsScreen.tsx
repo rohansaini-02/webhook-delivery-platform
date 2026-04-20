@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, FlatList,
   RefreshControl, ActivityIndicator, Platform, TextInput, ScrollView
@@ -28,16 +28,16 @@ export default function DeliveryLogsScreen({ route, navigation }: any) {
       } else {
         setLoading(true);
       }
-      
+
       const res = await fetchDeliveries(cursor);
       const { data, pagination } = res.data;
-      
+
       if (cursor) {
         setLogs(prev => [...prev, ...(data || [])]);
       } else {
         setLogs(data || []);
       }
-      
+
       setNextCursor(pagination?.nextCursor || null);
       setHasMore(pagination?.hasMore || false);
     } catch (e) {
@@ -61,16 +61,10 @@ export default function DeliveryLogsScreen({ route, navigation }: any) {
     }
   };
 
-  useEffect(() => { 
+  useEffect(() => {
     loadData();
     loadTypes();
   }, [loadData]);
-
-  useEffect(() => {
-    if (route.params?.status) {
-      setActiveStatusFilter(route.params.status);
-    }
-  }, [route.params?.status]);
 
   const filteredLogs = logs.filter((log: any) => {
     // 1. Status Filter
@@ -128,10 +122,10 @@ export default function DeliveryLogsScreen({ route, navigation }: any) {
             <Text style={styles.headerTitleText}>Logs</Text>
           </View>
         </View>
-        
+
         <View style={styles.searchWrap}>
           <Search size={14} color={colors.textMuted} style={styles.searchIcon} />
-          <TextInput 
+          <TextInput
             placeholder="Search by ID or URL..."
             placeholderTextColor={colors.textMuted}
             style={styles.searchInput}
@@ -141,13 +135,13 @@ export default function DeliveryLogsScreen({ route, navigation }: any) {
         </View>
 
         <View style={styles.filterControlsRow}>
-          <FilterPicker 
+          <FilterPicker
             label="Status"
             value={activeStatusFilter === 'All' ? 'All' : activeStatusFilter}
             options={['All', 'SUCCESS', 'FAILED', 'PENDING']}
             onSelect={setActiveStatusFilter}
           />
-          <FilterPicker 
+          <FilterPicker
             label="Type"
             value={activeEventFilter}
             options={['All', ...eventTypes]}
@@ -161,22 +155,22 @@ export default function DeliveryLogsScreen({ route, navigation }: any) {
         {filteredLogs.map(log => {
           const timeStr = new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
           const dateStr = new Date(log.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' });
-          
+
           let statusColor = colors.primary;
           let statusBg = 'rgba(74,222,128,0.1)';
           let statusText = log.status;
           let statusCode = log.lastStatusCode ? `${log.lastStatusCode} OK` : '---';
 
-          if (log.status === 'SUCCESS') { 
-            statusColor = colors.success; 
+          if (log.status === 'SUCCESS') {
+            statusColor = colors.success;
             statusBg = 'rgba(0,230,118,0.1)';
             statusCode = `${log.lastStatusCode || 200} OK`;
-          } else if (log.status === 'FAILED' || log.status === 'DLQ') { 
-            statusColor = colors.error; 
+          } else if (log.status === 'FAILED' || log.status === 'DLQ') {
+            statusColor = colors.error;
             statusBg = 'rgba(255,82,82,0.1)';
             statusCode = `${log.lastStatusCode || 500} ERROR`;
           } else if (log.status === 'RETRYING' || log.status === 'PENDING') {
-            statusColor = colors.warning; 
+            statusColor = colors.warning;
             statusBg = 'rgba(255,179,0,0.1)';
             statusCode = log.lastStatusCode ? `${log.lastStatusCode} RETRY` : 'WAITING';
           }
@@ -184,7 +178,7 @@ export default function DeliveryLogsScreen({ route, navigation }: any) {
           return (
             <TouchableOpacity key={log.id} activeOpacity={0.8} style={[styles.logCard, { borderLeftColor: statusColor }]} onPress={() => handleLogPress(log.id)}>
               <View style={styles.cardHeader}>
-                <View style={{flex: 1}}>
+                <View style={{ flex: 1 }}>
                   <Text style={styles.eventType} numberOfLines={1}>{log.event?.type}</Text>
                   <Text style={styles.eventId}>{log.id.substring(0, 16).toUpperCase()}</Text>
                 </View>
@@ -195,15 +189,15 @@ export default function DeliveryLogsScreen({ route, navigation }: any) {
               </View>
 
               <View style={styles.cardBotRow}>
-                <View style={{flexDirection: 'row', alignItems: 'center', gap: spacing.md}}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
                   <View style={[styles.statusPill, { backgroundColor: statusBg }]}>
-                    <View style={[styles.statusDot, { backgroundColor: statusColor }]}/>
+                    <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
                     <Text style={[styles.statusPillText, { color: statusColor }]}>{statusText}</Text>
                   </View>
                   <Text style={[styles.statusCodeText, { color: statusColor }]}>{statusCode}</Text>
                 </View>
-                
-                <View style={{flexDirection: 'row', alignItems: 'center', gap: spacing.sm}}>
+
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
                   <Text style={styles.retriesText}>{log.attempts ? log.attempts - 1 : 0} retries</Text>
                   <ChevronRight size={18} color={colors.textMuted} />
                 </View>
@@ -213,13 +207,13 @@ export default function DeliveryLogsScreen({ route, navigation }: any) {
         })}
 
         {filteredLogs.length === 0 && (
-           <Text style={{color: colors.textMuted, textAlign: 'center', marginTop: 40}}>No logs found matching your criteria.</Text>
+          <Text style={{ color: colors.textMuted, textAlign: 'center', marginTop: 40 }}>No logs found matching your criteria.</Text>
         )}
 
         {hasMore && (
-          <TouchableOpacity 
-            activeOpacity={0.8} 
-            style={[styles.loadMoreBtn, loadingMore && { opacity: 0.7 }]} 
+          <TouchableOpacity
+            activeOpacity={0.8}
+            style={[styles.loadMoreBtn, loadingMore && { opacity: 0.7 }]}
             onPress={handleLoadMore}
             disabled={loadingMore}
           >
@@ -241,67 +235,65 @@ export default function DeliveryLogsScreen({ route, navigation }: any) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
-  
+
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: spacing.xl, paddingTop: 60, marginBottom: spacing.lg },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   headerTitleText: { ...typography.h3, color: colors.primary, fontWeight: '700' },
-  
-  stickyHeader: { 
-    backgroundColor: colors.bg, 
-    borderBottomWidth: 1, 
+
+  stickyHeader: {
+    backgroundColor: colors.bg,
+    borderBottomWidth: 1,
     borderColor: colors.border,
     paddingBottom: spacing.lg,
     zIndex: 10
   },
 
-  searchWrap: { 
+  searchWrap: {
     flexDirection: 'row', alignItems: 'center', marginHorizontal: spacing.xl, marginBottom: spacing.md,
     paddingHorizontal: spacing.lg, paddingVertical: 12, borderRadius: borderRadius.md,
     backgroundColor: '#161B19', borderWidth: 1, borderColor: colors.border
   },
   searchIcon: { marginRight: spacing.sm },
   searchInput: { flex: 1, ...typography.body, color: '#FFFFFF', padding: 0, fontSize: 16 },
-  
-  filterControlsRow: { 
-    flexDirection: 'row', 
-    marginHorizontal: spacing.xl, 
-    gap: spacing.md 
+
+  filterControlsRow: {
+    flexDirection: 'row',
+    marginHorizontal: spacing.xl,
+    gap: spacing.md
   },
 
   list: { paddingHorizontal: spacing.xl, paddingBottom: 100 },
-  
-  logCard: { 
-    padding: spacing.lg, 
-    borderRadius: borderRadius.md, 
-    backgroundColor: colors.bgElevated, 
+
+  logCard: {
+    padding: spacing.lg,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.bgElevated,
     borderLeftWidth: 4,
     marginBottom: spacing.md,
     ...shadows.soft,
     borderWidth: 1,
     borderColor: colors.borderCard
   },
-  
+
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
-  eventType: { ...typography.bodyBold, color: '#FFFFFF', marginBottom: 2 },
-  eventId: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textMuted, fontSize: 13, letterSpacing: 1 },
-  
+  eventType: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 16, marginBottom: 2 },
+  eventId: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textMuted, fontSize: 11, letterSpacing: 1 },
+
   timeSection: { alignItems: 'flex-end' },
-  timeText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textPrimary, fontSize: 15, fontWeight: '600' },
-  dateText: { ...typography.small, color: colors.textMuted, marginTop: 2 },
+  timeText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: colors.textPrimary, fontSize: 13, fontWeight: '600' },
+  dateText: { ...typography.small, color: colors.textMuted, fontSize: 11, marginTop: 2 },
 
-  cardBotRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: spacing.md },
-  statusPill: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 6 },
-  statusDot: { width: 6, height: 6, borderRadius: 3, marginRight: 8 },
-  statusPillText: { ...typography.captionBold, letterSpacing: 0.5, textTransform: 'uppercase' },
-  statusCodeText: { ...typography.captionBold, marginLeft: 2 },
-  retriesText: { ...typography.small, color: colors.textMuted, fontWeight: '500' },
+  cardBotRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: spacing.sm },
+  statusPill: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 4 },
+  statusDot: { width: 6, height: 6, borderRadius: 3, marginRight: 6 },
+  statusPillText: { ...typography.small, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase', fontSize: 11 },
+  statusCodeText: { ...typography.small, fontWeight: '700', fontSize: 13, marginLeft: -4 },
+  retriesText: { ...typography.small, color: colors.textMuted, fontSize: 12, fontWeight: '500' },
 
-  loadMoreBtn: { 
+  loadMoreBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm,
-    paddingVertical: 14, borderRadius: borderRadius.pill, backgroundColor: '#181C1A', 
+    paddingVertical: 14, borderRadius: borderRadius.pill, backgroundColor: '#181C1A',
     marginTop: spacing.md, borderWidth: 1, borderColor: colors.border
   },
   loadMoreText: { ...typography.captionBold, color: colors.textSecondary }
 });
- 
- 

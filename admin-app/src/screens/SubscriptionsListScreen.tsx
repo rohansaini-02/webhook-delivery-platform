@@ -234,13 +234,13 @@ const styles = StyleSheet.create({
   searchBtnTop: { padding: 4 },
   center: { alignItems: 'center', justifyContent: 'center' },
   
-  pageHeader: { marginBottom: spacing.lg, marginTop: spacing.xs },
-  pageTitle: { ...typography.h2, color: colors.textPrimary, marginBottom: 4 },
-  pageSubtitle: { ...typography.caption, color: colors.textMuted, marginBottom: spacing.xl },
+  pageHeader: { marginBottom: spacing.md, marginTop: spacing.xs },
+  pageTitle: { ...typography.h2, color: colors.textPrimary, marginBottom: 2, fontSize: 22 },
+  pageSubtitle: { ...typography.caption, color: colors.textMuted, marginBottom: spacing.lg, fontSize: 14 },
   
   searchContainer: { 
     flexDirection: 'row', alignItems: 'center', backgroundColor: '#181C1A', 
-    borderRadius: borderRadius.md, paddingHorizontal: spacing.lg, paddingVertical: 12 
+    borderRadius: borderRadius.md, paddingHorizontal: spacing.lg, paddingVertical: 10 
   },
   searchIcon: { marginRight: spacing.sm },
   searchInput: { flex: 1, fontSize: 16, color: '#FFFFFF', padding: 0 },
@@ -248,29 +248,29 @@ const styles = StyleSheet.create({
   list: { paddingHorizontal: spacing.xl, paddingBottom: 140, paddingTop: spacing.xs },
   
   cardWrapper: { marginBottom: spacing.md, borderRadius: 12, overflow: 'hidden', backgroundColor: '#161B19', borderLeftWidth: 4 },
-  cardInner: { padding: spacing.lg, paddingLeft: 16 },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.sm },
+  cardInner: { padding: spacing.md, paddingLeft: 16 },
+  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.xs },
   cardTitleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  cardTitle: { ...typography.bodyBold, color: colors.textPrimary },
+  cardTitle: { ...typography.bodyBold, color: colors.textPrimary, fontSize: 15 },
   statusBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-  statusText: { ...typography.small, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase' },
+  statusText: { ...typography.small, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase', fontSize: 11 },
   
-  urlRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: spacing.md },
-  infinityIcon: { color: '#888', fontSize: 14, fontWeight: '800' },
-  cardUrl: { ...typography.small, color: '#8A9A8E', fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', flex: 1, opacity: 0.8 },
+  urlRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: spacing.sm },
+  infinityIcon: { color: '#888', fontSize: 13, fontWeight: '800' },
+  cardUrl: { ...typography.small, color: '#8A9A8E', fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', flex: 1, opacity: 0.8, fontSize: 13 },
   
-  statsSection: { marginBottom: spacing.md },
-  metricValue: { ...typography.h3, fontWeight: '700', marginTop: 4, letterSpacing: -0.5 },
+  statsSection: { marginBottom: spacing.sm },
+  metricValue: { ...typography.h3, fontWeight: '700', marginTop: 2, letterSpacing: -0.5, fontSize: 18 },
   
-  bottomSection: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 4 },
-  footerItem: { gap: 4 },
-  footerLabel: { ...typography.captionBold, color: '#5A6A5E', letterSpacing: 1, textTransform: 'uppercase' },
-  footerValuePrimary: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 15 },
-  menuBtn: { padding: 4, marginRight: -8, marginBottom: 4 },
+  bottomSection: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 2 },
+  footerItem: { gap: 2 },
+  footerLabel: { ...typography.captionBold, color: '#5A6A5E', letterSpacing: 1, textTransform: 'uppercase', fontSize: 11 },
+  footerValuePrimary: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 14 },
+  menuBtn: { padding: 4, marginRight: -8, marginBottom: 2 },
 
   listFooter: { alignItems: 'center', justifyContent: 'center', paddingTop: spacing.xxl, paddingBottom: 60 },
   footerIconContainer: { marginBottom: 16, opacity: 0.8 },
-  listFooterText: { ...typography.caption, color: '#8A9A8E', textAlign: 'center' },
+  listFooterText: { ...typography.caption, color: '#8A9A8E', textAlign: 'center', fontSize: 13 },
   
   emptyState: { alignItems: 'center', paddingTop: 60 },
   emptyText: { ...typography.body, color: colors.textMuted },

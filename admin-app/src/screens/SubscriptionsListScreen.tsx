@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, FlatList, TextInput,
-  RefreshControl, ActivityIndicator, Dimensions
+  RefreshControl, ActivityIndicator, Dimensions, Platform
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { User, Search, Plus, MoreVertical, Link, Sliders, ChevronRight } from 'lucide-react-native';

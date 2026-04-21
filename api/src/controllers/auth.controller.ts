@@ -58,42 +58,50 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
-  const admin = await prisma.admin.findFirst({
-    where: {
-      OR: [
-        { username: username },
-        { email: username }
-      ]
+  try {
+    const admin = await prisma.admin.findFirst({
+      where: {
+        OR: [
+          { username: username },
+          { email: username }
+        ]
+      }
+    });
+    if (!admin) {
+      logger.warn(`Login failed: User "${username}" not found in database.`);
+      res.status(401).json({ status: 'error', message: 'Invalid credentials' });
+      return;
     }
-  });
-  if (!admin) {
-    logger.warn(`Login failed: User "${username}" not found in database.`);
-    res.status(401).json({ status: 'error', message: 'Invalid credentials' });
-    return;
+
+    if (!admin.passwordHash) {
+      res.status(401).json({ status: 'error', message: 'This account uses Google Sign-In. Please use the Google button.' });
+      return;
+    }
+
+    const validPassword = await bcrypt.compare(password, admin.passwordHash);
+    if (!validPassword) {
+      logger.warn(`Login failed: Incorrect password for user "${username}".`);
+      res.status(401).json({ status: 'error', message: 'Invalid credentials' });
+      return;
+    }
+
+    logger.info(`Login successful for user: "${username}"`);
+
+    res.json({
+      status: 'ok',
+      message: 'Login successful',
+      data: {
+        apiKey: admin.apiKey,
+        username: admin.username,
+      },
+    });
+  } catch (err: any) {
+    logger.error(`Login DB error for "${username}": ${err.message}`);
+    res.status(503).json({
+      status: 'error',
+      message: 'Service temporarily unavailable. Please try again in a moment.',
+    });
   }
-
-  if (!admin.passwordHash) {
-    res.status(401).json({ status: 'error', message: 'This account uses Google Sign-In. Please use the Google button.' });
-    return;
-  }
-
-  const validPassword = await bcrypt.compare(password, admin.passwordHash);
-  if (!validPassword) {
-    logger.warn(`Login failed: Incorrect password for user "${username}".`);
-    res.status(401).json({ status: 'error', message: 'Invalid credentials' });
-    return;
-  }
-
-  logger.info(`Login successful for user: "${username}"`);
-
-  res.json({
-    status: 'ok',
-    message: 'Login successful',
-    data: {
-      apiKey: admin.apiKey,
-      username: admin.username,
-    },
-  });
 };
 
 export const updatePassword = async (req: Request, res: Response): Promise<void> => {

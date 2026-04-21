@@ -5,6 +5,7 @@ import rateLimit from 'express-rate-limit'; // Added import for rateLimit
 import morgan from 'morgan';
 
 import prisma from './config/db';
+import logger from './config/logger';
 import { apiKeyAuth } from './middlewares/auth';
 import { errorHandler, notFoundHandler } from './middlewares/errorHandler';
 
@@ -36,6 +37,14 @@ const limiter = rateLimit({
 });
 
 // ─── Global Middleware ────────────────────────────────────────────────────────
+app.use((req, res, next) => {
+  if (req.path !== '/health') {
+    logger.info(`[DEBUG] Incoming Request: ${req.method} ${req.path} from ${req.ip}`);
+    logger.info(`[DEBUG] Headers: ${JSON.stringify(req.headers)}`);
+  }
+  next();
+});
+
 app.use(helmet()); // Helmet helps secure the app by setting various HTTP headers.
 app.use(cors()); 
 app.use(express.json()); 

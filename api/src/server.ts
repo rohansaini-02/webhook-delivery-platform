@@ -66,8 +66,8 @@ const startServer = async () => {
     await connectRabbitMQ();
     startDispatcher();
     
-    app.listen(PORT, () => {
-        logger.info(`Webhook Delivery API is running on port ${PORT}`);
+    app.listen(Number(PORT), '0.0.0.0', () => {
+        logger.info(`Webhook Delivery API is running on all interfaces (0.0.0.0) at port ${PORT}`);
     });
 };
 
@@ -87,5 +87,11 @@ const shutdown = async (signal: string) => {
 
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 process.on('SIGINT', () => shutdown('SIGINT'));
+
+// Prevent ECONNRESET and other unhandled rejections from crashing the process
+process.on('unhandledRejection', (reason: any) => {
+    logger.error('Unhandled Rejection:', reason?.message || reason);
+    // Don't exit — let tsx watch keep the server alive
+});
 
 startServer();

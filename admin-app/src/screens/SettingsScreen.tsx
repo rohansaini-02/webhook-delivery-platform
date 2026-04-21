@@ -216,28 +216,28 @@ export default function SettingsScreen({ navigation }: any) {
           <Text style={styles.sectionHeader}>RESOURCES & SUPPORT</Text>
 
           <GlassCard color="#4ADE80" noPadding style={{ marginBottom: spacing.md }}>
-            <TouchableOpacity style={styles.resourceCardFull} onPress={handleDocumentation}>
+            <View style={styles.resourceCardFull}>
               <BookOpen size={18} color="#4ADE80" style={{ marginBottom: spacing.sm }} />
               <Text style={styles.resourceCardTitle}>Documentation</Text>
               <Text style={styles.resourceCardSub}>API references, CLI guides, and architecture schemas.</Text>
-            </TouchableOpacity>
+            </View>
           </GlassCard>
 
           <View style={styles.resourceGrid}>
             <GlassCard color="#A78BFA" noPadding style={{ flex: 1 }}>
-              <TouchableOpacity style={styles.resourceCardHalf} onPress={handleSupport}>
+              <View style={styles.resourceCardHalf}>
                 <Headset size={16} color="#A78BFA" style={{ marginBottom: spacing.sm }} />
                 <Text style={styles.resourceCardTitle}>Support</Text>
-                <Text style={styles.resourceCardSub}>Direct line line to specialists.</Text>
-              </TouchableOpacity>
+                <Text style={styles.resourceCardSub}>Direct line to specialists.</Text>
+              </View>
             </GlassCard>
 
             <GlassCard color="rgba(255,255,255,0.4)" noPadding style={{ flex: 1 }}>
-              <TouchableOpacity style={styles.resourceCardHalf} onPress={handlePrivacy}>
+              <View style={styles.resourceCardHalf}>
                 <Shield size={16} color="rgba(255,255,255,0.4)" style={{ marginBottom: spacing.sm }} />
                 <Text style={styles.resourceCardTitle}>Privacy</Text>
                 <Text style={styles.resourceCardSub}>Security protocols.</Text>
-              </TouchableOpacity>
+              </View>
             </GlassCard>
           </View>
         </View>

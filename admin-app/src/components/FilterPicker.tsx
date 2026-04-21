@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { 
-  View, Text, TouchableOpacity, Modal, StyleSheet, 
-  FlatList, Dimensions, Pressable 
+  View, Text, TouchableOpacity, StyleSheet, 
+  Pressable, ScrollView, Modal, Dimensions
 } from 'react-native';
 import { ChevronDown, Check } from 'lucide-react-native';
-import { colors, spacing, borderRadius, typography, shadows } from '../styles/theme';
+import { colors, spacing, borderRadius, typography } from '../styles/theme';
 
 interface FilterPickerProps {
   label: string;
@@ -16,48 +16,68 @@ interface FilterPickerProps {
 }
 
 export default function FilterPicker({ label, value, options, onSelect, flex = 1 }: FilterPickerProps) {
-  const [modalVisible, setModalVisible] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [layout, setLayout] = useState({ x: 0, y: 0, width: 0, height: 0 });
+  const viewRef = React.useRef<View>(null);
 
   const handleSelect = (val: string) => {
     onSelect(val);
-    setModalVisible(false);
+    setIsOpen(false);
+  };
+
+  const onTriggerPress = () => {
+    if (viewRef.current) {
+      viewRef.current.measure((fx, fy, width, height, px, py) => {
+        setLayout({ x: px, y: py, width, height });
+        setIsOpen(true);
+      });
+    }
   };
 
   return (
-    <View style={{ flex }}>
+    <View style={{ flex }} ref={viewRef} collapsable={false}>
       <TouchableOpacity 
-        style={styles.trigger} 
-        activeOpacity={0.7}
-        onPress={() => setModalVisible(true)}
+        style={[styles.trigger, isOpen && styles.triggerOpen]} 
+        activeOpacity={0.8}
+        onPress={onTriggerPress}
       >
         <View style={styles.triggerContent}>
           <Text style={styles.label}>{label}: </Text>
           <Text style={styles.value} numberOfLines={1}>{value}</Text>
         </View>
-        <ChevronDown size={14} color={colors.textSecondary} />
+        <ChevronDown 
+          size={14} 
+          color={isOpen ? '#4ADE80' : colors.textSecondary} 
+          style={{ transform: [{ rotate: isOpen ? '180deg' : '0deg' }] }}
+        />
       </TouchableOpacity>
 
       <Modal
-        animationType="fade"
+        visible={isOpen}
         transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
+        animationType="none"
+        onRequestClose={() => setIsOpen(false)}
       >
-        <Pressable 
-          style={styles.modalOverlay} 
-          onPress={() => setModalVisible(false)}
-        >
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select {label}</Text>
-              <View style={styles.modalTitleUnderline} />
-            </View>
-
-            <FlatList
-              data={options}
-              keyExtractor={(item) => item}
-              renderItem={({ item }) => (
+        <Pressable style={styles.modalBackdrop} onPress={() => setIsOpen(false)}>
+          <View 
+            style={[
+              styles.dropdownContent, 
+              { 
+                top: layout.y + layout.height + 4, 
+                left: layout.x, 
+                width: layout.width 
+              }
+            ]}
+          >
+            <ScrollView 
+              bounces={false}
+              showsVerticalScrollIndicator={true}
+              style={{ maxHeight: 250 }}
+              contentContainerStyle={{ paddingVertical: 4 }}
+            >
+              {options.map((item) => (
                 <TouchableOpacity 
+                  key={item}
                   style={styles.optionItem}
                   onPress={() => handleSelect(item)}
                 >
@@ -68,20 +88,17 @@ export default function FilterPicker({ label, value, options, onSelect, flex = 1
                     {item === 'All' ? `All ${label}s` : item}
                   </Text>
                   {value === item && (
-                    <Check size={16} color={colors.primary} />
+                    <Check size={16} color="#4ADE80" />
                   )}
                 </TouchableOpacity>
-              )}
-              ItemSeparatorComponent={() => <View style={styles.separator} />}
-            />
+              ))}
+            </ScrollView>
           </View>
         </Pressable>
       </Modal>
     </View>
   );
 }
-
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   trigger: {
@@ -93,8 +110,12 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: 'rgba(255,255,255,0.08)',
     minHeight: 44,
+  },
+  triggerOpen: {
+    borderColor: '#4ADE80',
+    backgroundColor: '#1A211E',
   },
   triggerContent: {
     flexDirection: 'row',
@@ -104,72 +125,48 @@ const styles = StyleSheet.create({
   },
   label: { 
     ...typography.small, 
-    color: colors.textMuted, 
+    color: 'rgba(255,255,255,0.4)', 
     fontSize: 12,
     fontWeight: '600'
   },
   value: { 
     ...typography.small, 
-    color: colors.primary, 
+    color: '#FFFFFF', 
     fontSize: 12,
     fontWeight: '700',
     flexShrink: 1
   },
-
-  modalOverlay: {
+  modalBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(5, 7, 8, 0.85)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing.xl,
+    backgroundColor: 'transparent',
   },
-  modalContent: {
-    width: '100%',
-    maxHeight: SCREEN_HEIGHT * 0.6,
-    backgroundColor: '#111518',
-    borderRadius: borderRadius.lg,
+  dropdownContent: {
+    position: 'absolute',
+    backgroundColor: '#1A211E',
+    borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: '#22272A',
-    ...shadows.soft,
+    borderColor: 'rgba(74,222,128,0.2)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+    elevation: 10,
     overflow: 'hidden',
-  },
-  modalHeader: {
-    padding: spacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: '#22272A',
-    backgroundColor: '#161B19',
-  },
-  modalTitle: {
-    ...typography.bodyBold,
-    color: '#FFFFFF',
-    fontSize: 14,
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-  },
-  modalTitleUnderline: {
-    width: 24,
-    height: 2,
-    backgroundColor: colors.primary,
-    marginTop: 4,
   },
   optionItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: spacing.lg,
-    backgroundColor: '#111518',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   optionText: {
     ...typography.body,
-    color: colors.textSecondary,
-    fontSize: 15,
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 14,
   },
   optionTextActive: {
     color: '#FFFFFF',
     fontWeight: '700',
-  },
-  separator: {
-    height: 1,
-    backgroundColor: '#1A1F22',
   },
 });

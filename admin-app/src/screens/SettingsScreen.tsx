@@ -213,32 +213,49 @@ export default function SettingsScreen({ navigation }: any) {
 
         {/* RESOURCES & SUPPORT */}
         <View style={{ marginHorizontal: spacing.xl, marginBottom: spacing.xl }}>
-          <Text style={styles.sectionHeader}>RESOURCES & SUPPORT</Text>
+          <View style={styles.sectionHeaderRow}>
+            <Text style={styles.sectionHeader}>RESOURCES & SUPPORT</Text>
+          </View>
 
-          <GlassCard color="#4ADE80" noPadding style={{ marginBottom: spacing.md }}>
-            <View style={styles.resourceCardFull}>
-              <BookOpen size={18} color="#4ADE80" style={{ marginBottom: spacing.sm }} />
-              <Text style={styles.resourceCardTitle}>Documentation</Text>
-              <Text style={styles.resourceCardSub}>API references, CLI guides, and architecture schemas.</Text>
-            </View>
-          </GlassCard>
+          <TouchableOpacity activeOpacity={0.8} onPress={handleDocumentation}>
+            <GlassCard color="#4ADE80" noPadding style={{ marginBottom: spacing.md, marginHorizontal: 0 }}>
+              <View style={styles.resourceCardFull}>
+                <View style={styles.resourceIconWrapper}>
+                  <BookOpen size={20} color="#4ADE80" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.resourceCardTitle}>Documentation</Text>
+                  <Text style={styles.resourceCardSub}>API references, CLI guides, and architecture schemas.</Text>
+                </View>
+                <ChevronRight size={18} color="rgba(255,255,255,0.2)" />
+              </View>
+            </GlassCard>
+          </TouchableOpacity>
 
           <View style={styles.resourceGrid}>
-            <GlassCard color="#A78BFA" noPadding style={{ flex: 1 }}>
-              <View style={styles.resourceCardHalf}>
-                <Headset size={16} color="#A78BFA" style={{ marginBottom: spacing.sm }} />
-                <Text style={styles.resourceCardTitle}>Support</Text>
-                <Text style={styles.resourceCardSub}>Direct line to specialists.</Text>
-              </View>
-            </GlassCard>
+            <TouchableOpacity activeOpacity={0.8} onPress={handleSupport} style={{ flex: 1 }}>
+              <GlassCard color="#A78BFA" noPadding style={{ marginHorizontal: 0 }}>
+                <View style={styles.resourceCardHalf}>
+                  <View style={[styles.resourceIconWrapper, { marginBottom: spacing.md, backgroundColor: 'rgba(167,139,250,0.1)' }]}>
+                    <Headset size={18} color="#A78BFA" />
+                  </View>
+                  <Text style={styles.resourceCardTitle}>Support</Text>
+                  <Text style={styles.resourceCardSub}>Direct line to our infrastructure specialists.</Text>
+                </View>
+              </GlassCard>
+            </TouchableOpacity>
 
-            <GlassCard color="rgba(255,255,255,0.4)" noPadding style={{ flex: 1 }}>
-              <View style={styles.resourceCardHalf}>
-                <Shield size={16} color="rgba(255,255,255,0.4)" style={{ marginBottom: spacing.sm }} />
-                <Text style={styles.resourceCardTitle}>Privacy</Text>
-                <Text style={styles.resourceCardSub}>Security protocols.</Text>
-              </View>
-            </GlassCard>
+            <TouchableOpacity activeOpacity={0.8} onPress={handlePrivacy} style={{ flex: 1 }}>
+              <GlassCard color="rgba(255,255,255,0.4)" noPadding style={{ marginHorizontal: 0 }}>
+                <View style={styles.resourceCardHalf}>
+                  <View style={[styles.resourceIconWrapper, { marginBottom: spacing.md, backgroundColor: 'rgba(255,255,255,0.05)' }]}>
+                    <Shield size={18} color="rgba(255,255,255,0.4)" />
+                  </View>
+                  <Text style={styles.resourceCardTitle}>Privacy</Text>
+                  <Text style={styles.resourceCardSub}>Our automated data handling protocols.</Text>
+                </View>
+              </GlassCard>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -309,6 +326,7 @@ const styles = StyleSheet.create({
   heroRole: { ...typography.captionBold, color: 'rgba(255,255,255,0.4)', fontSize: 13, letterSpacing: 1.5, marginBottom: 4 },
 
   sectionHeader: { ...typography.captionBold, color: '#FFFFFF', fontSize: 13, letterSpacing: 1.5, marginBottom: spacing.md },
+  sectionHeaderRow: { marginBottom: spacing.sm },
 
   accountRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 4 },
   toggleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.03)', paddingBottom: spacing.md, marginBottom: spacing.md },
@@ -317,12 +335,26 @@ const styles = StyleSheet.create({
   toggleTitle: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 15, marginBottom: 2 },
   toggleSub: { ...typography.caption, color: 'rgba(255,255,255,0.4)', fontSize: 13, lineHeight: 14 },
 
-  resourceCardFull: { padding: spacing.xl },
+  resourceCardFull: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    padding: spacing.xl,
+    paddingRight: spacing.lg
+  },
+  resourceIconWrapper: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    backgroundColor: 'rgba(74,222,128,0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.lg
+  },
   resourceCardTitle: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 16, marginBottom: 4 },
   resourceCardSub: { ...typography.caption, color: 'rgba(255,255,255,0.5)', fontSize: 13, lineHeight: 16 },
 
   resourceGrid: { flexDirection: 'row', gap: spacing.md },
-  resourceCardHalf: { padding: spacing.lg, minHeight: 120 },
+  resourceCardHalf: { padding: spacing.xl, minHeight: 160, justifyContent: 'flex-start' },
 
   logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 18 },
   logoutBtnText: { ...typography.bodyBold, color: '#F87171', fontSize: 14, fontWeight: '900', letterSpacing: 0.5 },

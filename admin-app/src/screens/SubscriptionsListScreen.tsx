@@ -199,6 +199,20 @@ export default function SubscriptionsListScreen({ navigation }: any) {
             </View>
           </View>
         </View>
+        
+        {/* Sticky Search Bar */}
+        <View style={styles.stickySearchWrap}>
+          <View style={styles.searchContainer}>
+            <Search size={18} color="#666" style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search by endpoint name or dest..."
+              placeholderTextColor="#666"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
+        </View>
       </BlurView>
 
       <FlatList
@@ -212,17 +226,6 @@ export default function SubscriptionsListScreen({ navigation }: any) {
           <View style={styles.pageHeader}>
             <Text style={styles.pageTitle}>Active Subscriptions</Text>
             <Text style={styles.pageSubtitle}>Manage high-availability webhooks and data stream listeners.</Text>
-
-            <View style={styles.searchContainer}>
-              <Search size={18} color="#666" style={styles.searchIcon} />
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Search by endpoint name or dest..."
-                placeholderTextColor="#666"
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-              />
-            </View>
           </View>
         }
         ListFooterComponent={
@@ -313,6 +316,9 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row', alignItems: 'center', backgroundColor: '#181C1A',
     borderRadius: borderRadius.md, paddingHorizontal: spacing.lg, paddingVertical: 10
+  },
+  stickySearchWrap: {
+    marginTop: spacing.md,
   },
   searchIcon: { marginRight: spacing.sm },
   searchInput: { flex: 1, fontSize: 16, color: '#FFFFFF', padding: 0 },

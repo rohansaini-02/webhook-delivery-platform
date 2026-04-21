@@ -79,15 +79,38 @@ export default function LoginScreen({ navigation }: any) {
     setLoading(true);
     setError('');
     try {
-      const { loginSettings } = require('../services/api');
-      const res = await loginSettings({ username: username.trim(), password: password.trim() });
+      const { loginSettings, API_BASE } = require('../services/api');
+      console.log('[LOGIN] Attempting login at:', `${API_BASE}/auth/login`);
+      const cleanUsername = username.trim();
+      const cleanPassword = password.trim();
+      const res = await loginSettings({ username: cleanUsername, password: cleanPassword });
+
+      // Guard: localtunnel sometimes returns HTML instead of JSON (interstitial page)
+      if (typeof res.data === 'string' && res.data.includes('<!DOCTYPE html>')) {
+        console.error('[LOGIN] Tunnel returned HTML instead of JSON. Interstitial might be blocked.');
+        setError('Tunnel error: Received HTML instead of JSON. Please try again.');
+        return;
+      }
+
       const { apiKey, username: returnedUsername } = res.data.data;
       await login(returnedUsername, apiKey);
     } catch (e: any) {
+      console.error('[LOGIN] Error details:', {
+        status: e.response?.status,
+        data: e.response?.data,
+        message: e.message
+      });
+
       if (e.message?.includes('Network Error')) {
-        setError('Network Connection Failed. Ensure your API is running and accessible.');
+        setError('Network Connection Failed. Check your internet tunnel.');
+      } else if (e.response?.status >= 500) {
+        setError(`Server Error (${e.response.status}). The backend or tunnel might be down.`);
+      } else if (e.response?.status === 404) {
+        setError('API Endpoint not found (404). Check your Expo URL configuration.');
+      } else if (e.response?.data?.message) {
+        setError(e.response.data.message);
       } else {
-        setError(e.response?.data?.message || 'Invalid credentials. Please try again.');
+        setError(`Connect Failed (${e.response?.status || 'Unknown'}). Please check your tunnel.`);
       }
     } finally {
       setLoading(false);

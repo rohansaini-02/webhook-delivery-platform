@@ -12,41 +12,46 @@ import UserAvatar from '../components/UserAvatar';
 
 const { width } = Dimensions.get('window');
 
-const AnimatedBar = ({ height, isLatest, delay, percentage }: { height: number, isLatest: boolean, delay: number, percentage: number }) => {
+const AnimatedBar = ({ height, delay, percentage }: { height: number, delay: number, percentage: number }) => {
   const animHeight = useRef(new Animated.Value(0)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    animHeight.setValue(0);
-    opacity.setValue(0);
-    Animated.sequence([
-      Animated.delay(delay),
-      Animated.parallel([
-        Animated.timing(animHeight, {
-          toValue: height,
-          duration: 800,
-          easing: Easing.out(Easing.exp),
-          useNativeDriver: false,
-        }),
-        Animated.sequence([
-          Animated.delay(200),
+    if (percentage > 0) {
+      animHeight.setValue(0);
+      opacity.setValue(0);
+      Animated.sequence([
+        Animated.delay(delay),
+        Animated.parallel([
+          Animated.timing(animHeight, {
+            toValue: height,
+            duration: 800,
+            easing: Easing.out(Easing.exp),
+            useNativeDriver: false,
+          }),
           Animated.timing(opacity, {
             toValue: 1,
             duration: 600,
             useNativeDriver: false,
           }),
         ]),
-      ]),
-    ]).start();
-  }, [height]);
+      ]).start();
+    }
+  }, [height, percentage]);
+
+  if (percentage === 0) {
+    return (
+      <View style={{ alignItems: 'center', justifyContent: 'flex-end', flex: 1, height: 100 }} />
+    );
+  }
 
   return (
     <View style={{ alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
-      <Animated.Text style={[styles.chartPercText, { opacity }, isLatest && { color: '#4ADE80' }]}>
+      <Animated.Text style={[styles.chartPercText, { opacity }]}>
         {percentage}%
       </Animated.Text>
-      <View style={[styles.chartBarBackground]}>
-        <Animated.View style={[styles.chartBar, { height: animHeight }, isLatest && { backgroundColor: '#4ADE80' }]} />
+      <View style={styles.chartBarWrapper}>
+        <Animated.View style={[styles.chartBar, { height: animHeight }]} />
       </View>
     </View>
   );
@@ -191,11 +196,9 @@ export default function DashboardScreen({ navigation }: any) {
     dlq: s?.dlq?.toString() || "0",
   };
 
-  const chartBars = metrics?.chartData || [0, 0, 0, 0, 0, 0, 0]; // Heights for past 7 days
-  const maxChartValue = Math.max(...chartBars, 1); // Avoid division by zero
-  const today = new Date().getDay();
-  const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-  const chartDays = Array.from({ length: 7 }, (_, i) => days[(today - 6 + i + 7) % 7]);
+  const chartBars = metrics?.chartData || [0, 0, 0, 0, 0, 0, 0];
+  const maxChartValue = Math.max(...chartBars, 1);
+  const chartDays = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
   return (
     <View style={styles.container}>
@@ -266,17 +269,16 @@ export default function DashboardScreen({ navigation }: any) {
         {/* System Throughput */}
         <GlassSection 
           title="System Throughput" 
-          subtitle="LAST 7 DAYS ACTIVE PROCESSING"
+          subtitle="WEEKLY PROCESSING TRENDS"
         >
           <View style={styles.chartWrapper}>
             {chartBars.map((h: number, i: number) => {
-              const isLatest = i === 6;
               const percentage = Math.round((h / maxChartValue) * 100);
               const barHeight = (h / maxChartValue) * 80;
               return (
                 <View key={i} style={styles.chartCol}>
-                  <AnimatedBar height={barHeight} isLatest={isLatest} percentage={percentage} delay={i * 70} />
-                  <Text style={[styles.chartDayText, isLatest && { color: '#4ADE80', marginTop: 8 }]}>{chartDays[i]}</Text>
+                  <AnimatedBar height={barHeight} percentage={percentage} delay={i * 70} />
+                  <Text style={styles.chartDayText}>{chartDays[i]}</Text>
                 </View>
               );
             })}
@@ -423,10 +425,19 @@ const styles = StyleSheet.create({
 
   chartWrapper: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', height: 140, paddingHorizontal: spacing.sm, paddingTop: spacing.md },
   chartCol: { alignItems: 'center', flex: 1, justifyContent: 'flex-end', height: '100%' },
-  chartBarBackground: { width: 22, height: 80, backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 4, justifyContent: 'flex-end' },
-  chartBar: { width: 22, backgroundColor: '#2D3531', borderRadius: 4 },
+  chartBarWrapper: { width: 14, height: 80, justifyContent: 'flex-end', alignItems: 'center' },
+  chartBar: { 
+    width: 14, 
+    backgroundColor: '#4ADE80', 
+    borderRadius: 20,
+    shadowColor: '#4ADE80',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 12,
+    elevation: 8,
+  },
   chartDayText: { ...typography.captionBold, color: 'rgba(255,255,255,0.4)', fontSize: 11, marginTop: 8 },
-  chartPercText: { ...typography.captionBold, color: 'rgba(255,255,255,0.6)', fontSize: 10, letterSpacing: 0.5, marginBottom: 4 },
+  chartPercText: { ...typography.captionBold, color: '#4ADE80', fontSize: 10, letterSpacing: 0.5, marginBottom: 4 },
 
   streamList: { marginTop: spacing.md },
   streamItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: spacing.md, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.03)' },

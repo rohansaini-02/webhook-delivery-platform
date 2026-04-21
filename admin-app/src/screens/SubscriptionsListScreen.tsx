@@ -225,7 +225,7 @@ export default function SubscriptionsListScreen({ navigation }: any) {
         ListHeaderComponent={
           <View style={styles.pageHeader}>
             <Text style={styles.pageTitle}>Active Subscriptions</Text>
-            <Text style={styles.pageSubtitle}>Manage high-availability webhooks and data stream listeners.</Text>
+            <Text style={styles.pageSubtitle}>Manage high-availability webhooks and data delivery listeners.</Text>
           </View>
         }
         ListFooterComponent={
@@ -278,7 +278,7 @@ function extractName(url: string): string {
   try {
     const host = new URL(url).hostname;
     if (host.includes('payments')) return 'Main Payment Gateway';
-    if (host.includes('marketing')) return 'User Onboarding Stream';
+    if (host.includes('marketing')) return 'User Onboarding Delivery';
     if (host.includes('inventory')) return 'Legacy Inventory Sync';
     if (host.includes('bigquery')) return 'Real-time Analytics Dump';
 
@@ -287,7 +287,7 @@ function extractName(url: string): string {
       ? parts[parts.length - 2].charAt(0).toUpperCase() + parts[parts.length - 2].slice(1) + ' Server'
       : host;
   } catch {
-    return 'Stream Target';
+    return 'Delivery Target';
   }
 }
 

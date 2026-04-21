@@ -125,7 +125,7 @@ export default function CreateSubscriptionScreen({ navigation }: any) {
         {/* Page Titles */}
         <View style={styles.pageHeader}>
           <Text style={styles.pageTitle}>Create Pipeline</Text>
-          <Text style={styles.pageSubtitle}>Configure a new data stream orchestrator by defining your destination endpoint.</Text>
+          <Text style={styles.pageSubtitle}>Configure a new data delivery orchestrator by defining your destination endpoint.</Text>
         </View>
 
         <GlassCard title="ENDPOINT CONFIGURATION" color="#4ADE80">

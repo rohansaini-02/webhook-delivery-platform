@@ -165,7 +165,7 @@ export default function DashboardScreen({ navigation }: any) {
         fetchDeliveries()
       ]);
       setMetrics(metricsRes.data.data);
-      setRecentDeliveries(deliveriesRes.data.data?.slice(0, 5) || []);
+      setRecentDeliveries(deliveriesRes.data.data?.slice(0, 10) || []);
     } catch (e) {
       console.error('Dashboard load error:', e);
     } finally {
@@ -312,18 +312,18 @@ export default function DashboardScreen({ navigation }: any) {
               return (
                 <TouchableOpacity
                   key={delivery.id}
-                  style={[styles.streamItem, isLast && { borderBottomWidth: 0, paddingBottom: 0 }]}
+                  style={[styles.deliveryItem, isLast && { borderBottomWidth: 0, paddingBottom: 0 }]}
                   onPress={() => handleLogPress(delivery.id)}
                 >
-                  <View style={styles.streamLeft}>
-                    <Text style={styles.streamIdText}>{delivery.event?.id?.substring(0, 12)}</Text>
-                    <Text style={styles.streamNameText}>{delivery.event?.type}</Text>
+                  <View style={styles.deliveryLeft}>
+                    <Text style={styles.deliveryIdText}>{delivery.event?.id?.substring(0, 12)}</Text>
+                    <Text style={styles.deliveryNameText}>{delivery.event?.type}</Text>
                   </View>
-                  <View style={styles.streamRight}>
+                  <View style={styles.deliveryRight}>
                     <View style={[styles.statusPillSmall, { backgroundColor: statusBg, borderColor: statusColor + '20' }]}>
                       <Text style={[styles.statusPillTextSmall, { color: statusColor }]}>{delivery.status}</Text>
                     </View>
-                    <Text style={styles.streamTimeText}>{timeStr}</Text>
+                    <Text style={styles.deliveryTimeText}>{timeStr}</Text>
                   </View>
                 </TouchableOpacity>
               )
@@ -331,7 +331,7 @@ export default function DashboardScreen({ navigation }: any) {
           </View>
 
           <TouchableOpacity style={styles.viewAllDarkBtn} onPress={() => navigation.getParent()?.navigate('Logs')}>
-            <Text style={styles.viewAllDarkBtnText}>VIEW ALL STREAMS</Text>
+            <Text style={styles.viewAllDarkBtnText}>VIEW ALL DELIVERIES</Text>
             <ChevronRight size={14} color="#4ADE80" style={{ marginLeft: 4 }} />
           </TouchableOpacity>
         </GlassSection>
@@ -439,16 +439,16 @@ const styles = StyleSheet.create({
   chartDayText: { ...typography.captionBold, color: 'rgba(255,255,255,0.4)', fontSize: 11, marginTop: 8 },
   chartPercText: { ...typography.captionBold, color: '#4ADE80', fontSize: 10, letterSpacing: 0.5, marginBottom: 4 },
 
-  streamList: { marginTop: spacing.md },
-  streamItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: spacing.md, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.03)' },
-  streamLeft: { flex: 1 },
-  streamIdText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: 'rgba(255,255,255,0.9)', fontSize: 15, marginBottom: 4 },
-  streamNameText: { ...typography.caption, color: 'rgba(255,255,255,0.5)', fontSize: 13 },
+  deliveryList: { marginTop: spacing.md },
+  deliveryItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: spacing.md, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.03)' },
+  deliveryLeft: { flex: 1 },
+  deliveryIdText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: 'rgba(255,255,255,0.9)', fontSize: 15, marginBottom: 4 },
+  deliveryNameText: { ...typography.caption, color: 'rgba(255,255,255,0.5)', fontSize: 13 },
 
-  streamRight: { alignItems: 'flex-end', justifyContent: 'center' },
+  deliveryRight: { alignItems: 'flex-end', justifyContent: 'center' },
   statusPillSmall: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, borderWidth: 1, marginBottom: 4 },
   statusPillTextSmall: { ...typography.captionBold, fontSize: 11, letterSpacing: 0.5, textTransform: 'uppercase' },
-  streamTimeText: { ...typography.caption, color: 'rgba(255,255,255,0.4)', fontSize: 13 },
+  deliveryTimeText: { ...typography.caption, color: 'rgba(255,255,255,0.4)', fontSize: 13 },
 
   viewAllDarkBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',

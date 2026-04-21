@@ -2,22 +2,77 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, FlatList,
   RefreshControl, ActivityIndicator, Platform, TextInput, ScrollView,
+  Animated, Pressable
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import { User, Search, Filter, Calendar, ChevronDown, ChevronUp, RotateCcw, ChevronRight } from 'lucide-react-native';
 import { fetchDeliveries, fetchEventTypes } from '../services/api';
 import { colors, spacing, borderRadius, typography, shadows } from '../styles/theme';
 import UserAvatar from '../components/UserAvatar';
 import FilterPicker from '../components/FilterPicker';
-import PremiumCard from '../components/PremiumCard';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const LogCard = React.memo(({ log, timeStr, dateStr, statusColor, statusBg, statusBorder, statusText, statusCode, onPress }: any) => {
+  const scale = React.useRef(new Animated.Value(1)).current;
+  const translateY = React.useRef(new Animated.Value(0)).current;
+  const glowOpacity = React.useRef(new Animated.Value(0.3)).current;
+
+  const animateIn = () => {
+    Animated.parallel([
+      Animated.spring(scale, { toValue: 1.01, useNativeDriver: true }),
+      Animated.spring(translateY, { toValue: -2, useNativeDriver: true }),
+      Animated.timing(glowOpacity, { toValue: 1, duration: 250, useNativeDriver: true })
+    ]).start();
+  };
+
+  const animateOut = () => {
+    Animated.parallel([
+      Animated.spring(scale, { toValue: 1, useNativeDriver: true }),
+      Animated.spring(translateY, { toValue: 0, useNativeDriver: true }),
+      Animated.timing(glowOpacity, { toValue: 0.3, duration: 250, useNativeDriver: true })
+    ]).start();
+  };
+
   return (
-    <PremiumCard
+    <AnimatedPressable
       onPress={onPress}
-      glowColor={statusColor}
-      style={{ marginBottom: spacing.md }}
+      onPressIn={animateIn}
+      onPressOut={animateOut}
+      {...(Platform.OS === 'web' ? { onHoverIn: animateIn, onHoverOut: animateOut } : {})}
+      style={[
+        styles.logCardContainer,
+        { transform: [{ scale }, { translateY }] }
+      ]}
     >
-      <View style={styles.cardContent}>
+      {/* Glow Layer */}
+      <Animated.View style={[styles.glowLayer, { opacity: glowOpacity, shadowColor: statusColor }]} />
+      
+      {/* Base Glass Layer */}
+      <View style={styles.glassContainer}>
+        {Platform.OS === 'web' ? (
+          <View style={[styles.absoluteFill, { backgroundColor: 'rgba(20,25,22,0.7)', backdropFilter: 'blur(20px)' } as any]} />
+        ) : (
+          <BlurView intensity={25} tint="dark" style={styles.absoluteFill} />
+        )}
+        
+        {/* Gradients */}
+        <LinearGradient
+          colors={['rgba(20,25,22,0.9)', 'rgba(24,20,28,0.88)', 'rgba(10,15,12,0.85)']} 
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.absoluteFill}
+        />
+        <LinearGradient
+          colors={['rgba(120, 255, 180, 0.08)', 'transparent', 'transparent']}
+          start={{ x: 1, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={styles.absoluteFill}
+        />
+        
+        {/* Content */}
+        <View style={styles.cardContent}>
           <View style={styles.cardHeader}>
             <View style={{ flex: 1 }}>
               <Text style={styles.eventType} numberOfLines={1}>{log.event?.type}</Text>
@@ -44,7 +99,8 @@ const LogCard = React.memo(({ log, timeStr, dateStr, statusColor, statusBg, stat
             </View>
           </View>
         </View>
-    </PremiumCard>
+      </View>
+    </AnimatedPressable>
   );
 });
 

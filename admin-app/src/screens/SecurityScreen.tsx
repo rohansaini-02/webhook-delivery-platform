@@ -1,13 +1,62 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView,
-  TextInput, Platform, Alert
+  TextInput, Platform, Alert, Animated, Pressable
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import { ChevronLeft, Cpu, Copy, RefreshCw, Eye, EyeOff, Lock, ShieldCheck, CheckCircle2, Laptop, Smartphone } from 'lucide-react-native';
 import * as Clipboard from 'expo-clipboard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, spacing, borderRadius, typography } from '../styles/theme';
 import { updatePasswordReq, regenerateApiKeyReq, setApiKey as setApiStorage } from '../services/api';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+const GlassCard = ({ children, title, subtitle, color = '#4ADE80', style, noPadding = false }: any) => {
+  const scale = useRef(new Animated.Value(1)).current;
+  const glowOpacity = useRef(new Animated.Value(0.3)).current;
+
+  const animateIn = () => {
+    Animated.parallel([
+      Animated.spring(scale, { toValue: 1.01, useNativeDriver: true }),
+      Animated.timing(glowOpacity, { toValue: 0.8, duration: 300, useNativeDriver: true })
+    ]).start();
+  };
+
+  const animateOut = () => {
+    Animated.parallel([
+      Animated.spring(scale, { toValue: 1, useNativeDriver: true }),
+      Animated.timing(glowOpacity, { toValue: 0.3, duration: 300, useNativeDriver: true })
+    ]).start();
+  };
+
+  return (
+    <Animated.View style={[styles.cardContainer, style, { transform: [{ scale }] }]}>
+      <Animated.View style={[styles.glowLayer, { opacity: glowOpacity, shadowColor: color }]} />
+      <View style={styles.glassContainer}>
+        {Platform.OS === 'web' ? (
+          <View style={[styles.absoluteFill, { backgroundColor: 'rgba(20,25,22,0.7)', backdropFilter: 'blur(20px)' } as any]} />
+        ) : (
+          <BlurView intensity={20} tint="dark" style={styles.absoluteFill} />
+        )}
+        <LinearGradient
+          colors={['rgba(28,34,32,0.9)', 'rgba(15,18,17,0.85)']}
+          style={styles.absoluteFill}
+        />
+        <View style={[styles.cardContent, noPadding && { padding: 0 }]}>
+          {title && (
+            <View style={styles.cardHeaderRow}>
+               <Text style={styles.cardHeaderLabel}>{title}</Text>
+               {subtitle && <Text style={[styles.cardHeaderLabelRight, { color }]}>{subtitle}</Text>}
+            </View>
+          )}
+          {children}
+        </View>
+      </View>
+    </Animated.View>
+  );
+};
 
 export default function SecurityScreen({ navigation }: any) {
   // API Key state
@@ -131,7 +180,8 @@ export default function SecurityScreen({ navigation }: any) {
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
             <ChevronLeft size={24} color="#FFFFFF" />
           </TouchableOpacity>
-          <Text style={styles.headerTitleText}>Security & Access</Text>
+          <Text style={styles.headerTitleText}>Settings</Text>
+          <Text style={styles.slashText}> / Security</Text>
         </View>
       </View>
 
@@ -147,12 +197,7 @@ export default function SecurityScreen({ navigation }: any) {
         </View>
 
         {/* API INFRASTRUCTURE */}
-        <View style={styles.sectionContainer}>
-          <View style={styles.sectionHeaderRow}>
-            <Cpu size={14} color="#4ADE80" style={{marginRight: 8}} />
-            <Text style={styles.sectionTitle}>API INFRASTRUCTURE</Text>
-          </View>
-
+        <GlassCard title="API INFRASTRUCTURE" color="#4ADE80">
           <Text style={styles.inputLabel}>PRODUCTION ACCESS KEY</Text>
           
           <View style={styles.apiKeyBox}>
@@ -184,15 +229,10 @@ export default function SecurityScreen({ navigation }: any) {
           <Text style={styles.apiSubtext}>
             ℹ Last rotated 14 days ago. Key provides full administrative access.
           </Text>
-        </View>
+        </GlassCard>
 
         {/* AUTHENTICATION STRATEGY */}
-        <View style={styles.sectionContainer}>
-          <View style={styles.sectionHeaderRow}>
-            <Lock size={14} color="#4ADE80" style={{marginRight: 8}} />
-            <Text style={styles.sectionTitle}>AUTHENTICATION STRATEGY</Text>
-          </View>
-
+        <GlassCard title="AUTHENTICATION STRATEGY" color="#A78BFA">
           <Text style={styles.inputLabel}>CURRENT PASSWORD</Text>
           <View style={styles.inputBox}>
             <TextInput
@@ -262,36 +302,28 @@ export default function SecurityScreen({ navigation }: any) {
           <TouchableOpacity style={styles.updateGreenBtn} onPress={handleUpdateCredentials}>
             <Text style={styles.updateGreenBtnText}>Update Credentials</Text>
           </TouchableOpacity>
-        </View>
+        </GlassCard>
 
         {/* SAFETY PROTOCOL */}
-        <View style={styles.sectionContainer}>
-          <View style={styles.sectionHeaderRow}>
-            <ShieldCheck size={14} color="#4ADE80" style={{marginRight: 8}} />
-            <Text style={styles.sectionTitle}>SAFETY PROTOCOL</Text>
-          </View>
-
+        <GlassCard title="SAFETY PROTOCOL" color="#FBBF24">
           <View style={styles.bulletRow}>
-            <CheckCircle2 size={12} color="#4ADE80" style={styles.bulletIcon} />
+            <CheckCircle2 size={12} color="#FBBF24" style={styles.bulletIcon} />
             <Text style={styles.bulletText}>Never commit your API keys to version control systems like Git. Use environment variables.</Text>
           </View>
           
           <View style={styles.bulletRow}>
-            <CheckCircle2 size={12} color="#4ADE80" style={styles.bulletIcon} />
+            <CheckCircle2 size={12} color="#FBBF24" style={styles.bulletIcon} />
             <Text style={styles.bulletText}>Enable Multi-Factor Authentication (MFA) to add an extra layer of structural integrity to your login.</Text>
           </View>
 
           <View style={styles.bulletRow}>
-            <CheckCircle2 size={12} color="#4ADE80" style={styles.bulletIcon} />
+            <CheckCircle2 size={12} color="#FBBF24" style={styles.bulletIcon} />
             <Text style={styles.bulletText}>Rotate your production keys every 90 days to minimize the blast radius of potential leaks.</Text>
           </View>
-        </View>
+        </GlassCard>
 
         {/* ACTIVE SESSIONS */}
-        <View style={styles.sectionContainer}>
-          <Text style={[styles.sectionTitle, { marginBottom: spacing.lg }]}>ACTIVE SESSIONS</Text>
-          
-          {/* macOS */}
+        <GlassCard title="ACTIVE SESSIONS" color="#4ADE80">
           <View style={styles.sessionRow}>
             <View style={styles.sessionIconBox}>
                <Laptop size={14} color="#4ADE80" />
@@ -302,9 +334,8 @@ export default function SecurityScreen({ navigation }: any) {
             </View>
           </View>
 
-          {/* iPhone */}
           <View style={styles.sessionRow}>
-            <View style={[styles.sessionIconBox, { backgroundColor: '#1A212B' }]}>
+            <View style={[styles.sessionIconBox, { backgroundColor: 'rgba(255,255,255,0.03)' }]}>
                <Smartphone size={14} color={colors.textSecondary} />
             </View>
             <View style={styles.sessionTextCol}>
@@ -316,7 +347,7 @@ export default function SecurityScreen({ navigation }: any) {
           <TouchableOpacity style={styles.terminateBtn} onPress={handleTerminateSessions}>
             <Text style={styles.terminateBtnText}>TERMINATE ALL OTHER SESSIONS</Text>
           </TouchableOpacity>
-        </View>
+        </GlassCard>
 
         <View style={{height: 50}}/>
 
@@ -333,31 +364,57 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: spacing.xl, paddingTop: 50, marginBottom: spacing.md },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   backBtn: { padding: 4, marginLeft: -8 },
-  headerTitleText: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 18 },
+  headerTitleText: { ...typography.bodyBold, color: '#4ADE80', fontSize: 16 },
+  slashText: { ...typography.body, color: colors.textSecondary, fontSize: 16 },
 
-  titleSection: { paddingHorizontal: spacing.xl, marginBottom: spacing.xl },
+  titleSection: { paddingHorizontal: spacing.xl, marginVertical: spacing.xl },
   pageTitle: { fontWeight: '800', color: '#FFFFFF', fontSize: 28, letterSpacing: -0.5, marginBottom: spacing.sm },
   pageSubtitle: { ...typography.body, color: colors.textSecondary, fontSize: 15, lineHeight: 18 },
 
-  sectionContainer: { marginHorizontal: spacing.xl, backgroundColor: '#161B1E', borderRadius: borderRadius.md, padding: spacing.xl, marginBottom: spacing.md },
-  sectionHeaderRow: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.lg },
-  sectionTitle: { ...typography.captionBold, color: '#FFFFFF', fontSize: 13, letterSpacing: 1.5 },
-
-  inputLabel: { ...typography.captionBold, color: colors.textMuted, fontSize: 12, letterSpacing: 1, marginBottom: 6 },
+  cardContainer: {
+    marginBottom: spacing.md,
+    borderRadius: borderRadius.lg,
+    marginHorizontal: spacing.xl,
+  },
+  glowLayer: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: borderRadius.lg,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 4,
+    backgroundColor: 'transparent',
+  },
+  glassContainer: {
+    borderRadius: borderRadius.lg,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.15)',
+  },
+  absoluteFill: { ...StyleSheet.absoluteFillObject },
+  cardContent: { padding: spacing.xl },
   
-  apiKeyBox: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#0B0D10', borderWidth: 1, borderColor: '#1F262B', borderRadius: borderRadius.sm, paddingHorizontal: spacing.md, paddingVertical: 12, marginBottom: spacing.md },
+  cardHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.lg },
+  cardHeaderLabel: { ...typography.captionBold, color: 'rgba(255,255,255,0.4)', fontSize: 11, letterSpacing: 2 },
+  cardHeaderLabelRight: { ...typography.captionBold, fontSize: 11, fontWeight: '800' },
+
+  inputLabel: { ...typography.captionBold, color: colors.textMuted, fontSize: 12, letterSpacing: 1, marginBottom: 8 },
+  
+  apiKeyBox: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.3)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)', borderRadius: borderRadius.sm, paddingHorizontal: spacing.md, paddingVertical: 12, marginBottom: spacing.md },
   apiKeyText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: '#E5E7EB', fontSize: 14, letterSpacing: 0.5, flex: 1, marginRight: spacing.sm },
   
   apiActionsRow: { flexDirection: 'row', gap: spacing.md, marginBottom: spacing.md },
-  apiBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#20282C', paddingVertical: 10, borderRadius: borderRadius.sm },
+  apiBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.03)', paddingVertical: 10, borderRadius: borderRadius.sm, borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)' },
   apiBtnText: { ...typography.bodyBold, color: '#E5E7EB', fontSize: 14 },
   
   apiSubtext: { ...typography.caption, color: colors.textMuted, fontSize: 14 },
 
-  inputBox: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#0B0D10', borderWidth: 1, borderColor: '#1F262B', borderRadius: borderRadius.sm, paddingHorizontal: spacing.md, marginBottom: spacing.md },
+  inputBox: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.3)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)', borderRadius: borderRadius.sm, paddingHorizontal: spacing.md, marginBottom: spacing.md },
   passwordInput: { flex: 1, color: '#FFFFFF', fontSize: 15, paddingVertical: 12 },
 
-  updateGreenBtn: { alignItems: 'center', backgroundColor: '#4ADE80', paddingVertical: 14, borderRadius: borderRadius.sm, marginTop: spacing.sm },
+  updateGreenBtn: { alignItems: 'center', backgroundColor: '#4ADE80', paddingVertical: 14, borderRadius: borderRadius.md, marginTop: spacing.sm },
   updateGreenBtnText: { ...typography.bodyBold, color: '#0A0D0C', fontSize: 15 },
 
   bulletRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: spacing.md },

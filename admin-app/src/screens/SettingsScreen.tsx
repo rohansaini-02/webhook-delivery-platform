@@ -1,14 +1,62 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView,
-  Switch, Platform, Alert, Linking
+  Switch, Platform, Alert, Linking, Animated, Pressable
 } from 'react-native';
-import { User, Bell, RotateCcw, BookOpen, Headset, Shield, LogOut } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
+import { User, Bell, RotateCcw, BookOpen, Headset, Shield, LogOut, ChevronRight } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, spacing, borderRadius, typography } from '../styles/theme';
 import { useAuth } from '../context/AuthContext';
 import UserAvatar from '../components/UserAvatar';
-import PremiumCard from '../components/PremiumCard';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+const GlassCard = ({ children, title, subtitle, color = '#4ADE80', style, noPadding = false }: any) => {
+  const scale = useRef(new Animated.Value(1)).current;
+  const glowOpacity = useRef(new Animated.Value(0.3)).current;
+
+  const animateIn = () => {
+    Animated.parallel([
+      Animated.spring(scale, { toValue: 1.01, useNativeDriver: true }),
+      Animated.timing(glowOpacity, { toValue: 0.8, duration: 300, useNativeDriver: true })
+    ]).start();
+  };
+
+  const animateOut = () => {
+    Animated.parallel([
+      Animated.spring(scale, { toValue: 1, useNativeDriver: true }),
+      Animated.timing(glowOpacity, { toValue: 0.3, duration: 300, useNativeDriver: true })
+    ]).start();
+  };
+
+  return (
+    <Animated.View style={[styles.cardContainer, style, { transform: [{ scale }] }]}>
+      <Animated.View style={[styles.glowLayer, { opacity: glowOpacity, shadowColor: color }]} />
+      <View style={styles.glassContainer}>
+        {Platform.OS === 'web' ? (
+          <View style={[styles.absoluteFill, { backgroundColor: 'rgba(20,25,22,0.7)', backdropFilter: 'blur(20px)' } as any]} />
+        ) : (
+          <BlurView intensity={20} tint="dark" style={styles.absoluteFill} />
+        )}
+        <LinearGradient
+          colors={['rgba(28,34,32,0.9)', 'rgba(15,18,17,0.85)']}
+          style={styles.absoluteFill}
+        />
+        <View style={[styles.cardContent, noPadding && { padding: 0 }]}>
+          {title && (
+            <View style={styles.cardHeaderRow}>
+               <Text style={styles.cardHeaderLabel}>{title}</Text>
+               {subtitle && <Text style={[styles.cardHeaderLabelRight, { color }]}>{subtitle}</Text>}
+            </View>
+          )}
+          {children}
+        </View>
+      </View>
+    </Animated.View>
+  );
+};
 
 export default function SettingsScreen({ navigation }: any) {
   const { logout, userEmail } = useAuth();
@@ -115,92 +163,92 @@ export default function SettingsScreen({ navigation }: any) {
         </View>
 
         {/* ACCOUNT & SECURITY */}
-        <View style={styles.sectionBlock}>
-          <Text style={styles.sectionHeader}>ACCOUNT & SECURITY</Text>
-          <PremiumCard
-            style={styles.cardBox}
+        <GlassCard title="ACCOUNT & SECURITY" color="#4ADE80">
+          <TouchableOpacity
+            activeOpacity={0.7}
+            style={styles.accountRow}
             onPress={() => navigation.navigate('SecuritySettings')}
           >
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: spacing.lg }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <View style={[styles.iconBox, { backgroundColor: 'rgba(74,222,128,0.1)', marginRight: 16 }]}>
-                  <Shield size={16} color="#4ADE80" />
-                </View>
-                <View>
-                  <Text style={styles.toggleTitle}>Security & Access</Text>
-                  <Text style={styles.toggleSub}>API Keys, Passwords, Active Sessions</Text>
-                </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+              <View style={[styles.iconBox, { backgroundColor: 'rgba(74,222,128,0.1)', marginRight: 16 }]}>
+                <Shield size={16} color="#4ADE80" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.toggleTitle}>Security & Access</Text>
+                <Text style={styles.toggleSub}>API Keys, Passwords, Active Sessions</Text>
               </View>
             </View>
-          </PremiumCard>
-        </View>
+            <ChevronRight size={16} color="rgba(255,255,255,0.2)" />
+          </TouchableOpacity>
+        </GlassCard>
 
         {/* SYSTEM PREFERENCES */}
-        <View style={styles.sectionBlock}>
-          <Text style={styles.sectionHeader}>SYSTEM PREFERENCES</Text>
-          <PremiumCard>
-            <View style={{ padding: spacing.lg }}>
-              <View style={styles.toggleRow}>
-                <View style={[styles.iconBox, { backgroundColor: 'rgba(74,222,128,0.1)' }]}>
-                  <Bell size={16} color="#4ADE80" />
-                </View>
-                <View style={styles.toggleTextCol}>
-                  <Text style={styles.toggleTitle}>Notifications</Text>
-                  <Text style={styles.toggleSub}>Real-time alerts for node failures</Text>
-                </View>
-                <View onStartShouldSetResponder={() => true} onResponderTerminationRequest={() => false}>
-                  <Switch value={notifications} onValueChange={handleNotificationToggle} trackColor={{ false: '#333A36', true: '#4ADE80' }} thumbColor="#FFFFFF" />
-                </View>
-              </View>
-              <View style={[styles.toggleRow, { borderBottomWidth: 0, paddingBottom: 0, marginBottom: 0 }]}>
-                <View style={[styles.iconBox, { backgroundColor: '#1D2421' }]}>
-                  <RotateCcw size={16} color="#D1D5DB" />
-                </View>
-                <View style={styles.toggleTextCol}>
-                  <Text style={styles.toggleTitle}>Auto-retry</Text>
-                  <Text style={styles.toggleSub}>Automatically restart failed instances</Text>
-                </View>
-                <View onStartShouldSetResponder={() => true} onResponderTerminationRequest={() => false}>
-                  <Switch value={autoRetry} onValueChange={handleAutoRetryToggle} trackColor={{ false: '#333A36', true: '#4ADE80' }} thumbColor="#A0ADC0" />
-                </View>
-              </View>
+        <GlassCard title="SYSTEM PREFERENCES" color="#4ADE80">
+          <View style={styles.toggleRow}>
+            <View style={[styles.iconBox, { backgroundColor: 'rgba(74,222,128,0.1)' }]}>
+              <Bell size={16} color="#4ADE80" />
             </View>
-          </PremiumCard>
-        </View>
+            <View style={styles.toggleTextCol}>
+              <Text style={styles.toggleTitle}>Notifications</Text>
+              <Text style={styles.toggleSub}>Real-time alerts for node failures</Text>
+            </View>
+            <View onStartShouldSetResponder={() => true} onResponderTerminationRequest={() => false}>
+              <Switch value={notifications} onValueChange={handleNotificationToggle} trackColor={{ false: 'rgba(255,255,255,0.05)', true: '#4ADE80' }} thumbColor="#FFFFFF" />
+            </View>
+          </View>
+
+          <View style={[styles.toggleRow, { borderBottomWidth: 0, paddingBottom: 0, marginBottom: 0 }]}>
+            <View style={[styles.iconBox, { backgroundColor: 'rgba(255,255,255,0.03)' }]}>
+              <RotateCcw size={16} color="rgba(255,255,255,0.4)" />
+            </View>
+            <View style={styles.toggleTextCol}>
+              <Text style={styles.toggleTitle}>Auto-retry</Text>
+              <Text style={styles.toggleSub}>Automatically restart failed instances</Text>
+            </View>
+            <View onStartShouldSetResponder={() => true} onResponderTerminationRequest={() => false}>
+              <Switch value={autoRetry} onValueChange={handleAutoRetryToggle} trackColor={{ false: 'rgba(255,255,255,0.05)', true: '#4ADE80' }} thumbColor="rgba(255,255,255,0.6)" />
+            </View>
+          </View>
+        </GlassCard>
 
         {/* RESOURCES & SUPPORT */}
-        <View style={styles.sectionBlock}>
+        <View style={{ marginHorizontal: spacing.xl, marginBottom: spacing.xl }}>
           <Text style={styles.sectionHeader}>RESOURCES & SUPPORT</Text>
-          <PremiumCard onPress={handleDocumentation}>
-            <View style={{ padding: spacing.xl }}>
+
+          <GlassCard color="#4ADE80" noPadding style={{ marginBottom: spacing.md }}>
+            <TouchableOpacity style={styles.resourceCardFull} onPress={handleDocumentation}>
               <BookOpen size={18} color="#4ADE80" style={{ marginBottom: spacing.sm }} />
               <Text style={styles.resourceCardTitle}>Documentation</Text>
               <Text style={styles.resourceCardSub}>API references, CLI guides, and architecture schemas.</Text>
-            </View>
-          </PremiumCard>
+            </TouchableOpacity>
+          </GlassCard>
+
           <View style={styles.resourceGrid}>
-            <PremiumCard onPress={handleSupport} glowColor="#A78BFA" style={{ flex: 1 }}>
-              <View style={{ padding: spacing.lg }}>
+            <GlassCard color="#A78BFA" noPadding style={{ flex: 1 }}>
+              <TouchableOpacity style={styles.resourceCardHalf} onPress={handleSupport}>
                 <Headset size={16} color="#A78BFA" style={{ marginBottom: spacing.sm }} />
                 <Text style={styles.resourceCardTitle}>Support</Text>
-                <Text style={styles.resourceCardSub}>Direct line to infrastructure specialists.</Text>
-              </View>
-            </PremiumCard>
-            <PremiumCard onPress={handlePrivacy} glowColor="#D1D5DB" style={{ flex: 1 }}>
-              <View style={{ padding: spacing.lg }}>
-                <Shield size={16} color="#D1D5DB" style={{ marginBottom: spacing.sm }} />
-                <Text style={styles.resourceCardTitle}>Privacy Policy</Text>
-                <Text style={styles.resourceCardSub}>Data handling and security protocols.</Text>
-              </View>
-            </PremiumCard>
+                <Text style={styles.resourceCardSub}>Direct line line to specialists.</Text>
+              </TouchableOpacity>
+            </GlassCard>
+
+            <GlassCard color="rgba(255,255,255,0.4)" noPadding style={{ flex: 1 }}>
+              <TouchableOpacity style={styles.resourceCardHalf} onPress={handlePrivacy}>
+                <Shield size={16} color="rgba(255,255,255,0.4)" style={{ marginBottom: spacing.sm }} />
+                <Text style={styles.resourceCardTitle}>Privacy</Text>
+                <Text style={styles.resourceCardSub}>Security protocols.</Text>
+              </TouchableOpacity>
+            </GlassCard>
           </View>
         </View>
 
         {/* LOGOUT */}
-        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-          <LogOut size={16} color="#FCA5A5" style={{ marginRight: spacing.sm }} />
-          <Text style={styles.logoutBtnText}>Logout from platform</Text>
-        </TouchableOpacity>
+        <GlassCard color="#F87171" noPadding style={{ marginHorizontal: spacing.xl, marginTop: spacing.lg, marginBottom: spacing.xl }}>
+          <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+            <LogOut size={16} color="#FCA5A5" style={{ marginRight: spacing.sm }} />
+            <Text style={styles.logoutBtnText}>Logout from platform</Text>
+          </TouchableOpacity>
+        </GlassCard>
 
         {/* Build Version */}
         <Text style={styles.versionText}>VERSION 4.2.0-ALPHA • BUILD 88291</Text>
@@ -228,29 +276,56 @@ const styles = StyleSheet.create({
   adminBadge: { position: 'absolute', bottom: 6, left: '15%', right: '15%', backgroundColor: 'rgba(0,0,0,0.6)', paddingVertical: 2, borderRadius: 2 },
   adminBadgeText: { ...typography.captionBold, color: '#FFFFFF', fontSize: 11, textAlign: 'center', letterSpacing: 0.5 },
 
-  heroName: { fontWeight: '800', color: '#FFFFFF', fontSize: 28, marginTop: spacing.md, marginBottom: 2 },
-  heroRole: { ...typography.captionBold, color: colors.textSecondary, fontSize: 13, letterSpacing: 1.5, marginBottom: 4 },
-  heroEmail: { ...typography.body, color: colors.textMuted, fontSize: 15 },
+  cardContainer: {
+    marginBottom: spacing.md,
+    borderRadius: borderRadius.lg,
+    marginHorizontal: spacing.xl,
+  },
+  glowLayer: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: borderRadius.lg,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 4,
+    backgroundColor: 'transparent',
+  },
+  glassContainer: {
+    borderRadius: borderRadius.lg,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.15)',
+  },
+  absoluteFill: { ...StyleSheet.absoluteFillObject },
+  cardContent: { padding: spacing.xl },
+  
+  cardHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.lg },
+  cardHeaderLabel: { ...typography.captionBold, color: 'rgba(255,255,255,0.4)', fontSize: 11, letterSpacing: 2 },
+  cardHeaderLabelRight: { ...typography.captionBold, fontSize: 11, fontWeight: '800' },
 
-  sectionBlock: { marginHorizontal: spacing.xl, marginBottom: spacing.xl },
+  heroName: { fontWeight: '800', color: '#FFFFFF', fontSize: 28, marginTop: spacing.md, marginBottom: 2 },
+  heroRole: { ...typography.captionBold, color: 'rgba(255,255,255,0.4)', fontSize: 13, letterSpacing: 1.5, marginBottom: 4 },
+
   sectionHeader: { ...typography.captionBold, color: '#FFFFFF', fontSize: 13, letterSpacing: 1.5, marginBottom: spacing.md },
 
-  cardBox: { borderRadius: borderRadius.md },
-  toggleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderBottomWidth: 1, borderBottomColor: '#1E2528', paddingBottom: spacing.md, marginBottom: spacing.md },
+  accountRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 4 },
+  toggleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.03)', paddingBottom: spacing.md, marginBottom: spacing.md },
   iconBox: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', marginRight: spacing.md },
   toggleTextCol: { flex: 1, paddingRight: spacing.md },
   toggleTitle: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 15, marginBottom: 2 },
-  toggleSub: { ...typography.caption, color: colors.textMuted, fontSize: 14, lineHeight: 14 },
+  toggleSub: { ...typography.caption, color: 'rgba(255,255,255,0.4)', fontSize: 13, lineHeight: 14 },
 
-  resourceCardFull: { borderRadius: borderRadius.md, marginBottom: spacing.md },
+  resourceCardFull: { padding: spacing.xl },
   resourceCardTitle: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 16, marginBottom: 4 },
-  resourceCardSub: { ...typography.caption, color: colors.textSecondary, fontSize: 14, lineHeight: 16 },
+  resourceCardSub: { ...typography.caption, color: 'rgba(255,255,255,0.5)', fontSize: 13, lineHeight: 16 },
 
   resourceGrid: { flexDirection: 'row', gap: spacing.md },
-  resourceCardHalf: { flex: 1, borderRadius: borderRadius.md },
+  resourceCardHalf: { padding: spacing.lg, minHeight: 120 },
 
-  logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#211215', borderRadius: borderRadius.md, marginHorizontal: spacing.xl, paddingVertical: 16, marginTop: spacing.lg, marginBottom: spacing.xl },
-  logoutBtnText: { ...typography.bodyBold, color: '#FCA5A5', fontSize: 15 },
+  logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 18 },
+  logoutBtnText: { ...typography.bodyBold, color: '#F87171', fontSize: 14, fontWeight: '900', letterSpacing: 0.5 },
 
-  versionText: { ...typography.captionBold, color: colors.textMuted, textAlign: 'center', fontSize: 12, letterSpacing: 2 }
+  versionText: { ...typography.captionBold, color: 'rgba(255,255,255,0.2)', textAlign: 'center', fontSize: 11, letterSpacing: 2 }
 });

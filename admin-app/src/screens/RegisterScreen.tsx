@@ -75,21 +75,33 @@ export default function RegisterScreen({ navigation }: any) {
   };
 
   const handleRegister = async () => {
-    if (!username || !email || !password) {
+    const cleanUsername = username.trim();
+    const cleanEmail = email.trim();
+    const cleanPassword = password.trim();
+
+    if (!cleanUsername || !cleanEmail || !cleanPassword) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
-    if (!isValidPassword(password)) {
+    if (!isValidPassword(cleanPassword)) {
       Alert.alert('Error', 'Password does not meet security requirements.');
       return;
     }
     setLoading(true);
     try {
-      await registerUser({ username, email, password });
+      await registerUser({ 
+        username: cleanUsername, 
+        email: cleanEmail, 
+        password: cleanPassword 
+      });
       Alert.alert('Success', 'Account created successfully! You can now log in.');
       navigation.navigate('Login');
     } catch (e: any) {
-      Alert.alert('Error', e.response?.data?.message || 'Registration failed');
+      if (e.message?.includes('Network Error') || e.response?.status >= 500) {
+        Alert.alert('Connection Error', 'Backend is busy or offline (503). Try again in a moment.');
+      } else {
+        Alert.alert('Error', e.response?.data?.message || 'Registration failed');
+      }
     } finally {
       setLoading(false);
     }

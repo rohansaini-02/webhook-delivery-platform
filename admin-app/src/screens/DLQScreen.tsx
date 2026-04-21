@@ -1,14 +1,62 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView,
-  ActivityIndicator, TextInput, Platform, Alert
+  ActivityIndicator, TextInput, Platform, Alert, Animated, Pressable
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import { User, Search, AlertTriangle, RotateCcw, Trash2, Eye, GitBranch, Clock, ChevronRight, ChevronLeft, ChevronUp } from 'lucide-react-native';
 import { colors, spacing, borderRadius, typography } from '../styles/theme';
 import { fetchDlqDeliveries, purgeDlq, replayAllDlq, replayDlqItem, fetchEventTypes } from '../services/api';
 import UserAvatar from '../components/UserAvatar';
 import FilterPicker from '../components/FilterPicker';
-import PremiumCard from '../components/PremiumCard';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+const GlassCard = ({ children, title, subtitle, color = '#F87171', style, noPadding = false }: any) => {
+  const scale = useRef(new Animated.Value(1)).current;
+  const glowOpacity = useRef(new Animated.Value(0.3)).current;
+
+  const animateIn = () => {
+    Animated.parallel([
+      Animated.spring(scale, { toValue: 1.01, useNativeDriver: true }),
+      Animated.timing(glowOpacity, { toValue: 0.8, duration: 300, useNativeDriver: true })
+    ]).start();
+  };
+
+  const animateOut = () => {
+    Animated.parallel([
+      Animated.spring(scale, { toValue: 1, useNativeDriver: true }),
+      Animated.timing(glowOpacity, { toValue: 0.3, duration: 300, useNativeDriver: true })
+    ]).start();
+  };
+
+  return (
+    <Animated.View style={[styles.cardContainer, style, { transform: [{ scale }] }]}>
+      <Animated.View style={[styles.glowLayer, { opacity: glowOpacity, shadowColor: color }]} />
+      <View style={styles.glassContainer}>
+        {Platform.OS === 'web' ? (
+          <View style={[styles.absoluteFill, { backgroundColor: 'rgba(20,15,15,0.7)', backdropFilter: 'blur(20px)' } as any]} />
+        ) : (
+          <BlurView intensity={20} tint="dark" style={styles.absoluteFill} />
+        )}
+        <LinearGradient
+          colors={['rgba(34,28,28,0.9)', 'rgba(22,15,15,0.85)']}
+          style={styles.absoluteFill}
+        />
+        <View style={[styles.cardContent, noPadding && { padding: 0 }]}>
+          {title && (
+             <View style={styles.cardHeaderRow}>
+               <Text style={styles.cardHeaderLabel}>{title}</Text>
+               {subtitle && <Text style={[styles.cardHeaderLabelRight, { color }]}>{subtitle}</Text>}
+             </View>
+          )}
+          {children}
+        </View>
+      </View>
+    </Animated.View>
+  );
+};
 
 export default function DLQScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true);
@@ -127,6 +175,11 @@ export default function DLQScreen({ navigation }: any) {
     <View style={styles.container}>
       {/* Sticky Header Section */}
       <View style={styles.stickyHeader}>
+        {Platform.OS === 'web' ? (
+          <View style={{...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(10,13,12,0.8)', backdropFilter: 'blur(10px)'} as any} />
+        ) : (
+          <BlurView intensity={15} tint="dark" style={StyleSheet.absoluteFill} />
+        )}
         <View style={styles.headerRow}>
           <View style={styles.headerLeft}>
             <UserAvatar size={30} />
@@ -136,10 +189,10 @@ export default function DLQScreen({ navigation }: any) {
         </View>
 
         <View style={styles.searchWrap}>
-          <Search size={14} color={colors.textSecondary} style={styles.searchIcon} />
+          <Search size={14} color="rgba(255,255,255,0.4)" style={styles.searchIcon} />
           <TextInput
             placeholder="Search by ID or Status..."
-            placeholderTextColor={colors.textMuted}
+            placeholderTextColor="rgba(255,255,255,0.3)"
             style={styles.searchInput}
             value={filterText}
             onChangeText={setFilterText}
@@ -157,8 +210,7 @@ export default function DLQScreen({ navigation }: any) {
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* Dead Letter Queue Alert Container */}
-        <PremiumCard style={styles.alertContainer} glowColor="#F87171">
+        <GlassCard style={{ marginTop: spacing.lg }} color="#F87171">
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
             <AlertTriangle size={12} color="#F87171" style={{ marginRight: 6 }} />
             <Text style={styles.alertLabelText}>DEAD LETTER QUEUE ALERT</Text>
@@ -175,7 +227,7 @@ export default function DLQScreen({ navigation }: any) {
               <Text style={styles.replayAllBtnText}>Replay All</Text>
             </TouchableOpacity>
           </View>
-        </PremiumCard>
+        </GlassCard>
 
         {/* Table Headers */}
         <View style={styles.tableHeaders}>
@@ -196,34 +248,39 @@ export default function DLQScreen({ navigation }: any) {
           })
           .map((item) => {
             return (
-              <PremiumCard
-                key={item.id}
-                style={styles.dlqCard}
-                glowColor="#F59E0B"
-                onPress={() => handleViewItem(item.id)}
+              <GlassCard 
+                key={item.id} 
+                color="#F59E0B" 
+                noPadding 
+                style={{ marginHorizontal: spacing.xl, marginBottom: spacing.md }}
               >
-              <View style={[styles.leftAccent, { backgroundColor: '#F59E0B' }]} />
-              <View style={styles.cardHeaderArea}>
-                <View style={styles.colLeft}>
-                  <Text style={[styles.identifierText, { color: '#F59E0B' }]}>{item.event.type}</Text>
-                  <View style={styles.idPill}>
-                    <Text style={styles.idPillText}>{item.id.substring(0, 8).toUpperCase()}</Text>
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  style={styles.itemInnerRow}
+                  onPress={() => handleViewItem(item.id)}
+                >
+                  <View style={styles.cardHeaderArea}>
+                    <View style={styles.colLeft}>
+                      <Text style={[styles.identifierText, { color: '#F59E0B' }]}>{item.event.type}</Text>
+                      <View style={styles.idPill}>
+                        <Text style={styles.idPillText}>{item.id.substring(0, 8).toUpperCase()}</Text>
+                      </View>
+                    </View>
+                    <View style={styles.colRight}>
+                      <Text style={styles.reasonTitle} numberOfLines={1}>{item.lastStatusCode || 'Failed'}: {item.lastError || 'Unknown Error'}</Text>
+                      <Text style={styles.reasonSub} numberOfLines={1}>Target: {item.subscription.url}</Text>
+                    </View>
                   </View>
-                </View>
-                <View style={styles.colRight}>
-                  <Text style={styles.reasonTitle}>{item.lastStatusCode || 'Failed'}: {item.lastError || 'Unknown Error'}</Text>
-                  <Text style={styles.reasonSub}>Target: {item.subscription.url}</Text>
-                </View>
-              </View>
 
-              <View style={styles.cardActionsArea}>
-                <TouchableOpacity style={styles.iconBtn} onPress={() => handleReplayItem(item.id)}><RotateCcw size={14} color={colors.textSecondary} /></TouchableOpacity>
-                <TouchableOpacity style={styles.iconBtn} onPress={() => handleViewItem(item.id)}><Eye size={14} color={colors.textSecondary} /></TouchableOpacity>
-                <TouchableOpacity style={styles.iconBtn} onPress={() => Alert.alert('Delete', 'Delete feature mock')}><Trash2 size={14} color={colors.textSecondary} /></TouchableOpacity>
-              </View>
-            </PremiumCard>
-          );
-        })}
+                  <View style={styles.cardActionsArea}>
+                    <TouchableOpacity style={styles.iconBtn} onPress={() => handleReplayItem(item.id)}><RotateCcw size={14} color="rgba(255,255,255,0.4)" /></TouchableOpacity>
+                    <TouchableOpacity style={styles.iconBtn} onPress={() => handleViewItem(item.id)}><Eye size={14} color="rgba(255,255,255,0.4)" /></TouchableOpacity>
+                    <TouchableOpacity style={styles.iconBtn} onPress={() => Alert.alert('Delete', 'Delete feature mock')}><Trash2 size={14} color="rgba(255,255,255,0.4)" /></TouchableOpacity>
+                  </View>
+                </TouchableOpacity>
+              </GlassCard>
+            );
+          })}
 
         {/* Pagination Footer */}
         {hasMore && (
@@ -243,14 +300,14 @@ export default function DLQScreen({ navigation }: any) {
         )}
 
         {/* Danger Zone: Purge Queue */}
-        <PremiumCard style={styles.dangerZone} glowColor="#F87171">
+        <GlassCard color="#F87171" style={{ marginTop: spacing.xl, marginHorizontal: spacing.xl }}>
           <Text style={styles.dangerTitle}>Danger Zone</Text>
           <Text style={styles.dangerDesc}>Permanently delete all Dead Letter Queue messages. This action cannot be undone.</Text>
           <TouchableOpacity style={styles.purgeBtnLine} onPress={handlePurge}>
             <Trash2 size={14} color="#F87171" style={{ marginRight: 8 }} />
             <Text style={styles.purgeBtnTextLine}>Purge Entire Queue</Text>
           </TouchableOpacity>
-        </PremiumCard>
+        </GlassCard>
 
 
       </ScrollView>
@@ -277,7 +334,7 @@ const styles = StyleSheet.create({
     zIndex: 10
   },
 
-  alertContainer: { marginHorizontal: spacing.xl, marginBottom: spacing.lg, padding: spacing.xl, borderRadius: borderRadius.md },
+  alertContainer: { marginHorizontal: spacing.xl, marginBottom: spacing.lg, padding: spacing.xl, borderRadius: borderRadius.md, backgroundColor: '#141718', borderWidth: 1, borderColor: 'rgba(248, 113, 113, 0.2)' },
   alertLabelText: { ...typography.captionBold, color: '#F87171', fontSize: 13, letterSpacing: 1 },
   hugeAlertNumber: { fontWeight: '800', fontSize: 32, color: '#FFFFFF', letterSpacing: -0.5, marginBottom: 4 },
   alertDescText: { ...typography.body, color: colors.textSecondary, fontSize: 14, lineHeight: 20, paddingRight: 20, marginBottom: spacing.xl },
@@ -286,7 +343,7 @@ const styles = StyleSheet.create({
   replayAllBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F87171', borderRadius: borderRadius.pill, paddingHorizontal: 16, paddingVertical: 10 },
   replayAllBtnText: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 15 },
 
-  dangerZone: { marginHorizontal: spacing.xl, marginTop: spacing.xl, padding: spacing.lg, borderRadius: borderRadius.md },
+  dangerZone: { marginHorizontal: spacing.xl, marginTop: spacing.xl, padding: spacing.lg, borderRadius: borderRadius.md, borderWidth: 1, borderColor: '#331515', backgroundColor: '#1A0E0E' },
   dangerTitle: { ...typography.bodyBold, color: '#F87171', fontSize: 15, marginBottom: 4 },
   dangerDesc: { ...typography.caption, color: colors.textSecondary, marginBottom: spacing.md },
   purgeBtnLine: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: '#331515', borderRadius: borderRadius.pill, paddingHorizontal: 16, paddingVertical: 12, borderWidth: 1, borderColor: '#5C1C1C' },
@@ -311,7 +368,7 @@ const styles = StyleSheet.create({
   headerLeftLabel: { flex: 1.2 },
   headerRightLabel: { flex: 2 },
 
-  dlqCard: { borderRadius: borderRadius.md, marginHorizontal: spacing.xl, marginBottom: spacing.md, overflow: 'hidden' },
+  dlqCard: { backgroundColor: '#141718', borderRadius: borderRadius.md, marginHorizontal: spacing.xl, marginBottom: spacing.md, borderWidth: 1, borderColor: 'transparent', overflow: 'hidden' },
   leftAccent: { position: 'absolute', left: 0, top: spacing.md, bottom: spacing.md, width: 3, borderTopRightRadius: 2, borderBottomRightRadius: 2 },
 
   cardHeaderArea: { flexDirection: 'row', padding: spacing.lg, paddingLeft: 24, paddingBottom: spacing.sm },
@@ -347,7 +404,35 @@ const styles = StyleSheet.create({
   pageBtn: { backgroundColor: '#22272A', minWidth: 32, height: 32, borderRadius: 4, alignItems: 'center', justifyContent: 'center' },
   pageBtnActive: { backgroundColor: '#F87171', minWidth: 32, height: 32, borderRadius: 4, alignItems: 'center', justifyContent: 'center' },
   pageText: { ...typography.caption, color: colors.textSecondary },
-  pageTextActive: { ...typography.captionBold, color: '#FFFFFF' }
+  pageTextActive: { ...typography.captionBold, color: '#FFFFFF' },
+
+  cardContainer: {
+    marginBottom: spacing.md,
+    borderRadius: borderRadius.lg,
+  },
+  glowLayer: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: borderRadius.lg,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 4,
+    backgroundColor: 'transparent',
+  },
+  glassContainer: {
+    borderRadius: borderRadius.lg,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.15)',
+  },
+  absoluteFill: { ...StyleSheet.absoluteFillObject },
+  cardContent: { padding: spacing.xl },
+  cardHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.lg },
+  cardHeaderLabel: { ...typography.captionBold, color: 'rgba(255,255,255,0.4)', fontSize: 11, letterSpacing: 2 },
+  cardHeaderLabelRight: { ...typography.captionBold, fontSize: 11, fontWeight: '800' },
+  itemInnerRow: { paddingVertical: spacing.md },
 });
 
 

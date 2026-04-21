@@ -2,7 +2,7 @@
     "compilerOptions": {
         "target": "es2022",
         "module": "commonjs",
-        "rootDir": "./",
+        "rootDir": "src",
         "baseUrl": "./",
         "outDir": "./dist",
         "esModuleInterop": true,
@@ -14,11 +14,11 @@
         "types": ["jest", "node"]
     },
     "include": [
-        "src/**/*",
-        "tests/**/*"
+        "src/**/*"
     ],
     "exclude": [
         "node_modules",
-        "dist"
+        "dist",
+        "tests/**/*"
     ]
 }

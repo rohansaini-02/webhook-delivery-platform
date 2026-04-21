@@ -164,7 +164,15 @@ export default function DeliveryLogsScreen({ route, navigation }: any) {
   const filteredLogs = logs.filter((log: any) => {
     // 1. Status Filter
     if (activeStatusFilter !== 'All') {
-      if (log.status !== activeStatusFilter.toUpperCase()) return false;
+      const logStatus = log.status;
+      const filterStatus = activeStatusFilter.toUpperCase();
+      
+      // If user filters for FAILED, show both FAILED and DLQ
+      if (filterStatus === 'FAILED') {
+        if (logStatus !== 'FAILED' && logStatus !== 'DLQ') return false;
+      } else {
+        if (logStatus !== filterStatus) return false;
+      }
     }
     // 2. Event Type Filter
     if (activeEventFilter !== 'All') {
@@ -240,7 +248,7 @@ export default function DeliveryLogsScreen({ route, navigation }: any) {
         <View style={styles.filterControlsRow}>
           <FilterPicker
             label="Status"
-            value={activeStatusFilter === 'All' ? 'All' : activeStatusFilter}
+            value={activeStatusFilter}
             options={['All', 'SUCCESS', 'FAILED', 'PENDING']}
             onSelect={setActiveStatusFilter}
           />

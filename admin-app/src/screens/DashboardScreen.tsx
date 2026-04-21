@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView,
-  ActivityIndicator, Platform, Dimensions, Animated, Easing
+  ActivityIndicator, Platform, Dimensions, Animated, Easing, Pressable
 } from 'react-native';
-import { User, Search, Star, CheckCircle, AlertTriangle, Inbox } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
+import { Search, Star, CheckCircle, AlertTriangle, Inbox, ChevronRight } from 'lucide-react-native';
 import { colors, spacing, borderRadius, typography } from '../styles/theme';
 import { fetchMetrics, fetchDeliveries } from '../services/api';
 import UserAvatar from '../components/UserAvatar';
-import PremiumCard from '../components/PremiumCard';
 
 const { width } = Dimensions.get('window');
 
@@ -44,7 +45,93 @@ const AnimatedBar = ({ height, isLatest, delay, percentage }: { height: number, 
       <Animated.Text style={[styles.chartPercText, { opacity }, isLatest && { color: '#4ADE80' }]}>
         {percentage}%
       </Animated.Text>
-      <Animated.View style={[styles.chartBar, { height: animHeight }, isLatest && { backgroundColor: '#4ADE80' }]} />
+      <View style={[styles.chartBarBackground]}>
+        <Animated.View style={[styles.chartBar, { height: animHeight }, isLatest && { backgroundColor: '#4ADE80' }]} />
+      </View>
+    </View>
+  );
+};
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+const GlassSubCard = ({ label, value, subInfo, subInfoColor, icon: Icon, color }: any) => {
+  const scale = useRef(new Animated.Value(1)).current;
+  const translateY = useRef(new Animated.Value(0)).current;
+  const glowOpacity = useRef(new Animated.Value(0.3)).current;
+
+  const animateIn = () => {
+    Animated.parallel([
+      Animated.spring(scale, { toValue: 1.02, useNativeDriver: true }),
+      Animated.spring(translateY, { toValue: -2, useNativeDriver: true }),
+      Animated.timing(glowOpacity, { toValue: 1, duration: 250, useNativeDriver: true })
+    ]).start();
+  };
+
+  const animateOut = () => {
+    Animated.parallel([
+      Animated.spring(scale, { toValue: 1, useNativeDriver: true }),
+      Animated.spring(translateY, { toValue: 0, useNativeDriver: true }),
+      Animated.timing(glowOpacity, { toValue: 0.3, duration: 250, useNativeDriver: true })
+    ]).start();
+  };
+
+  return (
+    <AnimatedPressable
+      onPressIn={animateIn}
+      onPressOut={animateOut}
+      style={[styles.gridCardContainer, { transform: [{ scale }, { translateY }] }]}
+    >
+      <Animated.View style={[styles.glowLayer, { opacity: glowOpacity, shadowColor: color }]} />
+      <View style={styles.glassInner}>
+        {Platform.OS === 'web' ? (
+          <View style={[styles.absoluteFill, { backgroundColor: 'rgba(20,25,22,0.7)', backdropFilter: 'blur(20px)' } as any]} />
+        ) : (
+          <BlurView intensity={20} tint="dark" style={styles.absoluteFill} />
+        )}
+        <LinearGradient
+          colors={['rgba(25,30,28,0.9)', 'rgba(15,18,17,0.85)']}
+          style={styles.absoluteFill}
+        />
+        <View style={styles.subCardContent}>
+          <View style={styles.cardHeaderRow}>
+            <Text style={styles.cardHeaderLabel}>{label}</Text>
+            <Icon size={14} color={color} />
+          </View>
+          <Text style={styles.hugeMetricLeft}>{value}</Text>
+          <Text style={[styles.metricSubInfo, { color: subInfoColor }]}>{subInfo}</Text>
+        </View>
+      </View>
+    </AnimatedPressable>
+  );
+};
+
+const GlassSection = ({ children, title, subtitle, showHeader = true, style }: any) => {
+  return (
+    <View style={[styles.sectionWrapper, style]}>
+      {Platform.OS === 'web' ? (
+        <View style={[styles.absoluteFill, { backgroundColor: 'rgba(20,25,22,0.6)', backdropFilter: 'blur(25px)', borderRadius: 16 } as any]} />
+      ) : (
+        <BlurView intensity={15} tint="dark" style={[styles.absoluteFill, { borderRadius: 16 }]} />
+      )}
+      <LinearGradient
+        colors={['rgba(25,30,28,0.8)', 'rgba(10,12,11,0.9)']}
+        style={[styles.absoluteFill, { borderRadius: 16 }]}
+      />
+      <View style={styles.sectionInner}>
+        {showHeader && (
+          <View style={styles.chartHeaderRow}>
+            <View>
+              <Text style={styles.sectionTitle}>{title}</Text>
+              <Text style={styles.sectionSubtitle}>{subtitle}</Text>
+            </View>
+            <View style={{ flexDirection: 'row', gap: 6 }}>
+              <View style={[styles.dotLegend, { backgroundColor: '#4ADE80' }]} />
+              <View style={[styles.dotLegend, { backgroundColor: '#A78BFA' }]} />
+            </View>
+          </View>
+        )}
+        {children}
+      </View>
     </View>
   );
 };
@@ -138,69 +225,54 @@ export default function DashboardScreen({ navigation }: any) {
         {/* Top 2x2 Grid */}
         <View style={styles.gridContainer}>
           <View style={styles.gridRow}>
-            {/* TOTAL EVENTS */}
-            <PremiumCard glowColor="#4ADE80" style={styles.gridCard}>
-              <View style={styles.cardHeaderRow}>
-                <Text style={styles.cardHeaderLabel}>TOTAL EVENTS</Text>
-                <Star size={12} color="#4ADE80" />
-              </View>
-              <Text style={styles.hugeMetricLeft}>{m.events}</Text>
-              <Text style={[styles.metricSubInfo, { color: '#4ADE80' }]}>+12.5% from peak</Text>
-            </PremiumCard>
-
-            {/* SUCCESSFUL */}
-            <PremiumCard glowColor="#4ADE80" style={styles.gridCard}>
-              <View style={styles.cardHeaderRow}>
-                <Text style={styles.cardHeaderLabel}>SUCCESSFUL</Text>
-                <CheckCircle size={12} color="#4ADE80" />
-              </View>
-              <Text style={styles.hugeMetricLeft}>{m.success}</Text>
-              <View style={{ height: 3, backgroundColor: '#4ADE80', borderRadius: 2, marginTop: 10, width: '90%' }} />
-            </PremiumCard>
+            <GlassSubCard 
+              label="TOTAL EVENTS" 
+              value={m.events} 
+              subInfo="+12.5% from peak" 
+              subInfoColor="#4ADE80" 
+              icon={Star} 
+              color="#4ADE80" 
+            />
+            <GlassSubCard 
+              label="SUCCESSFUL" 
+              value={m.success} 
+              subInfo="98.2% avg" 
+              subInfoColor="#4ADE80" 
+              icon={CheckCircle} 
+              color="#4ADE80" 
+            />
           </View>
 
           <View style={styles.gridRow}>
-            {/* FAILED */}
-            <PremiumCard glowColor="#F87171" style={styles.gridCard}>
-              <View style={styles.cardHeaderRow}>
-                <Text style={styles.cardHeaderLabel}>FAILED</Text>
-                <AlertTriangle size={12} color="#F87171" />
-              </View>
-              <Text style={styles.hugeMetricLeft}>{m.failed}</Text>
-              <Text style={[styles.metricSubInfo, { color: '#F87171' }]}>-5% from avg</Text>
-            </PremiumCard>
-
-            {/* DLQ COUNT */}
-            <PremiumCard glowColor="#A78BFA" style={styles.gridCard}>
-              <View style={styles.cardHeaderRow}>
-                <Text style={styles.cardHeaderLabel}>DLQ COUNT</Text>
-                <Inbox size={12} color="#A78BFA" />
-              </View>
-              <Text style={styles.hugeMetricLeft}>{m.dlq}</Text>
-              <Text style={[styles.metricSubInfo, { color: colors.textSecondary }]}>Pending action</Text>
-            </PremiumCard>
+            <GlassSubCard 
+              label="FAILED" 
+              value={m.failed} 
+              subInfo="-5% from avg" 
+              subInfoColor="#F87171" 
+              icon={AlertTriangle} 
+              color="#F87171" 
+            />
+            <GlassSubCard 
+              label="DLQ COUNT" 
+              value={m.dlq} 
+              subInfo="Pending action" 
+              subInfoColor={colors.textSecondary} 
+              icon={Inbox} 
+              color="#A78BFA" 
+            />
           </View>
         </View>
 
         {/* System Throughput */}
-        <PremiumCard style={styles.cardSection}>
-          <View style={styles.chartHeaderRow}>
-            <View>
-              <Text style={styles.sectionTitle}>System Throughput</Text>
-              <Text style={styles.sectionSubtitle}>LAST 7 DAYS ACTIVE PROCESSING</Text>
-            </View>
-            <View style={{ flexDirection: 'row', gap: 6 }}>
-              <View style={[styles.dotLegend, { backgroundColor: '#4ADE80' }]} />
-              <View style={[styles.dotLegend, { backgroundColor: '#A78BFA' }]} />
-            </View>
-          </View>
-
+        <GlassSection 
+          title="System Throughput" 
+          subtitle="LAST 7 DAYS ACTIVE PROCESSING"
+        >
           <View style={styles.chartWrapper}>
             {chartBars.map((h: number, i: number) => {
-              const isLatest = i === 6; // index 6 is today
+              const isLatest = i === 6;
               const percentage = Math.round((h / maxChartValue) * 100);
-              // Max height is ~80px for the visual chart bar
-              const barHeight = h === 0 ? 4 : Math.max(4, (h / maxChartValue) * 80);
+              const barHeight = (h / maxChartValue) * 80;
               return (
                 <View key={i} style={styles.chartCol}>
                   <AnimatedBar height={barHeight} isLatest={isLatest} percentage={percentage} delay={i * 70} />
@@ -209,13 +281,14 @@ export default function DashboardScreen({ navigation }: any) {
               );
             })}
           </View>
-        </PremiumCard>
+        </GlassSection>
 
         {/* Recent Deliveries */}
-        <PremiumCard style={styles.cardSection}>
-          <Text style={styles.sectionTitle}>Recent Deliveries</Text>
-          <Text style={styles.sectionSubtitle}>LIVE INGEST MONITORING</Text>
-
+        <GlassSection 
+          title="Recent Deliveries" 
+          subtitle="LIVE INGEST MONITORING"
+          style={{ marginTop: spacing.md }}
+        >
           <View style={styles.streamList}>
             {recentDeliveries.length === 0 ? (
               <Text style={{ color: colors.textMuted, fontSize: 14, textAlign: 'center', padding: 20 }}>No deliveries recorded today.</Text>
@@ -230,9 +303,9 @@ export default function DashboardScreen({ navigation }: any) {
               const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
               let statusColor = '#A78BFA';
-              let statusBg = 'rgba(167,139,250,0.15)';
-              if (delivery.status === 'SUCCESS') { statusColor = '#4ADE80'; statusBg = 'rgba(74,222,128,0.15)'; }
-              else if (delivery.status === 'FAILED' || delivery.status === 'DLQ') { statusColor = '#F87171'; statusBg = 'rgba(248,113,113,0.15)'; }
+              let statusBg = 'rgba(167,139,250,0.1)';
+              if (delivery.status === 'SUCCESS') { statusColor = '#4ADE80'; statusBg = 'rgba(74,222,128,0.1)'; }
+              else if (delivery.status === 'FAILED' || delivery.status === 'DLQ') { statusColor = '#F87171'; statusBg = 'rgba(248,113,113,0.1)'; }
 
               return (
                 <TouchableOpacity
@@ -240,16 +313,13 @@ export default function DashboardScreen({ navigation }: any) {
                   style={[styles.streamItem, isLast && { borderBottomWidth: 0, paddingBottom: 0 }]}
                   onPress={() => handleLogPress(delivery.id)}
                 >
-                  {delivery.status === 'RETRYING' && (
-                    <View style={{ position: 'absolute', left: -16, top: 0, bottom: 0, width: 2, backgroundColor: '#A78BFA' }} />
-                  )}
                   <View style={styles.streamLeft}>
                     <Text style={styles.streamIdText}>{delivery.event?.id?.substring(0, 12)}</Text>
                     <Text style={styles.streamNameText}>{delivery.event?.type}</Text>
                   </View>
                   <View style={styles.streamRight}>
-                    <View style={[styles.statusPill, { backgroundColor: statusBg }]}>
-                      <Text style={[styles.statusPillText, { color: statusColor }]}>{delivery.status}</Text>
+                    <View style={[styles.statusPillSmall, { backgroundColor: statusBg, borderColor: statusColor + '20' }]}>
+                      <Text style={[styles.statusPillTextSmall, { color: statusColor }]}>{delivery.status}</Text>
                     </View>
                     <Text style={styles.streamTimeText}>{timeStr}</Text>
                   </View>
@@ -258,11 +328,11 @@ export default function DashboardScreen({ navigation }: any) {
             })}
           </View>
 
-          {/* View All Streams Footer */}
           <TouchableOpacity style={styles.viewAllDarkBtn} onPress={() => navigation.getParent()?.navigate('Logs')}>
             <Text style={styles.viewAllDarkBtnText}>VIEW ALL STREAMS</Text>
+            <ChevronRight size={14} color="#4ADE80" style={{ marginLeft: 4 }} />
           </TouchableOpacity>
-        </PremiumCard>
+        </GlassSection>
 
         <View style={{ height: 100 }} />
 
@@ -285,52 +355,96 @@ const styles = StyleSheet.create({
   searchWrap: {
     flexDirection: 'row', alignItems: 'center', marginHorizontal: spacing.xl, marginBottom: spacing.lg,
     paddingHorizontal: spacing.lg, paddingVertical: 12, borderRadius: borderRadius.md,
-    backgroundColor: '#161B19', borderWidth: 1, borderColor: 'rgba(255,255,255,0.03)'
+    backgroundColor: '#161B19', borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)'
   },
   searchIcon: { marginRight: spacing.sm },
   searchInput: { flex: 1, ...typography.body, color: colors.textPrimary, padding: 0, fontSize: 16 },
 
-  gridContainer: { marginHorizontal: spacing.xl, marginBottom: spacing.xl, gap: spacing.md },
+  gridContainer: { marginHorizontal: spacing.xl, marginBottom: spacing.md, gap: spacing.md },
   gridRow: { flexDirection: 'row', gap: spacing.md },
-  gridCard: { flex: 1, borderRadius: borderRadius.md, padding: spacing.md, paddingVertical: spacing.lg },
-  cardHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
-  cardHeaderLabel: { ...typography.captionBold, color: colors.textMuted, fontSize: 13, letterSpacing: 1 },
-  hugeMetricLeft: { fontWeight: '800', fontSize: 32, color: '#FFFFFF', letterSpacing: -0.5, marginBottom: 2 },
-  metricSubInfo: { ...typography.caption, fontSize: 14 },
+  
+  gridCardContainer: {
+    flex: 1,
+    borderRadius: borderRadius.md,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.4,
+    shadowRadius: 20,
+    elevation: 8,
+  },
+  glowLayer: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: borderRadius.md,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.1,
+    shadowRadius: 15,
+    elevation: 4,
+    backgroundColor: 'transparent',
+  },
+  glassInner: {
+    borderRadius: borderRadius.md,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.12)',
+  },
+  subCardContent: {
+    padding: spacing.md,
+    paddingVertical: spacing.lg,
+  },
+  absoluteFill: { ...StyleSheet.absoluteFillObject },
 
-  cardSection: { borderRadius: borderRadius.md, marginHorizontal: spacing.xl, padding: spacing.lg, marginBottom: spacing.md },
+  sectionWrapper: {
+    marginHorizontal: spacing.xl,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.5,
+    shadowRadius: 30,
+    elevation: 10,
+  },
+  sectionInner: {
+    padding: spacing.lg,
+  },
+
+  cardHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
+  cardHeaderLabel: { ...typography.captionBold, color: 'rgba(255,255,255,0.5)', fontSize: 13, letterSpacing: 1.5 },
+  hugeMetricLeft: { fontWeight: '800', fontSize: 32, color: '#FFFFFF', letterSpacing: -0.5, marginBottom: 2 },
+  metricSubInfo: { ...typography.caption, fontSize: 13, fontWeight: '600' },
 
   chartHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: spacing.xl },
-  sectionTitle: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 16, marginBottom: 2 },
-  sectionSubtitle: { ...typography.captionBold, color: colors.textMuted, fontSize: 12, letterSpacing: 1 },
+  sectionTitle: { ...typography.bodyBold, color: '#FFFFFF', fontSize: 17, marginBottom: 2 },
+  sectionSubtitle: { ...typography.captionBold, color: 'rgba(255,255,255,0.4)', fontSize: 11, letterSpacing: 1.5 },
   dotLegend: { width: 6, height: 6, borderRadius: 3, marginTop: 4 },
 
   chartWrapper: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', height: 140, paddingHorizontal: spacing.sm, paddingTop: spacing.md },
   chartCol: { alignItems: 'center', flex: 1, justifyContent: 'flex-end', height: '100%' },
-  chartBar: { width: 22, backgroundColor: '#333A36', borderRadius: 4 },
-  chartDayText: { ...typography.captionBold, color: colors.textMuted, fontSize: 12, marginTop: 8 },
-  chartPercText: { ...typography.captionBold, color: colors.textMuted, fontSize: 10, letterSpacing: 0, marginBottom: 4 },
+  chartBarBackground: { width: 22, height: 80, backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 4, justifyContent: 'flex-end' },
+  chartBar: { width: 22, backgroundColor: '#2D3531', borderRadius: 4 },
+  chartDayText: { ...typography.captionBold, color: 'rgba(255,255,255,0.4)', fontSize: 11, marginTop: 8 },
+  chartPercText: { ...typography.captionBold, color: 'rgba(255,255,255,0.6)', fontSize: 10, letterSpacing: 0.5, marginBottom: 4 },
 
-  streamList: { marginTop: spacing.lg },
-  streamItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingBottom: spacing.lg, marginBottom: spacing.md, borderBottomWidth: 1, borderBottomColor: '#1F2422' },
+  streamList: { marginTop: spacing.md },
+  streamItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: spacing.md, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.03)' },
   streamLeft: { flex: 1 },
-  streamIdText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: '#FFFFFF', fontSize: 15, marginBottom: 4 },
-  streamNameText: { ...typography.caption, color: colors.textSecondary },
+  streamIdText: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', color: 'rgba(255,255,255,0.9)', fontSize: 15, marginBottom: 4 },
+  streamNameText: { ...typography.caption, color: 'rgba(255,255,255,0.5)', fontSize: 13 },
 
   streamRight: { alignItems: 'flex-end', justifyContent: 'center' },
-  statusPill: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, marginBottom: 4 },
-  statusPillText: { ...typography.captionBold, fontSize: 12, letterSpacing: 0.5 },
-  streamTimeText: { ...typography.caption, color: colors.textSecondary, fontSize: 14 },
+  statusPillSmall: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, borderWidth: 1, marginBottom: 4 },
+  statusPillTextSmall: { ...typography.captionBold, fontSize: 11, letterSpacing: 0.5, textTransform: 'uppercase' },
+  streamTimeText: { ...typography.caption, color: 'rgba(255,255,255,0.4)', fontSize: 13 },
 
   viewAllDarkBtn: {
-    alignItems: 'center', justifyContent: 'center',
-    backgroundColor: '#0A0D0C', borderRadius: borderRadius.md,
-    paddingVertical: 14, marginTop: spacing.md
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 12,
+    paddingVertical: 14, marginTop: spacing.lg, borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)'
   },
-  viewAllDarkBtnText: { ...typography.bodyBold, color: '#4ADE80', fontSize: 14, letterSpacing: 0.5 },
+  viewAllDarkBtnText: { ...typography.bodyBold, color: '#4ADE80', fontSize: 13, letterSpacing: 1 },
   emptyState: { paddingVertical: spacing.xxxl, alignItems: 'center' },
   emptyStateText: { ...typography.body, color: colors.textMuted, textAlign: 'center', paddingHorizontal: spacing.xxl },
 });
-
-
-

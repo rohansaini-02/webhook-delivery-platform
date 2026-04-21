@@ -81,7 +81,7 @@ export default function SubscriptionDetailsScreen({ route, navigation }: any) {
       setLoadingTypes(true);
       const res = await fetchEventTypes();
       const types = res.data.data || [];
-      if (!types.includes('test.dlq')) types.push('test.dlq');
+
       setEventTypes(types);
     } catch (e) {
       console.error(e);

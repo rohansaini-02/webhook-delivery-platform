@@ -148,8 +148,7 @@ export default function DeliveryLogsScreen({ route, navigation }: any) {
     try {
       const res = await fetchEventTypes();
       const types = res.data.data || [];
-      // Always include test.dlq if not present for discovery
-      if (!types.includes('test.dlq')) types.push('test.dlq');
+
       setEventTypes(types);
     } catch (e) {
       console.error('Fetch types error:', e);

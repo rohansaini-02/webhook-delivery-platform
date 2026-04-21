@@ -3,32 +3,39 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 
-// Auto-detect backend IP
-const debuggerHost = Constants.expoConfig?.hostUri;
-let ip = '10.110.155.246'; // Your current Wi-Fi IPv4: 10.110.155.246
-
-if (__DEV__) {
-  if (!Constants.isDevice && Platform.OS === 'android') {
-    ip = '10.0.2.2';
-  } else if (!Constants.isDevice && Platform.OS === 'ios') {
-    ip = '127.0.0.1';
-  } else if (debuggerHost) {
-    // Priority 1: Use the actual Expo dev host IP
-    ip = debuggerHost.split(':')[0];
+// ─── API Base URL Configuration ──────────────────────────────────────────────
+// Production: Set EXPO_PUBLIC_API_URL in your .env before building the APK
+// Development: Auto-detects from Expo dev server
+const resolveApiUrl = (): string => {
+  // 1. Always prefer explicitly set URL (production builds use this)
+  if (process.env.EXPO_PUBLIC_API_URL) {
+    return process.env.EXPO_PUBLIC_API_URL;
   }
-}
 
-// Ensure we aren't using an Expo tunnel URL for the API (unless configured)
-if (ip.includes('exp.direct') || ip.includes('anonymous')) {
-  console.warn('[API] Expo Tunnel detected. Standard local connections might fail. Defaulting back to current local IP.');
-  ip = '10.110.155.246';
-}
+  // 2. Development: auto-detect from Expo
+  if (__DEV__) {
+    const debuggerHost = Constants.expoConfig?.hostUri;
 
-// 1. Prioritize explicitly provided URL (Best for dealing with AP Isolation on physical devices)
-// 2. Fall back to local LAN IP resolution
-export const API_BASE = process.env.EXPO_PUBLIC_API_URL || `http://${ip}:3000/api/v1`;
+    if (!Constants.isDevice && Platform.OS === 'android') {
+      return 'http://10.0.2.2:3000/api/v1'; // Android emulator
+    }
+    if (!Constants.isDevice && Platform.OS === 'ios') {
+      return 'http://127.0.0.1:3000/api/v1'; // iOS simulator
+    }
+    if (debuggerHost) {
+      const ip = debuggerHost.split(':')[0];
+      return `http://${ip}:3000/api/v1`;
+    }
+  }
 
-console.log('[API] ===== CONNECTING TO:', API_BASE, '=====');
+  // 3. Fallback
+  return 'http://localhost:3000/api/v1';
+};
+
+export const API_BASE = resolveApiUrl();
+
+console.log('[API] Connecting to:', API_BASE);
+
 
 const api = axios.create({
   baseURL: API_BASE,

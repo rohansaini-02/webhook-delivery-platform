@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "npx tsx watch src/server.ts",
     "start": "node dist/server.js",
-    "build": "tsc",
+    "build": "npx prisma generate && tsc",
+    "postinstall": "npx prisma generate",
     "test": "jest",
     "worker": "node dist/workers/start.worker.js"
   },

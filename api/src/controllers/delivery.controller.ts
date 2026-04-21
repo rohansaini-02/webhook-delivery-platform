@@ -11,7 +11,11 @@ export const getDeliveries = async (req: Request, res: Response): Promise<void> 
   const deliveries = await prisma.delivery.findMany({
     where: {
       adminId: req.admin?.id,
-      ...(status && typeof status === 'string' ? { status: status as any } : {}),
+      ...(status && typeof status === 'string' 
+        ? (status === 'FAILED' 
+            ? { status: { in: ['FAILED', 'DLQ'] } as any } 
+            : { status: status as any }) 
+        : {}),
       ...(subscriptionId && typeof subscriptionId === 'string' ? { subscriptionId } : {}),
     },
     ...(cursor ? { cursor: { id: cursor as string }, skip: 1 } : {}),

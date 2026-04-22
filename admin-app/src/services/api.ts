@@ -7,28 +7,7 @@ import { Platform } from 'react-native';
 // Production: Set EXPO_PUBLIC_API_URL in your .env before building the APK
 // Development: Auto-detects from Expo dev server
 const resolveApiUrl = (): string => {
-  // 1. Always prefer explicitly set URL (production builds use this)
-  if (process.env.EXPO_PUBLIC_API_URL) {
-    return process.env.EXPO_PUBLIC_API_URL;
-  }
-
-  // 2. Development: auto-detect from Expo
-  if (__DEV__) {
-    const debuggerHost = Constants.expoConfig?.hostUri;
-
-    if (!Constants.isDevice && Platform.OS === 'android') {
-      return 'http://10.0.2.2:3000/api/v1'; // Android emulator
-    }
-    if (!Constants.isDevice && Platform.OS === 'ios') {
-      return 'http://127.0.0.1:3000/api/v1'; // iOS simulator
-    }
-    if (debuggerHost) {
-      const ip = debuggerHost.split(':')[0];
-      return `http://${ip}:3000/api/v1`;
-    }
-  }
-
-  // 3. Fallback to production backend URL if env is missing
+  // Hardcoded to strictly point to Render for the production testing phase
   return 'https://webhook-delivery-platform-nlew.onrender.com/api/v1';
 };
 

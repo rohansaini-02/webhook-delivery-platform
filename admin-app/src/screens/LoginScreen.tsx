@@ -47,16 +47,17 @@ export default function LoginScreen({ navigation }: any) {
         message: e.message
       });
 
+      const { API_BASE } = require('../services/api');
       if (e.message?.includes('Network Error')) {
-        setError('Network Connection Failed. Check your internet tunnel.');
+         setError(`Network Error while reaching: ${API_BASE}. \nDetails: ${e.message}`);
       } else if (e.response?.status >= 500) {
-        setError(`Server Error (${e.response.status}). The backend or tunnel might be down.`);
+        setError(`Server Error (${e.response.status}). The backend is offline.`);
       } else if (e.response?.status === 404) {
-        setError('API Endpoint not found (404). Check your Expo URL configuration.');
+        setError(`API Endpoint not found (404) at ${API_BASE}.`);
       } else if (e.response?.data?.message) {
         setError(e.response.data.message);
       } else {
-        setError(`Connect Failed (${e.response?.status || 'Unknown'}). Please check your tunnel.`);
+        setError(`Connect Failed (${e.response?.status || e.message}).`);
       }
     } finally {
       setLoading(false);

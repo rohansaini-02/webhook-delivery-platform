@@ -45,8 +45,10 @@ export default function RegisterScreen({ navigation }: any) {
       Alert.alert('Success', 'Account created successfully! You can now log in.');
       navigation.navigate('Login');
     } catch (e: any) {
-      if (e.message?.includes('Network Error') || e.response?.status >= 500) {
-        Alert.alert('Connection Error', 'Backend is busy or offline (503). Try again in a moment.');
+      if (e.message?.includes('Network Error')) {
+        Alert.alert('Network Error', `Could not reach backend. Details: ${e.message}`);
+      } else if (e.response?.status >= 500) {
+        Alert.alert('Server Error', `Backend returned ${e.response.status}.`);
       } else {
         Alert.alert('Error', e.response?.data?.message || 'Registration failed');
       }

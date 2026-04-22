@@ -56,20 +56,12 @@ const SubscriptionCard = React.memo(({ item, successRateStr, onPress }: any) => 
         {Platform.OS === 'web' ? (
           <View style={[styles.absoluteFill, { backgroundColor: 'rgba(20,25,22,0.7)', backdropFilter: 'blur(20px)' } as any]} />
         ) : (
-          <BlurView intensity={25} tint="dark" style={styles.absoluteFill} />
+          <BlurView intensity={20} tint="dark" style={styles.absoluteFill} />
         )}
 
         {/* Gradients */}
         <LinearGradient
-          colors={['rgba(20,25,22,0.9)', 'rgba(24,20,28,0.88)', 'rgba(10,15,12,0.85)']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.absoluteFill}
-        />
-        <LinearGradient
-          colors={['rgba(120, 255, 180, 0.08)', 'transparent', 'transparent']}
-          start={{ x: 1, y: 0 }}
-          end={{ x: 0, y: 1 }}
+          colors={['rgba(25,30,28,0.9)', 'rgba(15,18,17,0.85)']}
           style={styles.absoluteFill}
         />
 
@@ -329,27 +321,19 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
     borderRadius: borderRadius.md,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.6,
-    shadowRadius: 40,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 24,
     elevation: 8,
   },
   glowLayer: {
-    ...StyleSheet.absoluteFillObject,
-    borderRadius: borderRadius.md,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.08,
-    shadowRadius: 25,
-    elevation: 4,
-    backgroundColor: 'transparent',
+    display: 'none',
   },
   glassContainer: {
     borderRadius: borderRadius.md,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.06)',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.15)',
+    borderColor: 'rgba(255,255,255,0.08)',
   },
   absoluteFill: {
     ...StyleSheet.absoluteFillObject,

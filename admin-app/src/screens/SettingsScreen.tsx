@@ -217,7 +217,7 @@ export default function SettingsScreen({ navigation }: any) {
             <Text style={styles.sectionHeader}>RESOURCES & SUPPORT</Text>
           </View>
 
-          <TouchableOpacity activeOpacity={0.8} onPress={handleDocumentation}>
+          <View>
             <GlassCard color="#4ADE80" noPadding style={{ marginBottom: spacing.md, marginHorizontal: 0 }}>
               <View style={styles.resourceCardFull}>
                 <View style={styles.resourceIconWrapper}>
@@ -227,13 +227,12 @@ export default function SettingsScreen({ navigation }: any) {
                   <Text style={styles.resourceCardTitle}>Documentation</Text>
                   <Text style={styles.resourceCardSub}>API references, CLI guides, and architecture schemas.</Text>
                 </View>
-                <ChevronRight size={18} color="rgba(255,255,255,0.2)" />
               </View>
             </GlassCard>
-          </TouchableOpacity>
+          </View>
 
           <View style={styles.resourceGrid}>
-            <TouchableOpacity activeOpacity={0.8} onPress={handleSupport} style={{ flex: 1 }}>
+            <View style={{ flex: 1 }}>
               <GlassCard color="#A78BFA" noPadding style={{ marginHorizontal: 0 }}>
                 <View style={styles.resourceCardHalf}>
                   <View style={[styles.resourceIconWrapper, { marginBottom: spacing.md, backgroundColor: 'rgba(167,139,250,0.1)' }]}>
@@ -243,9 +242,9 @@ export default function SettingsScreen({ navigation }: any) {
                   <Text style={styles.resourceCardSub}>Direct line to our infrastructure specialists.</Text>
                 </View>
               </GlassCard>
-            </TouchableOpacity>
+            </View>
 
-            <TouchableOpacity activeOpacity={0.8} onPress={handlePrivacy} style={{ flex: 1 }}>
+            <View style={{ flex: 1 }}>
               <GlassCard color="rgba(255,255,255,0.4)" noPadding style={{ marginHorizontal: 0 }}>
                 <View style={styles.resourceCardHalf}>
                   <View style={[styles.resourceIconWrapper, { marginBottom: spacing.md, backgroundColor: 'rgba(255,255,255,0.05)' }]}>
@@ -255,7 +254,7 @@ export default function SettingsScreen({ navigation }: any) {
                   <Text style={styles.resourceCardSub}>Our automated data handling protocols.</Text>
                 </View>
               </GlassCard>
-            </TouchableOpacity>
+            </View>
           </View>
         </View>
 

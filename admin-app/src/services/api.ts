@@ -28,8 +28,8 @@ const resolveApiUrl = (): string => {
     }
   }
 
-  // 3. Fallback
-  return 'http://localhost:3000/api/v1';
+  // 3. Fallback to production backend URL if env is missing
+  return 'https://webhook-delivery-platform-nlew.onrender.com/api/v1';
 };
 
 export const API_BASE = resolveApiUrl();

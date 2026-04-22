@@ -8,14 +8,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import GlassCard from '../components/GlassCard';
 import { colors, spacing, borderRadius, typography } from '../styles/theme';
 import { useAuth } from '../context/AuthContext';
-import { googleAuth } from '../services/api';
-import * as AuthSession from 'expo-auth-session';
-import * as Google from 'expo-auth-session/providers/google';
-import * as WebBrowser from 'expo-web-browser';
-
-WebBrowser.maybeCompleteAuthSession();
-
-const EXPO_CLIENT_ID = process.env.EXPO_PUBLIC_EXPO_CLIENT_ID;
 
 export default function LoginScreen({ navigation }: any) {
   const { login } = useAuth();
@@ -24,52 +16,6 @@ export default function LoginScreen({ navigation }: any) {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
-  // Use the Expo Proxy for physical devices
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId: EXPO_CLIENT_ID,
-    redirectUri: AuthSession.makeRedirectUri({
-      scheme: 'webhook-admin',
-      path: 'auth/callback'
-    }),
-  });
-
-  // Handle Auth Response
-  React.useEffect(() => {
-    if (response?.type === 'success') {
-      const { code } = response.params;
-      if (code) {
-        // Google Auth Successful
-        handleGoogleCode(code);
-      }
-    } else if (response?.type === 'error') {
-      console.error('[Auth] Google response error:', response);
-      setError('Google Login failed. Please try again.');
-    }
-  }, [response]);
-
-  const handleGoogleCode = async (code: string) => {
-    setLoading(true);
-    try {
-      const redirectUri = AuthSession.makeRedirectUri({
-        scheme: 'webhook-admin',
-        path: 'auth/callback'
-      });
-      
-      console.log('[Auth] Sending code to backend for verification...');
-      // We send the code AND the matching redirectUri so the backend can verify
-      const res = await googleAuth({ code, redirectUri });
-      const { apiKey, username: returnedUsername } = res.data.data;
-      
-      // Successful login handled by navigation
-      await login(returnedUsername, apiKey);
-    } catch (e: any) {
-      console.error('[Auth] Backend exchange failed:', e.response?.data || e.message);
-      setError(e.response?.data?.message || 'Failed to verify Google account with server.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleLogin = async () => {
     if (!username.trim() || !password.trim()) {
@@ -117,17 +63,6 @@ export default function LoginScreen({ navigation }: any) {
     }
   };
 
-  const handleGoogleLogin = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      await promptAsync();
-    } catch (e: any) {
-      console.error('Google Auth Error:', e);
-      setError('Google Auth Failed. Please try again.');
-      setLoading(false);
-    }
-  };
 
   return (
     <View style={styles.container}>
@@ -275,14 +210,6 @@ const styles = StyleSheet.create({
     paddingVertical: 16, alignItems: 'center',
   },
   primaryBtnText: { ...typography.bodyBold, color: colors.textInverse, fontSize: 16 },
-  orDivider: { flexDirection: 'row', alignItems: 'center', marginVertical: spacing.xl },
-  orLine: { flex: 1, height: 1, backgroundColor: colors.border },
-  orText: { marginHorizontal: spacing.md, ...typography.captionBold, color: colors.textMuted },
-  googleBtn: {
-    borderRadius: borderRadius.md, paddingVertical: 16, alignItems: 'center',
-    backgroundColor: '#ffffff', borderWidth: 1, borderColor: colors.borderFocused
-  },
-  googleBtnText: { ...typography.bodyBold, color: '#000000', fontSize: 16 },
   footer: { flexDirection: 'row', justifyContent: 'center', marginTop: spacing.xxxl },
   footerText: { ...typography.body, color: colors.textSecondary },
   footerLink: { ...typography.bodyBold, color: colors.primary },

@@ -14,8 +14,6 @@ const PORT = process.env.PORT || 3000;
 const startServer = async () => {
     // Environment Check
     console.log('--- Backend Health Check ---');
-    console.log('GOOGLE_CLIENT_ID:', process.env.GOOGLE_CLIENT_ID ? '✅ LOADED' : '❌ MISSING');
-    console.log('GOOGLE_CLIENT_SECRET:', process.env.GOOGLE_CLIENT_SECRET ? '✅ LOADED' : '❌ MISSING');
     console.log('BACKEND_URL:', process.env.BACKEND_URL || '❌ NOT SET');
     console.log('---------------------------');
 

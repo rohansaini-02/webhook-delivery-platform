@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { login, updatePassword, regenerateKey, register, googleSignIn, googleCallback } from '../controllers/auth.controller';
+import { login, updatePassword, regenerateKey, register } from '../controllers/auth.controller';
 import { apiKeyAuth } from '../middlewares/auth';
 import { validate } from '../middlewares/validate';
 import { loginSchema, registerSchema, updatePasswordSchema } from '../validators/schemas';
@@ -55,23 +55,6 @@ router.post('/login', validate(loginSchema), login);
  */
 router.post('/register', validate(registerSchema), register);
 
-/**
- * @openapi
- * /api/v1/auth/google:
- *   post:
- *     summary: Authenticate with Google (POST - accepts code or idToken)
- *     tags: [Auth]
- */
-router.post('/google', googleSignIn);
-
-/**
- * @openapi
- * /api/v1/auth/google/callback:
- *   get:
- *     summary: Google OAuth callback - exchanges code and redirects to app
- *     tags: [Auth]
- */
-router.get('/google/callback', googleCallback);
 
 // Protected routes (require current API key in Authorization header)
 /**

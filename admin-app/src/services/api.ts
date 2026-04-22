@@ -77,8 +77,6 @@ export const registerUser = (data: any) => api.post('/auth/register', data);
 export const loginSettings = (data: any) => api.post('/auth/login', data);
 export const updatePasswordReq = (data: any) => api.post('/auth/update-password', data);
 export const regenerateApiKeyReq = () => api.post('/auth/regenerate-key');
-export const googleAuth = (data: { idToken?: string; code?: string; redirectUri?: string }) =>
-  api.post('/auth/google', data);
 
 export const setApiKey = async (key: string) => {
   await AsyncStorage.setItem('apiKey', key);

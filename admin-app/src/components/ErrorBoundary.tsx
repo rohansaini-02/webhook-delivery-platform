@@ -9,15 +9,17 @@ interface Props {
 
 interface State {
   hasError: boolean;
+  error: Error | null;
 }
 
 export default class ErrorBoundary extends Component<Props, State> {
   public state: State = {
-    hasError: false
+    hasError: false,
+    error: null
   };
 
-  public static getDerivedStateFromError(_: Error): State {
-    return { hasError: true };
+  public static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, error };
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
@@ -30,9 +32,17 @@ export default class ErrorBoundary extends Component<Props, State> {
         <View style={styles.container}>
           <Text style={styles.title}>Oops, something went wrong.</Text>
           <Text style={styles.text}>The application encountered an unexpected error.</Text>
+          
+          <View style={styles.errorBox}>
+            <Text style={styles.errorMsg}>{this.state.error?.message}</Text>
+            <Text style={styles.errorStack} numberOfLines={8}>
+              {this.state.error?.stack}
+            </Text>
+          </View>
+
           <PrimaryButton 
             title="Try Again" 
-            onPress={() => this.setState({ hasError: false })} 
+            onPress={() => this.setState({ hasError: false, error: null })} 
             style={styles.button}
           />
         </View>
@@ -66,4 +76,23 @@ const styles = StyleSheet.create({
   button: {
     width: '60%',
   },
+  errorBox: {
+    backgroundColor: '#1A1D1B',
+    padding: 15,
+    borderRadius: 8,
+    width: '100%',
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 82, 82, 0.2)',
+  },
+  errorMsg: {
+    ...typography.bodyBold,
+    color: colors.error,
+    marginBottom: 5,
+  },
+  errorStack: {
+    ...typography.small,
+    color: colors.textMuted,
+    fontFamily: 'System',
+  }
 });

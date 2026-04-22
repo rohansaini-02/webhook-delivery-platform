@@ -291,7 +291,7 @@ export default function DashboardScreen({ navigation }: any) {
           subtitle="LIVE INGEST MONITORING"
           style={{ marginTop: spacing.md }}
         >
-          <View style={styles.streamList}>
+          <View style={styles.deliveryList}>
             {recentDeliveries.length === 0 ? (
               <Text style={{ color: colors.textMuted, fontSize: 14, textAlign: 'center', padding: 20 }}>No deliveries recorded today.</Text>
             ) : null}

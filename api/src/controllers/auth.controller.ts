@@ -11,34 +11,54 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
-  const existingAdmin = await prisma.admin.findUnique({ where: { username } });
-  if (existingAdmin) {
-    res.status(400).json({ status: 'error', message: 'Username is already taken' });
-    return;
+  try {
+    const existingAdmin = await prisma.admin.findUnique({ where: { username } });
+    if (existingAdmin) {
+      res.status(400).json({ status: 'error', message: 'Username is already taken' });
+      return;
+    }
+
+    // Also check for duplicate email if provided
+    if (email) {
+      const existingEmail = await prisma.admin.findUnique({ where: { email } });
+      if (existingEmail) {
+        res.status(400).json({ status: 'error', message: 'Email is already registered' });
+        return;
+      }
+    }
+
+    const saltRounds = 10;
+    const passwordHash = await bcrypt.hash(password, saltRounds);
+    const newApiKey = 'sk_live_' + crypto.randomBytes(32).toString('hex');
+
+    const newAdmin = await prisma.admin.create({
+      data: {
+        email: email || null,
+        username,
+        passwordHash,
+        apiKey: newApiKey,
+      },
+    });
+
+    res.status(201).json({
+      status: 'ok',
+      message: 'User registered successfully',
+      data: {
+        apiKey: newAdmin.apiKey,
+        username: newAdmin.username,
+        email: newAdmin.email,
+      },
+    });
+  } catch (err: any) {
+    // Handle Prisma unique constraint violations
+    if (err.code === 'P2002') {
+      const field = err.meta?.target?.[0] || 'field';
+      res.status(400).json({ status: 'error', message: `This ${field} is already taken.` });
+      return;
+    }
+    logger.error(`Registration error: ${err.message}`, { stack: err.stack });
+    res.status(500).json({ status: 'error', message: 'Registration failed. Please try again.' });
   }
-
-  const saltRounds = 10;
-  const passwordHash = await bcrypt.hash(password, saltRounds);
-  const newApiKey = 'sk_live_' + crypto.randomBytes(32).toString('hex');
-
-  const newAdmin = await prisma.admin.create({
-    data: {
-      email,
-      username,
-      passwordHash,
-      apiKey: newApiKey,
-    },
-  });
-
-  res.status(201).json({
-    status: 'ok',
-    message: 'User registered successfully',
-    data: {
-      apiKey: newAdmin.apiKey,
-      username: newAdmin.username,
-      email: newAdmin.email,
-    },
-  });
 };
 
 /**

@@ -1,13 +1,6 @@
-import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Constants from 'expo-constants';
-import { Platform } from 'react-native';
 
-// ─── API Base URL Configuration ──────────────────────────────────────────────
-// Production: Set EXPO_PUBLIC_API_URL in your .env before building the APK
-// Development: Auto-detects from Expo dev server
 const resolveApiUrl = (): string => {
-  // Hardcoded to strictly point to Render for the production testing phase
   return 'https://webhook-delivery-platform-nlew.onrender.com/api/v1';
 };
 
@@ -15,41 +8,74 @@ export const API_BASE = resolveApiUrl();
 
 console.log('[API] Connecting to:', API_BASE);
 
+// Helper to build explicit query parameters
+const buildUrl = (path: string, params?: Record<string, any>) => {
+  let url = `${API_BASE}${path}`;
+  if (params) {
+    const searchParams = new URLSearchParams();
+    Object.keys(params).forEach(key => {
+      if (params[key] !== undefined && params[key] !== null) {
+         searchParams.append(key, String(params[key]));
+      }
+    });
+    const qs = searchParams.toString();
+    if (qs) url += `?${qs}`;
+  }
+  return url;
+};
 
-const api = axios.create({
-  baseURL: API_BASE,
-  timeout: 15000,
-  headers: {
+// Explicit Fetch Adapter that completely replaces the bugged Axios instance
+const nativeFetchRequest = async (method: string, path: string, options: { data?: any, params?: any } = {}) => {
+  const url = buildUrl(path, options.params);
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    'bypass-tunnel-reminder': 'true',  // Required: skip LocalTunnel interstitial page
-  },
-});
+    'bypass-tunnel-reminder': 'true'
+  };
 
-// Attach API key from storage to every request
-api.interceptors.request.use(async (config) => {
   const apiKey = await AsyncStorage.getItem('apiKey');
   if (apiKey) {
-    config.headers.Authorization = `Bearer ${apiKey}`;
+    headers['Authorization'] = `Bearer ${apiKey}`;
   }
-  return config;
-});
 
-// Handle global response errors (e.g., auto-logout on 401)
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    if (error.response?.status === 401) {
-      // Only clear auth if the backend explicitly rejected the key
-      // (don't clear on tunnel errors or transient network issues)
-      const isRealAuthError = error.response?.data?.status === 'error'
-        && typeof error.response?.data?.message === 'string';
-      if (isRealAuthError) {
-        await AsyncStorage.removeItem('apiKey');
-      }
-    }
-    return Promise.reject(error);
+  const fetchOptions: RequestInit = {
+    method,
+    headers,
+  };
+
+  if (options.data) {
+    fetchOptions.body = JSON.stringify(options.data);
   }
-);
+
+  try {
+    const response = await fetch(url, fetchOptions);
+    const text = await response.text();
+    let data;
+    try { data = JSON.parse(text); } catch(e) { data = text; }
+
+    // Replicate Axios error shape
+    if (!response.ok) {
+      if (response.status === 401 && data?.status === 'error' && typeof data?.message === 'string') {
+         await AsyncStorage.removeItem('apiKey');
+      }
+      throw { response: { status: response.status, data }, message: `HTTP ${response.status}` };
+    }
+
+    // Replicate Axios success shape
+    return { data, status: response.status };
+  } catch (err: any) {
+    if (!err.response) {
+      throw { message: err.message || 'Network Error', isFetchError: true };
+    }
+    throw err;
+  }
+};
+
+const api = {
+  get: (path: string, config?: any) => nativeFetchRequest('GET', path, { params: config?.params }),
+  post: (path: string, data?: any, config?: any) => nativeFetchRequest('POST', path, { data, params: config?.params }),
+  patch: (path: string, data?: any, config?: any) => nativeFetchRequest('PATCH', path, { data, params: config?.params }),
+  delete: (path: string, config?: any) => nativeFetchRequest('DELETE', path, { params: config?.params }),
+};
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
 export const registerUser = (data: any) => api.post('/auth/register', data);

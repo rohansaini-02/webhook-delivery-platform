@@ -41,30 +41,16 @@ export default function LoginScreen({ navigation }: any) {
       const { apiKey, username: returnedUsername } = res.data.data;
       await login(returnedUsername, apiKey);
     } catch (e: any) {
-      console.error('[LOGIN] Axios Error details:', {
-        status: e.response?.status,
-        data: e.response?.data,
-        message: e.message
-      });
-      // Fallback explicitly to fetch if Axios adapter fails
-      try {
-        const { API_BASE } = require('../services/api');
-        const fetchRes = await fetch(`${API_BASE}/auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: cleanUsername, password: cleanPassword })
-        });
-        const text = await fetchRes.text();
-        if (!fetchRes.ok) {
-           setError(`Fetch failed: ${fetchRes.status} - ${text}`);
-           return;
-        }
-        const data = JSON.parse(text);
-        await login(data.data.username, data.data.apiKey);
-        return;
-      } catch (fetchErr: any) {
-        const { API_BASE } = require('../services/api');
-        setError(`BOTH Axios & Fetch failed reaching: ${API_BASE}. \nFetch Error: ${fetchErr.message}`);
+      if (e.message?.includes('Network Error')) {
+        setError(`Network Error: Could not reach backend: ${e.message}`);
+      } else if (e.response?.status >= 500) {
+        setError(`Server Error (${e.response.status}). The backend is offline.`);
+      } else if (e.response?.status === 404) {
+        setError(`API Endpoint not found (404).`);
+      } else if (e.response?.data?.message) {
+        setError(e.response.data.message);
+      } else {
+        setError(`Connect Failed (${e.response?.status || e.message}).`);
       }
     } finally {
       setLoading(false);
